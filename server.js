@@ -115,7 +115,7 @@ app.get('/api/check-auth', async (req, res) => {
 
     try {
         const result = await pool.query(
-            'SELECT uid, username, created_at, subscription_type, subscription_expires FROM users WHERE uid = $1',
+            'SELECT uid, username, email, hwid, created_at, subscription_type, subscription_expires FROM users WHERE uid = $1',
             [req.session.userId]
         );
         
@@ -132,6 +132,8 @@ app.get('/api/check-auth', async (req, res) => {
             authenticated: true,
             uid: user.uid,
             username: user.username,
+            email: user.email,
+            hwid: user.hwid,
             created_at: user.created_at,
             subscription_type: user.subscription_type,
             subscription_expires: user.subscription_expires,
@@ -147,6 +149,19 @@ app.get('/api/check-auth', async (req, res) => {
 app.post('/api/logout', (req, res) => {
     req.session.destroy();
     res.json({ success: true, message: 'Выход выполнен' });
+});
+
+// API: Сброс HWID (пользователь)
+app.post('/api/reset-hwid', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    
+    try {
+        await pool.query('UPDATE users SET hwid = NULL WHERE uid = $1', [req.session.userId]);
+        res.json({ success: true, message: 'HWID сброшен' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка сервера' });
+    }
 });
 
 // API: Админ - все пользователи
