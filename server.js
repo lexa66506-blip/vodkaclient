@@ -264,15 +264,15 @@ app.post('/api/launcher/check-subscription', async (req, res) => {
             });
         }
 
-        // HWID логика: если пустой - записываем, если есть - проверяем
+        // HWID логика: если пустой - записываем, если есть - проверяем что совпадает
         if (!user.hwid) {
-            // Первый вход - записываем HWID
+            // Первый вход - записываем HWID (разрешаем один HWID на несколько аккаунтов)
             db.run('UPDATE users SET hwid = ? WHERE uid = ?', [hwid, user.uid], (err) => {
                 if (err) console.error('Ошибка записи HWID:', err);
                 else console.log(`✅ HWID записан для ${username}: ${hwid}`);
             });
         } else if (user.hwid !== hwid) {
-            // HWID не совпадает
+            // HWID не совпадает - этот аккаунт привязан к другому ПК
             return res.status(403).json({ 
                 success: false, 
                 message: 'Аккаунт привязан к другому ПК',
