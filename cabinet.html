@@ -280,7 +280,6 @@ nav {
                     <span>💻</span> HWID
                 </div>
                 <div class="info-value" id="hwidDisplay">-</div>
-                <button class="action-btn" id="resetHwidBtn">🔄 Сбросить</button>
             </div>
 
             <div class="info-row">
@@ -334,7 +333,10 @@ async function loadUserData() {
         document.getElementById('uidDisplay').textContent = data.uid || '-';
         document.getElementById('loginDisplay').textContent = data.username || '-';
         document.getElementById('emailDisplay').textContent = data.email || 'Не указан';
-        document.getElementById('hwidDisplay').textContent = data.hwid || 'Не привязан';
+        
+        // HWID - проверяем все возможные варианты
+        const hwid = data.hwid || data.HWID || null;
+        document.getElementById('hwidDisplay').textContent = hwid || 'Не привязан';
         
         // Форматирование даты регистрации
         if (data.created_at) {
@@ -384,27 +386,6 @@ async function loadUserData() {
         window.location.href = '/';
     }
 }
-
-// Сброс HWID
-document.getElementById('resetHwidBtn').addEventListener('click', async () => {
-    if (!confirm('Вы уверены, что хотите сбросить HWID?')) return;
-    
-    try {
-        const response = await fetch('/api/reset-hwid', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        
-        const data = await response.json();
-        alert(data.message || 'HWID сброшен');
-        
-        if (data.success) {
-            loadUserData();
-        }
-    } catch (error) {
-        alert('Ошибка при сбросе HWID');
-    }
-});
 
 // Продление подписки
 document.getElementById('extendBtn').addEventListener('click', () => {
@@ -493,5 +474,3 @@ loadUserData();
 
 </body>
 </html>
-
-
