@@ -17,10 +17,94 @@ body {
     background: linear-gradient(135deg, #1a0a2e 0%, #16082a 50%, #0d0515 100%);
     color: #fff;
     min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Навигация сверху */
+.top-nav {
+    position: relative;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 40px;
+    background: rgba(10, 5, 20, 0.9);
+    backdrop-filter: blur(15px);
+    border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+}
+
+.nav-logo {
+    font-size: 22px;
+    font-weight: 700;
+    color: #a855f7;
+    letter-spacing: 1px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.nav-links a {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.3s;
+}
+
+.nav-links a:hover {
+    color: #a855f7;
+}
+
+.nav-links a::before {
+    content: '⚡';
+    font-size: 10px;
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Лучи эффект */
+.rays-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.ray {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, rgba(138, 43, 226, 0.15), transparent);
+    transform-origin: top center;
+}
+
+/* Основной контейнер */
+.main-container {
+    position: relative;
+    z-index: 10;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    min-height: calc(100vh - 60px);
+    padding: 30px;
 }
 
 .cabinet-wrapper {
@@ -30,20 +114,20 @@ body {
     width: 100%;
 }
 
-/* Левая панель - шарики и профиль */
+/* Левая панель */
 .left-panel {
     width: 420px;
-    background: rgba(20, 10, 30, 0.8);
-    border: 1px solid rgba(138, 43, 226, 0.3);
+    background: rgba(20, 10, 30, 0.85);
+    border: 1px solid rgba(138, 43, 226, 0.25);
     border-radius: 20px;
     overflow: hidden;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
 }
 
 .balls-container {
     position: relative;
-    height: 280px;
-    background: linear-gradient(180deg, rgba(30, 15, 45, 0.9) 0%, rgba(20, 10, 30, 0.9) 100%);
+    height: 260px;
+    background: linear-gradient(180deg, rgba(25, 12, 40, 0.95) 0%, rgba(15, 8, 25, 0.95) 100%);
     overflow: hidden;
 }
 
@@ -54,16 +138,16 @@ body {
 
 .balls-label {
     position: absolute;
-    top: 10px;
+    top: 12px;
     left: 15px;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
     padding: 5px 12px;
     border-radius: 6px;
-    font-size: 12px;
-    color: #888;
+    font-size: 11px;
+    color: #666;
 }
 
-/* Профиль пользователя */
+/* Профиль */
 .profile-section {
     padding: 25px;
 }
@@ -79,17 +163,18 @@ body {
     width: 70px;
     height: 70px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    font-weight: bold;
     border: 3px solid rgba(138, 43, 226, 0.5);
+    overflow: hidden;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .profile-details h2 {
-    font-size: 22px;
+    font-size: 20px;
     margin-bottom: 5px;
     display: flex;
     align-items: center;
@@ -100,13 +185,13 @@ body {
     background: rgba(138, 43, 226, 0.3);
     padding: 3px 10px;
     border-radius: 5px;
-    font-size: 12px;
+    font-size: 11px;
     color: #a855f7;
 }
 
 .subscription-date {
-    color: #888;
-    font-size: 14px;
+    color: #777;
+    font-size: 13px;
 }
 
 .subscription-date span {
@@ -116,18 +201,17 @@ body {
 .btn-download {
     width: 100%;
     padding: 14px;
-    background: rgba(138, 43, 226, 0.2);
-    border: 1px solid rgba(138, 43, 226, 0.4);
+    background: rgba(138, 43, 226, 0.15);
+    border: 1px solid rgba(138, 43, 226, 0.3);
     border-radius: 10px;
-    color: #ccc;
-    font-size: 15px;
+    color: #aaa;
+    font-size: 14px;
     cursor: pointer;
     transition: all 0.3s;
 }
 
 .btn-download:hover {
-    background: rgba(138, 43, 226, 0.3);
-    color: #fff;
+    background: rgba(138, 43, 226, 0.25);
 }
 
 .btn-download.active {
@@ -136,7 +220,7 @@ body {
     color: #fff;
 }
 
-/* Правая панель - информация */
+/* Правая панель */
 .right-panel {
     flex: 1;
     display: flex;
@@ -145,11 +229,11 @@ body {
 }
 
 .info-panel {
-    background: rgba(20, 10, 30, 0.8);
-    border: 1px solid rgba(138, 43, 226, 0.3);
+    background: rgba(20, 10, 30, 0.85);
+    border: 1px solid rgba(138, 43, 226, 0.25);
     border-radius: 20px;
     padding: 25px;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
 }
 
 .info-row {
@@ -168,20 +252,19 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #888;
+    color: #777;
     font-size: 14px;
-}
-
-.info-label i {
-    font-size: 16px;
 }
 
 .info-value {
-    background: rgba(30, 20, 40, 0.8);
+    background: rgba(25, 15, 35, 0.9);
     padding: 8px 15px;
     border-radius: 8px;
-    font-size: 14px;
-    color: #fff;
+    font-size: 13px;
+    color: #ddd;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .info-value.status {
@@ -189,55 +272,30 @@ body {
     color: #a855f7;
 }
 
-.toggle-box {
-    width: 40px;
-    height: 24px;
-    background: rgba(60, 60, 60, 0.5);
-    border-radius: 12px;
-    position: relative;
-    cursor: pointer;
+.info-value.hwid {
+    font-family: monospace;
+    font-size: 11px;
+    color: #888;
 }
 
-.toggle-box::after {
-    content: '';
-    position: absolute;
-    width: 18px;
-    height: 18px;
-    background: #666;
-    border-radius: 50%;
-    top: 3px;
-    left: 3px;
-    transition: all 0.3s;
-}
-
-.toggle-box.active {
-    background: rgba(138, 43, 226, 0.5);
-}
-
-.toggle-box.active::after {
-    left: 19px;
-    background: #a855f7;
-}
-
-/* Actions секция */
+/* Actions */
 .actions-panel {
-    background: rgba(20, 10, 30, 0.8);
-    border: 1px solid rgba(138, 43, 226, 0.3);
+    background: rgba(20, 10, 30, 0.85);
+    border: 1px solid rgba(138, 43, 226, 0.25);
     border-radius: 20px;
     padding: 25px;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(15px);
 }
 
 .actions-title {
     font-size: 18px;
     margin-bottom: 20px;
-    color: #fff;
 }
 
 .actions-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
+    gap: 12px;
 }
 
 .action-card {
@@ -246,34 +304,33 @@ body {
 
 .action-card label {
     display: block;
-    font-size: 12px;
-    color: #888;
+    font-size: 11px;
+    color: #666;
     margin-bottom: 8px;
 }
 
 .action-btn {
     width: 100%;
-    padding: 10px 15px;
-    background: rgba(138, 43, 226, 0.2);
-    border: 1px solid rgba(138, 43, 226, 0.4);
+    padding: 10px 12px;
+    background: rgba(138, 43, 226, 0.15);
+    border: 1px solid rgba(138, 43, 226, 0.3);
     border-radius: 8px;
     color: #a855f7;
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
     transition: all 0.3s;
 }
 
 .action-btn:hover {
-    background: rgba(138, 43, 226, 0.35);
+    background: rgba(138, 43, 226, 0.3);
     transform: translateY(-2px);
 }
 
 /* Кнопка выхода */
 .logout-btn {
-    margin-top: auto;
     padding: 12px;
-    background: rgba(255, 50, 50, 0.15);
-    border: 1px solid rgba(255, 50, 50, 0.3);
+    background: rgba(255, 50, 50, 0.1);
+    border: 1px solid rgba(255, 50, 50, 0.25);
     border-radius: 10px;
     color: #ff6b6b;
     font-size: 14px;
@@ -282,10 +339,10 @@ body {
 }
 
 .logout-btn:hover {
-    background: rgba(255, 50, 50, 0.25);
+    background: rgba(255, 50, 50, 0.2);
 }
 
-/* Модальное окно */
+/* Модальные окна */
 .modal {
     display: none;
     position: fixed;
@@ -293,7 +350,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     z-index: 1000;
     justify-content: center;
     align-items: center;
@@ -304,7 +361,7 @@ body {
 }
 
 .modal-content {
-    background: rgba(20, 10, 30, 0.95);
+    background: rgba(20, 10, 30, 0.98);
     border: 1px solid rgba(138, 43, 226, 0.4);
     border-radius: 16px;
     padding: 30px;
@@ -315,12 +372,13 @@ body {
 .modal-title {
     font-size: 20px;
     margin-bottom: 20px;
+    color: #fff;
 }
 
 .modal-input {
     width: 100%;
     padding: 12px 15px;
-    background: rgba(10, 5, 15, 0.8);
+    background: rgba(10, 5, 15, 0.9);
     border: 1px solid rgba(138, 43, 226, 0.3);
     border-radius: 8px;
     color: #fff;
@@ -367,98 +425,119 @@ body {
     display: none;
 }
 
-/* Загрузка */
 .loading {
     text-align: center;
     padding: 100px 20px;
-    font-size: 20px;
-    color: #888;
+    font-size: 18px;
+    color: #666;
 }
 </style>
 </head>
 
 <body>
 
-<div id="loadingMessage" class="loading">Загрузка...</div>
+<!-- Лучи эффект -->
+<div class="rays-container" id="raysContainer"></div>
 
-<div class="cabinet-wrapper" id="cabinetContent" style="display: none;">
-    <!-- Левая панель -->
-    <div class="left-panel">
-        <div class="balls-container">
-            <canvas id="ballsCanvas"></canvas>
-            <div class="balls-label">⚙ balls.tsx</div>
+<!-- Навигация -->
+<nav class="top-nav">
+    <div class="nav-logo">VodkaClient</div>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/#features">Products</a>
+        <a href="#">Rules</a>
+        <a href="#">Eula</a>
+    </div>
+    <div class="nav-user" id="navUser">
+        <span>👤</span>
+        <span id="navUsername">username</span>
+    </div>
+</nav>
+
+<div class="main-container">
+    <div id="loadingMessage" class="loading">Загрузка...</div>
+
+    <div class="cabinet-wrapper" id="cabinetContent" style="display: none;">
+        <!-- Левая панель -->
+        <div class="left-panel">
+            <div class="balls-container">
+                <canvas id="ballsCanvas"></canvas>
+                <div class="balls-label">⚙ balls.tsx</div>
+            </div>
+            
+            <div class="profile-section">
+                <div class="profile-info">
+                    <div class="avatar">
+                        <img src="logo.png" alt="Avatar" id="avatarImg">
+                    </div>
+                    <div class="profile-details">
+                        <h2>
+                            <span id="usernameDisplay">username</span>
+                            <span class="uid-badge">UID: <span id="uidDisplay">0</span></span>
+                        </h2>
+                        <div class="subscription-date">
+                            Subscription: <span id="subscriptionDisplay">Не активна</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn-download" id="downloadBtn">Download Loader</button>
+            </div>
         </div>
         
-        <div class="profile-section">
-            <div class="profile-info">
-                <div class="avatar" id="avatarLetter">?</div>
-                <div class="profile-details">
-                    <h2>
-                        <span id="usernameDisplay">username</span>
-                        <span class="uid-badge">UID: <span id="uidDisplay">0</span></span>
-                    </h2>
-                    <div class="subscription-date">
-                        Subscription: <span id="subscriptionDisplay">Не активна</span>
+        <!-- Правая панель -->
+        <div class="right-panel">
+            <div class="info-panel">
+                <div class="info-row">
+                    <div class="info-label">👤 Username:</div>
+                    <div class="info-value" id="infoUsername">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">✉ E-Mail:</div>
+                    <div class="info-value" id="infoEmail">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">⏰ Subscription:</div>
+                    <div class="info-value" id="infoSubscription">-</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">💻 HWID:</div>
+                    <div class="info-value hwid" id="infoHwid">Не привязан</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">⚡ Role:</div>
+                    <div class="info-value status" id="infoRole">User</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">⭐ Beta Access:</div>
+                    <div class="info-value" id="infoBeta">Нет</div>
+                </div>
+            </div>
+            
+            <div class="actions-panel">
+                <div class="actions-title">Actions</div>
+                <div class="actions-grid">
+                    <div class="action-card">
+                        <label>Configure RAM</label>
+                        <button class="action-btn" onclick="openModal('ram')">Configure</button>
+                    </div>
+                    <div class="action-card">
+                        <label>Activate Key</label>
+                        <button class="action-btn" onclick="openModal('key')">Activate</button>
+                    </div>
+                    <div class="action-card">
+                        <label>Change Avatar</label>
+                        <button class="action-btn" onclick="openModal('avatar')">Change</button>
+                    </div>
+                    <div class="action-card">
+                        <label>Change Password</label>
+                        <button class="action-btn" onclick="openModal('password')">Change</button>
                     </div>
                 </div>
             </div>
             
-            <button class="btn-download" id="downloadBtn">Download Loader</button>
+            <button class="logout-btn" id="logoutBtn">🚪 Выйти из аккаунта</button>
         </div>
-    </div>
-    
-    <!-- Правая панель -->
-    <div class="right-panel">
-        <div class="info-panel">
-            <div class="info-row">
-                <div class="info-label">👤 Username:</div>
-                <div class="info-value" id="infoUsername">-</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">✉ E-Mail:</div>
-                <div class="info-value" id="infoEmail">-</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">⏰ Subscription:</div>
-                <div class="info-value" id="infoSubscription">-</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">💻 Device ID:</div>
-                <div class="toggle-box" id="deviceToggle"></div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">⚡ Role:</div>
-                <div class="info-value status" id="infoRole">User</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">⭐ Beta Access:</div>
-                <div class="toggle-box" id="betaToggle"></div>
-            </div>
-        </div>
-        
-        <div class="actions-panel">
-            <div class="actions-title">Actions</div>
-            <div class="actions-grid">
-                <div class="action-card">
-                    <label>Configure RAM</label>
-                    <button class="action-btn" onclick="openModal('ram')">Configure</button>
-                </div>
-                <div class="action-card">
-                    <label>Activate Key</label>
-                    <button class="action-btn" onclick="openModal('key')">Activate</button>
-                </div>
-                <div class="action-card">
-                    <label>Change Avatar</label>
-                    <button class="action-btn" onclick="openModal('avatar')">Change</button>
-                </div>
-                <div class="action-card">
-                    <label>Change Password</label>
-                    <button class="action-btn" onclick="openModal('password')">Change</button>
-                </div>
-            </div>
-        </div>
-        
-        <button class="logout-btn" id="logoutBtn">🚪 Выйти из аккаунта</button>
     </div>
 </div>
 
@@ -491,7 +570,7 @@ body {
 <div class="modal" id="ramModal">
     <div class="modal-content">
         <div class="modal-title">Настройка RAM</div>
-        <input type="number" class="modal-input" id="ramInput" placeholder="Количество GB (2-16)" min="2" max="16" value="4">
+        <input type="number" class="modal-input" id="ramInput" placeholder="GB (2-16)" min="2" max="16" value="4">
         <div class="modal-buttons">
             <button class="modal-btn secondary" onclick="closeModal('ram')">Отмена</button>
             <button class="modal-btn primary" onclick="saveRam()">Сохранить</button>
@@ -502,7 +581,7 @@ body {
 <div class="modal" id="avatarModal">
     <div class="modal-content">
         <div class="modal-title">Смена аватара</div>
-        <p style="color: #888; margin-bottom: 15px;">Функция в разработке</p>
+        <p style="color: #666; margin-bottom: 15px;">Функция в разработке</p>
         <div class="modal-buttons">
             <button class="modal-btn secondary" onclick="closeModal('avatar')">Закрыть</button>
         </div>
@@ -511,10 +590,43 @@ body {
 
 <script>
 let userData = null;
+let mouseX = 0, mouseY = 0;
+
+// ========== ЛУЧИ ЭФФЕКТ ==========
+function createRays() {
+    const container = document.getElementById('raysContainer');
+    const rayCount = 20;
+    
+    for (let i = 0; i < rayCount; i++) {
+        const ray = document.createElement('div');
+        ray.className = 'ray';
+        ray.style.left = (i / rayCount * 100) + '%';
+        ray.style.opacity = Math.random() * 0.3 + 0.1;
+        ray.style.transform = `rotate(${(i - rayCount/2) * 3}deg)`;
+        container.appendChild(ray);
+    }
+}
+
+// Анимация лучей за мышкой
+document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    
+    const rays = document.querySelectorAll('.ray');
+    const centerX = window.innerWidth / 2;
+    const offsetX = (mouseX - centerX) / centerX * 10;
+    
+    rays.forEach((ray, i) => {
+        const baseAngle = (i - rays.length/2) * 3;
+        ray.style.transform = `rotate(${baseAngle + offsetX}deg)`;
+    });
+});
+
+createRays();
 </script>
 
 <script>
-// Загрузка данных пользователя
+// ========== ЗАГРУЗКА ДАННЫХ ==========
 async function loadUserData() {
     try {
         const response = await fetch('/api/check-auth');
@@ -529,31 +641,26 @@ async function loadUserData() {
         
         // Заполняем данные
         document.getElementById('usernameDisplay').textContent = data.username;
+        document.getElementById('navUsername').textContent = data.username;
         document.getElementById('uidDisplay').textContent = data.uid;
-        document.getElementById('avatarLetter').textContent = data.username.charAt(0).toUpperCase();
         
         document.getElementById('infoUsername').textContent = data.username;
         document.getElementById('infoEmail').textContent = data.email || 'Не указан';
+        document.getElementById('infoHwid').textContent = data.hwid ? data.hwid.substring(0, 20) + '...' : 'Не привязан';
         
         // Подписка
         if (data.subscription_active) {
             const expires = new Date(data.subscription_expires);
-            const dateStr = expires.toLocaleDateString('ru-RU') + ' ' + expires.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+            const dateStr = expires.toLocaleDateString('ru-RU') + ' ' + expires.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
             document.getElementById('subscriptionDisplay').textContent = dateStr;
             document.getElementById('infoSubscription').textContent = dateStr;
             
-            // Активируем кнопку скачивания
             const downloadBtn = document.getElementById('downloadBtn');
             downloadBtn.classList.add('active');
             downloadBtn.textContent = '📥 Download Loader';
         } else {
             document.getElementById('subscriptionDisplay').textContent = 'Не активна';
             document.getElementById('infoSubscription').textContent = 'Не активна';
-        }
-        
-        // HWID
-        if (data.hwid) {
-            document.getElementById('deviceToggle').classList.add('active');
         }
         
         // Показываем контент
@@ -570,7 +677,7 @@ async function loadUserData() {
     }
 }
 
-// Модальные окна
+// ========== МОДАЛЬНЫЕ ОКНА ==========
 function openModal(type) {
     document.getElementById(type + 'Modal').classList.add('active');
 }
@@ -579,7 +686,6 @@ function closeModal(type) {
     document.getElementById(type + 'Modal').classList.remove('active');
 }
 
-// Активация ключа
 async function activateKey() {
     const keyCode = document.getElementById('keyInput').value.trim();
     const messageDiv = document.getElementById('keyMessage');
@@ -611,7 +717,6 @@ async function activateKey() {
     }
 }
 
-// Смена пароля
 async function changePassword() {
     const oldPass = document.getElementById('oldPassword').value;
     const newPass = document.getElementById('newPassword').value;
@@ -669,35 +774,39 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     window.location.href = '/';
 });
 
-// ========== ШАРИКИ С ФИЗИКОЙ ==========
+// ========== ШАРИКИ С ФИЗИКОЙ (МЕДЛЕННЫЕ, ПОЛУПРОЗРАЧНЫЕ) ==========
 const canvas = document.getElementById('ballsCanvas');
 const ctx = canvas.getContext('2d');
 
 let balls = [];
-let mouse = { x: 0, y: 0, vx: 0, vy: 0, prevX: 0, prevY: 0 };
+let ballMouse = { x: 0, y: 0, vx: 0, vy: 0, prevX: 0, prevY: 0 };
 
-const colors = ['#a855f7', '#7c3aed', '#8b5cf6', '#c084fc', '#9333ea', '#d946ef', '#a21caf'];
+const colors = ['#a855f7', '#7c3aed', '#8b5cf6', '#c084fc', '#9333ea', '#d946ef'];
 
 function initBalls() {
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
     
     balls = [];
-    for (let i = 0; i < 50; i++) {
-        const radius = Math.random() * 15 + 8;
+    for (let i = 0; i < 45; i++) {
+        const radius = Math.random() * 12 + 6;
         balls.push({
             x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height * 0.5,
-            vx: (Math.random() - 0.5) * 2,
-            vy: Math.random() * 2,
+            y: Math.random() * canvas.height * 0.6,
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: Math.random() * 0.3,
             radius: radius,
             color: colors[Math.floor(Math.random() * colors.length)],
-            mass: radius * 0.1
+            mass: radius * 0.1,
+            alpha: Math.random() * 0.4 + 0.3 // Полупрозрачность 0.3-0.7
         });
     }
 }
 
 function drawBall(ball) {
+    ctx.globalAlpha = ball.alpha;
+    
+    // Градиент для шейдер-эффекта
     const gradient = ctx.createRadialGradient(
         ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, 0,
         ball.x, ball.y, ball.radius
@@ -707,9 +816,9 @@ function drawBall(ball) {
     const g = parseInt(ball.color.slice(3, 5), 16);
     const b = parseInt(ball.color.slice(5, 7), 16);
     
-    gradient.addColorStop(0, `rgb(${Math.min(255, r + 80)}, ${Math.min(255, g + 80)}, ${Math.min(255, b + 80)})`);
-    gradient.addColorStop(0.5, ball.color);
-    gradient.addColorStop(1, `rgb(${Math.max(0, r - 50)}, ${Math.max(0, g - 50)}, ${Math.max(0, b - 50)})`);
+    gradient.addColorStop(0, `rgba(${Math.min(255, r + 100)}, ${Math.min(255, g + 100)}, ${Math.min(255, b + 100)}, 0.9)`);
+    gradient.addColorStop(0.4, `rgba(${r}, ${g}, ${b}, 0.7)`);
+    gradient.addColorStop(1, `rgba(${Math.max(0, r - 60)}, ${Math.max(0, g - 60)}, ${Math.max(0, b - 60)}, 0.4)`);
     
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
@@ -718,36 +827,41 @@ function drawBall(ball) {
     
     // Блик
     ctx.beginPath();
-    ctx.arc(ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, ball.radius * 0.2, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.arc(ball.x - ball.radius * 0.25, ball.y - ball.radius * 0.25, ball.radius * 0.15, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.fill();
+    
+    ctx.globalAlpha = 1;
 }
 
 function updateBall(ball) {
-    ball.vy += 0.12; // гравитация
-    ball.vx *= 0.99;
-    ball.vy *= 0.99;
+    // Очень медленная гравитация
+    ball.vy += 0.02;
+    
+    // Сильное трение для медленного движения
+    ball.vx *= 0.985;
+    ball.vy *= 0.985;
     
     ball.x += ball.vx;
     ball.y += ball.vy;
     
-    // Курсор пинает шарики
-    const dx = ball.x - mouse.x;
-    const dy = ball.y - mouse.y;
+    // Курсор пинает шарики (мягко)
+    const dx = ball.x - ballMouse.x;
+    const dy = ball.y - ballMouse.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
     
-    if (dist < 60 + ball.radius) {
+    if (dist < 50 + ball.radius) {
         const angle = Math.atan2(dy, dx);
-        const force = (60 + ball.radius - dist) * 0.5 / ball.mass;
-        ball.vx += Math.cos(angle) * force + mouse.vx * 0.3;
-        ball.vy += Math.sin(angle) * force + mouse.vy * 0.3;
+        const force = (50 + ball.radius - dist) * 0.08 / ball.mass;
+        ball.vx += Math.cos(angle) * force + ballMouse.vx * 0.15;
+        ball.vy += Math.sin(angle) * force + ballMouse.vy * 0.15;
     }
     
     // Границы
-    if (ball.x - ball.radius < 0) { ball.x = ball.radius; ball.vx *= -0.7; }
-    if (ball.x + ball.radius > canvas.width) { ball.x = canvas.width - ball.radius; ball.vx *= -0.7; }
-    if (ball.y - ball.radius < 0) { ball.y = ball.radius; ball.vy *= -0.7; }
-    if (ball.y + ball.radius > canvas.height) { ball.y = canvas.height - ball.radius; ball.vy *= -0.7; }
+    if (ball.x - ball.radius < 0) { ball.x = ball.radius; ball.vx *= -0.5; }
+    if (ball.x + ball.radius > canvas.width) { ball.x = canvas.width - ball.radius; ball.vx *= -0.5; }
+    if (ball.y - ball.radius < 0) { ball.y = ball.radius; ball.vy *= -0.5; }
+    if (ball.y + ball.radius > canvas.height) { ball.y = canvas.height - ball.radius; ball.vy *= -0.5; }
 }
 
 function checkCollisions() {
@@ -771,7 +885,7 @@ function checkCollisions() {
                 const dvn = (b1.vx - b2.vx) * nx + (b1.vy - b2.vy) * ny;
                 
                 if (dvn > 0) {
-                    const factor = dvn / (b1.mass + b2.mass) * 0.7;
+                    const factor = dvn / (b1.mass + b2.mass) * 0.4;
                     b1.vx -= factor * b2.mass * nx;
                     b1.vy -= factor * b2.mass * ny;
                     b2.vx += factor * b1.mass * nx;
@@ -785,10 +899,10 @@ function checkCollisions() {
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    mouse.vx = mouse.x - mouse.prevX;
-    mouse.vy = mouse.y - mouse.prevY;
-    mouse.prevX = mouse.x;
-    mouse.prevY = mouse.y;
+    ballMouse.vx = (ballMouse.x - ballMouse.prevX) * 0.5;
+    ballMouse.vy = (ballMouse.y - ballMouse.prevY) * 0.5;
+    ballMouse.prevX = ballMouse.x;
+    ballMouse.prevY = ballMouse.y;
     
     balls.forEach(updateBall);
     checkCollisions();
@@ -797,11 +911,10 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-// Отслеживание мыши относительно канваса
 canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
-    mouse.x = e.clientX - rect.left;
-    mouse.y = e.clientY - rect.top;
+    ballMouse.x = e.clientX - rect.left;
+    ballMouse.y = e.clientY - rect.top;
 });
 
 window.addEventListener('resize', initBalls);
