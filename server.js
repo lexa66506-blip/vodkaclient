@@ -411,6 +411,32 @@ app.post('/api/admin/reset-hwid', async (req, res) => {
     }
 });
 
+// API: Сброс базы данных (ОПАСНО!)
+app.post('/api/admin/reset-database', async (req, res) => {
+    const { confirm_password } = req.body;
+    const ADMIN_PASSWORD = 'irairairA1';
+    
+    if (confirm_password !== ADMIN_PASSWORD) {
+        return res.status(403).json({ success: false, message: 'Неверный пароль подтверждения' });
+    }
+    
+    try {
+        // Удаляем все данные
+        await pool.query('DELETE FROM keys');
+        await pool.query('DELETE FROM users');
+        
+        // Сбрасываем счётчик UID на 1
+        await pool.query('ALTER SEQUENCE users_uid_seq RESTART WITH 1');
+        await pool.query('ALTER SEQUENCE keys_id_seq RESTART WITH 1');
+        
+        console.log('⚠️ БАЗА ДАННЫХ ПОЛНОСТЬЮ ОЧИЩЕНА!');
+        res.json({ success: true, message: 'База данных очищена' });
+    } catch (err) {
+        console.error('Ошибка сброса БД:', err);
+        res.status(500).json({ success: false, message: 'Ошибка сброса базы данных' });
+    }
+});
+
 // Запуск сервера
 app.listen(PORT, () => {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
