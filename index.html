@@ -921,8 +921,6 @@ nav {
         </div>
         <div id="userInfo" class="user-info">
             <span id="usernameDisplay"></span>
-            <span class="user-uid" id="uidDisplay"></span>
-            <button class="btn-logout" id="logoutBtn">Выйти</button>
         </div>
         <button class="btn-login" id="loginBtn">Войти в кабинет</button>
     </div>
@@ -1254,21 +1252,9 @@ loginForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Выход
-logoutBtn.addEventListener('click', async () => {
-    try {
-        await fetch('/api/logout', { method: 'POST' });
-        loginBtn.style.display = 'block';
-        userInfo.classList.remove('active');
-    } catch (error) {
-        console.error('Ошибка выхода');
-    }
-});
-
 // Обновление информации о пользователе
 function updateUserInfo(username, uid) {
     usernameDisplay.textContent = username;
-    uidDisplay.textContent = `UID: ${uid}`;
     loginBtn.style.display = 'none';
     userInfo.classList.add('active');
     
