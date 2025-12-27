@@ -257,15 +257,33 @@ app.post('/api/activate-key', async (req, res) => {
         const key = keyResult.rows[0];
         if (key.used) return res.status(400).json({ success: false, message: 'Ключ уже использован' });
 
+        // Если это ключ сброса HWID
+        if (key.subscription_type === 'hwid_reset') {
+            await pool.query('UPDATE users SET hwid = NULL WHERE uid = $1', [userId]);
+            await pool.query(
+                'UPDATE keys SET used = TRUE, used_by = $1, used_at = CURRENT_TIMESTAMP WHERE key_code = $2',
+                [userId, key_code]
+            );
+            return res.json({ success: true, message: 'HWID успешно сброшен! Теперь можете войти с другого ПК.' });
+        }
+
         let expiresDate;
         if (key.subscription_type === 'lifetime') {
             const now = new Date();
             now.setFullYear(now.getFullYear() + 1337);
             expiresDate = now.toISOString();
         } else {
-            const now = new Date();
-            now.setDate(now.getDate() + key.duration_days);
-            expiresDate = now.toISOString();
+            // Проверяем текущую подписку и продлеваем если активна
+            const userResult = await pool.query('SELECT subscription_expires FROM users WHERE uid = $1', [userId]);
+            const user = userResult.rows[0];
+            let startDate = new Date();
+            
+            if (user.subscription_expires && new Date(user.subscription_expires) > new Date()) {
+                startDate = new Date(user.subscription_expires);
+            }
+            
+            startDate.setDate(startDate.getDate() + key.duration_days);
+            expiresDate = startDate.toISOString();
         }
 
         await pool.query(
