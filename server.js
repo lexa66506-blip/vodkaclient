@@ -1,29 +1,16 @@
 const express = require('express');
+const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Определяем, какую БД использовать
-const USE_POSTGRES = !!process.env.DATABASE_URL;
-let pool, db;
-
-if (USE_POSTGRES) {
-    const { Pool } = require('pg');
-    pool = new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl: { rejectUnauthorized: false }
-    });
-    console.log('📊 Используется PostgreSQL');
-} else {
-    const sqlite3 = require('sqlite3').verbose();
-    db = new sqlite3.Database('./users.db', (err) => {
-        if (err) console.error('❌ Ошибка подключения к SQLite:', err);
-        else console.log('✅ Подключено к SQLite');
-    });
-    console.log('📊 Используется SQLite');
-}
+// PostgreSQL подключение (Render даёт DATABASE_URL)
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+});
 
 // Middleware
 app.use(express.json());
@@ -43,65 +30,32 @@ app.use(session({
 // Инициализация таблиц
 async function initDB() {
     try {
-        if (USE_POSTGRES) {
-            await pool.query(`
-                CREATE TABLE IF NOT EXISTS users (
-                    uid SERIAL PRIMARY KEY,
-                    username VARCHAR(255) UNIQUE NOT NULL,
-                    password VARCHAR(255) NOT NULL,
-                    email VARCHAR(255) DEFAULT NULL,
-                    hwid VARCHAR(255) DEFAULT NULL,
-                    subscription_type VARCHAR(50) DEFAULT NULL,
-                    subscription_expires TIMESTAMP DEFAULT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            `);
-            
-            await pool.query(`
-                CREATE TABLE IF NOT EXISTS keys (
-                    id SERIAL PRIMARY KEY,
-                    key_code VARCHAR(255) UNIQUE NOT NULL,
-                    subscription_type VARCHAR(50) NOT NULL,
-                    duration_days INTEGER NOT NULL,
-                    used BOOLEAN DEFAULT FALSE,
-                    used_by INTEGER DEFAULT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    used_at TIMESTAMP DEFAULT NULL
-                )
-            `);
-            
-            console.log('✅ Таблицы PostgreSQL созданы');
-        } else {
-            db.serialize(() => {
-                db.run(`
-                    CREATE TABLE IF NOT EXISTS users (
-                        uid INTEGER PRIMARY KEY AUTOINCREMENT,
-                        username TEXT UNIQUE NOT NULL,
-                        password TEXT NOT NULL,
-                        email TEXT DEFAULT NULL,
-                        hwid TEXT DEFAULT NULL,
-                        subscription_type TEXT DEFAULT NULL,
-                        subscription_expires TEXT DEFAULT NULL,
-                        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-                    )
-                `);
-                
-                db.run(`
-                    CREATE TABLE IF NOT EXISTS keys (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        key_code TEXT UNIQUE NOT NULL,
-                        subscription_type TEXT NOT NULL,
-                        duration_days INTEGER NOT NULL,
-                        used INTEGER DEFAULT 0,
-                        used_by INTEGER DEFAULT NULL,
-                        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                        used_at TEXT DEFAULT NULL
-                    )
-                `);
-                
-                console.log('✅ Таблицы SQLite созданы');
-            });
-        }
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                uid SERIAL PRIMARY KEY,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL,
+                hwid VARCHAR(255) DEFAULT NULL,
+                subscription_type VARCHAR(50) DEFAULT NULL,
+                subscription_expires TIMESTAMP DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS keys (
+                id SERIAL PRIMARY KEY,
+                key_code VARCHAR(255) UNIQUE NOT NULL,
+                subscription_type VARCHAR(50) NOT NULL,
+                duration_days INTEGER NOT NULL,
+                used BOOLEAN DEFAULT FALSE,
+                used_by INTEGER DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                used_at TIMESTAMP DEFAULT NULL
+            )
+        `);
+        
+        console.log('✅ Таблицы PostgreSQL созданы');
     } catch (err) {
         console.error('❌ Ошибка создания таблиц:', err);
     }
@@ -161,7 +115,7 @@ app.get('/api/check-auth', async (req, res) => {
 
     try {
         const result = await pool.query(
-            'SELECT uid, username, email, hwid, created_at, subscription_type, subscription_expires FROM users WHERE uid = $1',
+            'SELECT uid, username, created_at, subscription_type, subscription_expires FROM users WHERE uid = $1',
             [req.session.userId]
         );
         
@@ -178,8 +132,6 @@ app.get('/api/check-auth', async (req, res) => {
             authenticated: true,
             uid: user.uid,
             username: user.username,
-            email: user.email,
-            hwid: user.hwid,
             created_at: user.created_at,
             subscription_type: user.subscription_type,
             subscription_expires: user.subscription_expires,
@@ -195,19 +147,6 @@ app.get('/api/check-auth', async (req, res) => {
 app.post('/api/logout', (req, res) => {
     req.session.destroy();
     res.json({ success: true, message: 'Выход выполнен' });
-});
-
-// API: Сброс HWID (пользователь)
-app.post('/api/reset-hwid', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    
-    try {
-        await pool.query('UPDATE users SET hwid = NULL WHERE uid = $1', [req.session.userId]);
-        res.json({ success: true, message: 'HWID сброшен' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка сервера' });
-    }
 });
 
 // API: Админ - все пользователи
