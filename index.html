@@ -1021,10 +1021,10 @@ nav {
             <p>Выберите подходящий для вас план подписки</p>
         </div>
         <div class="pricing-grid">
-            <div class="pricing-card">
-                <h3>1 День</h3>
-                <div class="price">Выдача <span>бесплатно</span></div>
-                <a href="https://t.me/SmertnixVteste" target="_blank" class="btn-buy">Получить</a>
+            <div class="pricing-card" style="border-color: rgba(50, 255, 50, 0.5);">
+                <h3 style="color: #55ff55;">🎁 1 День</h3>
+                <div class="price" style="color: #55ff55;">БЕСПЛАТНО</div>
+                <button class="btn-buy" onclick="getFreeDay()" style="border-color: rgba(50, 255, 50, 0.5); color: #55ff55;">Получить</button>
             </div>
             <div class="pricing-card">
                 <h3>1 Неделя</h3>
@@ -1324,6 +1324,26 @@ const langSelector = document.getElementById('langSelector');
 langSelector.addEventListener('click', () => {
     alert('Доступные языки:\n🇷🇺 Русский (текущий)\n🇬🇧 English (скоро)\n🇨🇳 中文 (скоро)');
 });
+
+// Получить бесплатный день
+async function getFreeDay() {
+    try {
+        const response = await fetch('/api/get-free-day', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('✅ ' + data.message);
+            modal.classList.remove('active');
+        } else {
+            alert('❌ ' + data.message);
+        }
+    } catch (error) {
+        alert('❌ Сначала войдите в аккаунт!');
+    }
+}
 </script>
 
 </body>
