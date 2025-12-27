@@ -2,6 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,13 +18,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
+// Сессии с хранением в PostgreSQL (не теряются при перезагрузке)
 app.use(session({
+    store: new pgSession({
+        pool: pool,
+        tableName: 'user_sessions',
+        createTableIfMissing: true
+    }),
     secret: 'vodka-client-secret-key-2024',
     resave: false,
     saveUninitialized: false,
     cookie: {
         secure: false,
-        maxAge: 30 * 24 * 60 * 60 * 1000
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
+        httpOnly: true
     }
 }));
 
@@ -154,6 +162,32 @@ app.get('/api/check-auth', async (req, res) => {
 app.post('/api/logout', (req, res) => {
     req.session.destroy();
     res.json({ success: true, message: 'Выход выполнен' });
+});
+
+// API: Смена пароля
+app.post('/api/change-password', async (req, res) => {
+    const { old_password, new_password } = req.body;
+    const userId = req.session.userId;
+    
+    if (!userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    if (!old_password || !new_password) return res.status(400).json({ success: false, message: 'Заполните все поля' });
+    if (new_password.length < 6) return res.status(400).json({ success: false, message: 'Новый пароль минимум 6 символов' });
+
+    try {
+        const result = await pool.query('SELECT password FROM users WHERE uid = $1', [userId]);
+        if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Пользователь не найден' });
+
+        const validPassword = await bcrypt.compare(old_password, result.rows[0].password);
+        if (!validPassword) return res.status(400).json({ success: false, message: 'Неверный текущий пароль' });
+
+        const hashedPassword = await bcrypt.hash(new_password, 10);
+        await pool.query('UPDATE users SET password = $1 WHERE uid = $2', [hashedPassword, userId]);
+
+        res.json({ success: true, message: 'Пароль успешно изменен!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка сервера' });
+    }
 });
 
 // API: Админ - все пользователи
