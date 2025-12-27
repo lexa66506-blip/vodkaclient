@@ -275,11 +275,7 @@ nav {
         <div id="errorMessage" class="error-message"></div>
         <form id="adminLoginForm">
             <div class="form-group">
-                <label>Логин администратора</label>
-                <input type="text" id="adminUsername" placeholder="ServerVodki" required>
-            </div>
-            <div class="form-group">
-                <label>Пароль</label>
+                <label>Пароль администратора</label>
                 <input type="password" id="adminPassword" placeholder="••••••••" required>
             </div>
             <button type="submit" class="btn-login">Войти</button>
@@ -388,7 +384,6 @@ nav {
 </div>
 
 <script>
-const ADMIN_USERNAME = 'ServerVodki';
 const ADMIN_PASSWORD = 'irairairA1';
 
 let isAdminLoggedIn = false;
@@ -408,18 +403,17 @@ function checkAdminSession() {
 document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
     e.preventDefault();
     
-    const username = document.getElementById('adminUsername').value;
     const password = document.getElementById('adminPassword').value;
     
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+    if (password === ADMIN_PASSWORD) {
         isAdminLoggedIn = true;
-        localStorage.setItem('adminLoggedIn', 'true'); // Сохраняем сессию
+        localStorage.setItem('adminLoggedIn', 'true');
         document.getElementById('loginContainer').style.display = 'none';
         document.getElementById('adminContainer').style.display = 'block';
         loadAdminData();
     } else {
         const errorMsg = document.getElementById('errorMessage');
-        errorMsg.textContent = 'Неверный логин или пароль';
+        errorMsg.textContent = 'Неверный пароль';
         errorMsg.style.display = 'block';
     }
 });
