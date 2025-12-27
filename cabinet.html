@@ -20,60 +20,70 @@ body {
     overflow-x: hidden;
 }
 
-/* Навигация сверху */
-.top-nav {
-    position: relative;
+/* Плавающая навигация */
+.floating-nav {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 100;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 15px 40px;
-    background: rgba(10, 5, 20, 0.9);
-    backdrop-filter: blur(15px);
-    border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+    gap: 20px;
+    padding: 12px 25px;
+    background: rgba(15, 8, 25, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(138, 43, 226, 0.25);
+    border-radius: 50px;
 }
 
 .nav-logo {
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 700;
     color: #a855f7;
     letter-spacing: 1px;
+    margin-right: 15px;
 }
 
 .nav-links {
     display: flex;
-    gap: 30px;
+    gap: 8px;
     align-items: center;
 }
 
 .nav-links a {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.5);
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    transition: all 0.3s;
     display: flex;
     align-items: center;
     gap: 6px;
-    transition: color 0.3s;
 }
 
 .nav-links a:hover {
-    color: #a855f7;
+    color: #fff;
+    background: rgba(138, 43, 226, 0.2);
 }
 
-.nav-links a::before {
-    content: '⚡';
-    font-size: 10px;
+.nav-links a .icon {
+    font-size: 12px;
+    opacity: 0.7;
 }
 
 .nav-user {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     background: linear-gradient(135deg, #7c3aed, #a855f7);
-    padding: 8px 18px;
-    border-radius: 8px;
-    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
     font-weight: 600;
+    margin-left: 15px;
+    cursor: pointer;
 }
 
 /* Лучи эффект */
@@ -92,7 +102,7 @@ body {
     position: absolute;
     width: 2px;
     height: 100%;
-    background: linear-gradient(180deg, transparent, rgba(138, 43, 226, 0.15), transparent);
+    background: linear-gradient(180deg, transparent, rgba(138, 43, 226, 0.12), transparent);
     transform-origin: top center;
 }
 
@@ -103,8 +113,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 60px);
-    padding: 30px;
+    min-height: 100vh;
+    padding: 100px 30px 30px;
 }
 
 .cabinet-wrapper {
@@ -249,9 +259,6 @@ body {
 }
 
 .info-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
     color: #777;
     font-size: 14px;
 }
@@ -439,14 +446,14 @@ body {
 <!-- Лучи эффект -->
 <div class="rays-container" id="raysContainer"></div>
 
-<!-- Навигация -->
-<nav class="top-nav">
+<!-- Плавающая навигация -->
+<nav class="floating-nav">
     <div class="nav-logo">VodkaClient</div>
     <div class="nav-links">
-        <a href="/">Home</a>
-        <a href="/#features">Products</a>
-        <a href="#">Rules</a>
-        <a href="#">Eula</a>
+        <a href="/"><span class="icon">🏠</span> Home</a>
+        <a href="/#pricingModal" onclick="openPricing()"><span class="icon">📦</span> Products</a>
+        <a href="/#hero"><span class="icon">📜</span> Rules</a>
+        <a href="https://t.me/SmertnixVteste" target="_blank"><span class="icon">�<//span> Support</a>
     </div>
     <div class="nav-user" id="navUser">
         <span>👤</span>
@@ -588,36 +595,49 @@ body {
     </div>
 </div>
 
+<!-- Скрытая админ авторизация (Alt+N) -->
+<div class="modal" id="adminModal">
+    <div class="modal-content" style="border-color: rgba(255, 50, 50, 0.4);">
+        <div class="modal-title" style="color: #ff6b6b;">🔐 Admin Access</div>
+        <input type="password" class="modal-input" id="adminPassword" placeholder="Введите пароль администратора" style="border-color: rgba(255, 50, 50, 0.3);">
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('admin')">Отмена</button>
+            <button class="modal-btn primary" onclick="adminLogin()" style="background: linear-gradient(135deg, #dc2626, #ef4444);">Войти</button>
+        </div>
+        <div class="modal-message" id="adminMessage"></div>
+    </div>
+</div>
+
 <script>
 let userData = null;
 let mouseX = 0, mouseY = 0;
+let adminAuthorized = false;
 
 // ========== ЛУЧИ ЭФФЕКТ ==========
 function createRays() {
     const container = document.getElementById('raysContainer');
-    const rayCount = 20;
+    const rayCount = 25;
     
     for (let i = 0; i < rayCount; i++) {
         const ray = document.createElement('div');
         ray.className = 'ray';
         ray.style.left = (i / rayCount * 100) + '%';
-        ray.style.opacity = Math.random() * 0.3 + 0.1;
-        ray.style.transform = `rotate(${(i - rayCount/2) * 3}deg)`;
+        ray.style.opacity = Math.random() * 0.25 + 0.05;
+        ray.style.transform = `rotate(${(i - rayCount/2) * 2.5}deg)`;
         container.appendChild(ray);
     }
 }
 
-// Анимация лучей за мышкой
 document.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
     
     const rays = document.querySelectorAll('.ray');
     const centerX = window.innerWidth / 2;
-    const offsetX = (mouseX - centerX) / centerX * 10;
+    const offsetX = (mouseX - centerX) / centerX * 8;
     
     rays.forEach((ray, i) => {
-        const baseAngle = (i - rays.length/2) * 3;
+        const baseAngle = (i - rays.length/2) * 2.5;
         ray.style.transform = `rotate(${baseAngle + offsetX}deg)`;
     });
 });
@@ -639,7 +659,6 @@ async function loadUserData() {
         
         userData = data;
         
-        // Заполняем данные
         document.getElementById('usernameDisplay').textContent = data.username;
         document.getElementById('navUsername').textContent = data.username;
         document.getElementById('uidDisplay').textContent = data.uid;
@@ -648,7 +667,6 @@ async function loadUserData() {
         document.getElementById('infoEmail').textContent = data.email || 'Не указан';
         document.getElementById('infoHwid').textContent = data.hwid ? data.hwid.substring(0, 20) + '...' : 'Не привязан';
         
-        // Подписка
         if (data.subscription_active) {
             const expires = new Date(data.subscription_expires);
             const dateStr = expires.toLocaleDateString('ru-RU') + ' ' + expires.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
@@ -663,11 +681,9 @@ async function loadUserData() {
             document.getElementById('infoSubscription').textContent = 'Не активна';
         }
         
-        // Показываем контент
         document.getElementById('loadingMessage').style.display = 'none';
         document.getElementById('cabinetContent').style.display = 'flex';
         
-        // Инициализируем шарики
         initBalls();
         animate();
         
@@ -686,14 +702,15 @@ function closeModal(type) {
     document.getElementById(type + 'Modal').classList.remove('active');
 }
 
+function openPricing() {
+    window.location.href = '/#pricingModal';
+}
+
 async function activateKey() {
     const keyCode = document.getElementById('keyInput').value.trim();
     const messageDiv = document.getElementById('keyMessage');
     
-    if (!keyCode) {
-        showMessage(messageDiv, 'Введите ключ', false);
-        return;
-    }
+    if (!keyCode) { showMessage(messageDiv, 'Введите ключ', false); return; }
     
     try {
         const response = await fetch('/api/activate-key', {
@@ -701,20 +718,14 @@ async function activateKey() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ key_code: keyCode })
         });
-        
         const data = await response.json();
         showMessage(messageDiv, data.message, data.success);
         
         if (data.success) {
             document.getElementById('keyInput').value = '';
-            setTimeout(() => {
-                closeModal('key');
-                loadUserData();
-            }, 1500);
+            setTimeout(() => { closeModal('key'); loadUserData(); }, 1500);
         }
-    } catch (error) {
-        showMessage(messageDiv, 'Ошибка соединения', false);
-    }
+    } catch (error) { showMessage(messageDiv, 'Ошибка соединения', false); }
 }
 
 async function changePassword() {
@@ -722,10 +733,7 @@ async function changePassword() {
     const newPass = document.getElementById('newPassword').value;
     const messageDiv = document.getElementById('passwordMessage');
     
-    if (!oldPass || !newPass) {
-        showMessage(messageDiv, 'Заполните все поля', false);
-        return;
-    }
+    if (!oldPass || !newPass) { showMessage(messageDiv, 'Заполните все поля', false); return; }
     
     try {
         const response = await fetch('/api/change-password', {
@@ -733,16 +741,10 @@ async function changePassword() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ old_password: oldPass, new_password: newPass })
         });
-        
         const data = await response.json();
         showMessage(messageDiv, data.message, data.success);
-        
-        if (data.success) {
-            setTimeout(() => closeModal('password'), 1500);
-        }
-    } catch (error) {
-        showMessage(messageDiv, 'Ошибка соединения', false);
-    }
+        if (data.success) setTimeout(() => closeModal('password'), 1500);
+    } catch (error) { showMessage(messageDiv, 'Ошибка соединения', false); }
 }
 
 function saveRam() {
@@ -759,22 +761,18 @@ function showMessage(div, text, success) {
     div.textContent = text;
 }
 
-// Скачивание
 document.getElementById('downloadBtn').addEventListener('click', () => {
     if (userData && userData.subscription_active) {
         window.open('https://www.dropbox.com/scl/fi/2zbuk1s0opsmjl21zrsd3/VodkaClient.exe?rlkey=vt6dzy7evnbxr8rosnidyyaio&st=caeou3b8&dl=1', '_blank');
-    } else {
-        alert('Нужна активная подписка');
-    }
+    } else { alert('Нужна активная подписка'); }
 });
 
-// Выход
 document.getElementById('logoutBtn').addEventListener('click', async () => {
     await fetch('/api/logout', { method: 'POST' });
     window.location.href = '/';
 });
 
-// ========== ШАРИКИ С ФИЗИКОЙ (МЕДЛЕННЫЕ, ПОЛУПРОЗРАЧНЫЕ) ==========
+// ========== ШАРИКИ С СВЕЧЕНИЕМ ==========
 const canvas = document.getElementById('ballsCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -788,25 +786,36 @@ function initBalls() {
     canvas.height = canvas.offsetHeight;
     
     balls = [];
-    for (let i = 0; i < 45; i++) {
-        const radius = Math.random() * 12 + 6;
+    for (let i = 0; i < 35; i++) {
+        const radius = Math.random() * 18 + 12; // Больше размер: 12-30
         balls.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height * 0.6,
-            vx: (Math.random() - 0.5) * 0.3,
-            vy: Math.random() * 0.3,
+            vx: (Math.random() - 0.5) * 0.2,
+            vy: Math.random() * 0.2,
             radius: radius,
             color: colors[Math.floor(Math.random() * colors.length)],
             mass: radius * 0.1,
-            alpha: Math.random() * 0.4 + 0.3 // Полупрозрачность 0.3-0.7
+            alpha: Math.random() * 0.5 + 0.4
         });
     }
 }
 
 function drawBall(ball) {
+    // Свечение (glow)
+    ctx.save();
+    ctx.globalAlpha = ball.alpha * 0.4;
+    ctx.shadowColor = ball.color;
+    ctx.shadowBlur = 25;
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius * 1.2, 0, Math.PI * 2);
+    ctx.fillStyle = ball.color;
+    ctx.fill();
+    ctx.restore();
+    
+    // Основной шарик
     ctx.globalAlpha = ball.alpha;
     
-    // Градиент для шейдер-эффекта
     const gradient = ctx.createRadialGradient(
         ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, 0,
         ball.x, ball.y, ball.radius
@@ -816,9 +825,9 @@ function drawBall(ball) {
     const g = parseInt(ball.color.slice(3, 5), 16);
     const b = parseInt(ball.color.slice(5, 7), 16);
     
-    gradient.addColorStop(0, `rgba(${Math.min(255, r + 100)}, ${Math.min(255, g + 100)}, ${Math.min(255, b + 100)}, 0.9)`);
-    gradient.addColorStop(0.4, `rgba(${r}, ${g}, ${b}, 0.7)`);
-    gradient.addColorStop(1, `rgba(${Math.max(0, r - 60)}, ${Math.max(0, g - 60)}, ${Math.max(0, b - 60)}, 0.4)`);
+    gradient.addColorStop(0, `rgba(${Math.min(255, r + 120)}, ${Math.min(255, g + 120)}, ${Math.min(255, b + 120)}, 0.95)`);
+    gradient.addColorStop(0.3, `rgba(${r}, ${g}, ${b}, 0.8)`);
+    gradient.addColorStop(1, `rgba(${Math.max(0, r - 50)}, ${Math.max(0, g - 50)}, ${Math.max(0, b - 50)}, 0.5)`);
     
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
@@ -827,41 +836,38 @@ function drawBall(ball) {
     
     // Блик
     ctx.beginPath();
-    ctx.arc(ball.x - ball.radius * 0.25, ball.y - ball.radius * 0.25, ball.radius * 0.15, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.arc(ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, ball.radius * 0.2, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.fill();
     
     ctx.globalAlpha = 1;
 }
 
 function updateBall(ball) {
-    // Очень медленная гравитация
-    ball.vy += 0.02;
-    
-    // Сильное трение для медленного движения
-    ball.vx *= 0.985;
-    ball.vy *= 0.985;
+    ball.vy += 0.015; // Медленная гравитация
+    ball.vx *= 0.99;
+    ball.vy *= 0.99;
     
     ball.x += ball.vx;
     ball.y += ball.vy;
     
-    // Курсор пинает шарики (мягко)
+    // Курсор пинает шарики (сильнее)
     const dx = ball.x - ballMouse.x;
     const dy = ball.y - ballMouse.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
     
-    if (dist < 50 + ball.radius) {
+    if (dist < 70 + ball.radius) {
         const angle = Math.atan2(dy, dx);
-        const force = (50 + ball.radius - dist) * 0.08 / ball.mass;
-        ball.vx += Math.cos(angle) * force + ballMouse.vx * 0.15;
-        ball.vy += Math.sin(angle) * force + ballMouse.vy * 0.15;
+        const force = (70 + ball.radius - dist) * 0.15 / ball.mass; // Сильнее отталкивание
+        ball.vx += Math.cos(angle) * force + ballMouse.vx * 0.25;
+        ball.vy += Math.sin(angle) * force + ballMouse.vy * 0.25;
     }
     
     // Границы
-    if (ball.x - ball.radius < 0) { ball.x = ball.radius; ball.vx *= -0.5; }
-    if (ball.x + ball.radius > canvas.width) { ball.x = canvas.width - ball.radius; ball.vx *= -0.5; }
-    if (ball.y - ball.radius < 0) { ball.y = ball.radius; ball.vy *= -0.5; }
-    if (ball.y + ball.radius > canvas.height) { ball.y = canvas.height - ball.radius; ball.vy *= -0.5; }
+    if (ball.x - ball.radius < 0) { ball.x = ball.radius; ball.vx *= -0.6; }
+    if (ball.x + ball.radius > canvas.width) { ball.x = canvas.width - ball.radius; ball.vx *= -0.6; }
+    if (ball.y - ball.radius < 0) { ball.y = ball.radius; ball.vy *= -0.6; }
+    if (ball.y + ball.radius > canvas.height) { ball.y = canvas.height - ball.radius; ball.vy *= -0.6; }
 }
 
 function checkCollisions() {
@@ -885,7 +891,7 @@ function checkCollisions() {
                 const dvn = (b1.vx - b2.vx) * nx + (b1.vy - b2.vy) * ny;
                 
                 if (dvn > 0) {
-                    const factor = dvn / (b1.mass + b2.mass) * 0.4;
+                    const factor = dvn / (b1.mass + b2.mass) * 0.5;
                     b1.vx -= factor * b2.mass * nx;
                     b1.vy -= factor * b2.mass * ny;
                     b2.vx += factor * b1.mass * nx;
@@ -899,8 +905,8 @@ function checkCollisions() {
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    ballMouse.vx = (ballMouse.x - ballMouse.prevX) * 0.5;
-    ballMouse.vy = (ballMouse.y - ballMouse.prevY) * 0.5;
+    ballMouse.vx = (ballMouse.x - ballMouse.prevX) * 0.6;
+    ballMouse.vy = (ballMouse.y - ballMouse.prevY) * 0.6;
     ballMouse.prevX = ballMouse.x;
     ballMouse.prevY = ballMouse.y;
     
@@ -918,6 +924,38 @@ canvas.addEventListener('mousemove', (e) => {
 });
 
 window.addEventListener('resize', initBalls);
+
+// ========== АДМИН АВТОРИЗАЦИЯ (Alt+N) ==========
+document.addEventListener('keydown', (e) => {
+    if (e.altKey && e.key.toLowerCase() === 'n') {
+        e.preventDefault();
+        if (adminAuthorized) {
+            window.location.href = '/admin.html';
+        } else {
+            openModal('admin');
+            document.getElementById('adminPassword').focus();
+        }
+    }
+});
+
+function adminLogin() {
+    const password = document.getElementById('adminPassword').value;
+    const messageDiv = document.getElementById('adminMessage');
+    const ADMIN_PASSWORD = 'vodka2024admin';
+    
+    if (password === ADMIN_PASSWORD) {
+        adminAuthorized = true;
+        showMessage(messageDiv, 'Доступ разрешен!', true);
+        setTimeout(() => { window.location.href = '/admin.html'; }, 500);
+    } else {
+        showMessage(messageDiv, 'Неверный пароль', false);
+        document.getElementById('adminPassword').value = '';
+    }
+}
+
+document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') adminLogin();
+});
 
 // Запуск
 loadUserData();
