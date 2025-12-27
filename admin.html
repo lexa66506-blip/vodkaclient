@@ -335,13 +335,13 @@ nav {
     <!-- Генерация ключей -->
     <div class="users-section" style="margin-top: 30px;">
         <h2>Генерация ключей</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-            <button class="btn-generate" onclick="generateKey('1day', 1)">🎫 1 День (выдача)</button>
-            <button class="btn-generate" onclick="generateKey('1week', 7)">📅 1 Неделя (99₽)</button>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <button class="btn-generate" onclick="generateKey('1day', 1)">🎫 1 День</button>
+            <button class="btn-generate" onclick="generateKey('1week', 7)">📅 1 Неделя</button>
             <button class="btn-generate" onclick="generateKey('1month', 30)">📆 1 Месяц</button>
             <button class="btn-generate" onclick="generateKey('6months', 180)">📆 6 Месяцев</button>
             <button class="btn-generate" onclick="generateKey('lifetime', 0)">♾️ LifeTime</button>
-            <button class="btn-generate" onclick="generateKey('hwid_reset', 0)" style="background: rgba(255, 165, 0, 0.2); border-color: rgba(255, 165, 0, 0.5); color: #ffa500;">🔄 Сброс HWID (149₽)</button>
+            <button class="btn-generate" onclick="generateKey('hwid_reset', 0)" style="background: rgba(255, 165, 0, 0.2); border-color: rgba(255, 165, 0, 0.5); color: #ffa500;">🔄 Сброс HWID</button>
         </div>
         
         <div id="generatedKey" style="display: none; background: rgba(50, 255, 50, 0.1); border: 1px solid rgba(50, 255, 50, 0.3); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
