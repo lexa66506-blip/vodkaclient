@@ -82,6 +82,17 @@ app.post('/api/register', async (req, res) => {
     if (username.length < 3) return res.status(400).json({ success: false, message: 'Логин минимум 3 символа' });
     if (password.length < 6) return res.status(400).json({ success: false, message: 'Пароль минимум 6 символов' });
     if (!email.includes('@')) return res.status(400).json({ success: false, message: 'Некорректный email' });
+    
+    // Проверка на английские буквы, цифры и спецсимволы (без русских)
+    const validChars = /^[a-zA-Z0-9_\-\.]+$/;
+    const validPassword = /^[a-zA-Z0-9!@#$%^&*()_\-+=\[\]{}|;:'"<>,.?/\\~`]+$/;
+    
+    if (!validChars.test(username)) {
+        return res.status(400).json({ success: false, message: 'Логин только английские буквы, цифры и _-.' });
+    }
+    if (!validPassword.test(password)) {
+        return res.status(400).json({ success: false, message: 'Пароль только английские буквы, цифры и спецсимволы' });
+    }
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
