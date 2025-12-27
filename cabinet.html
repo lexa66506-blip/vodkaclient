@@ -825,7 +825,7 @@ const canvas = document.getElementById('ballsCanvas');
 const ctx = canvas.getContext('2d');
 
 let balls = [];
-let mouseX = 0, mouseY = 0;
+let ballMouseX = 0, ballMouseY = 0;
 
 const colors = [
     '#a855f7', '#7c3aed', '#8b5cf6', '#c084fc', '#9333ea', '#d946ef',
@@ -833,9 +833,8 @@ const colors = [
 ];
 
 function initBalls() {
-    canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-    canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
     
     balls = [];
     const count = 60; // Много шариков как на скрине
@@ -843,8 +842,8 @@ function initBalls() {
     for (let i = 0; i < count; i++) {
         const radius = Math.random() * 12 + 8; // 8-20px
         balls.push({
-            x: Math.random() * canvas.offsetWidth,
-            y: canvas.offsetHeight - radius - Math.random() * 150, // Внизу
+            x: Math.random() * canvas.width,
+            y: canvas.height - radius - Math.random() * 150, // Внизу
             vx: 0,
             vy: 0,
             radius: radius,
@@ -878,8 +877,8 @@ function updateBalls() {
     const gravity = 0.3;
     const friction = 0.98;
     const bounce = 0.6;
-    const w = canvas.offsetWidth;
-    const h = canvas.offsetHeight;
+    const w = canvas.width;
+    const h = canvas.height;
     
     for (let ball of balls) {
         // Гравитация
@@ -894,8 +893,8 @@ function updateBalls() {
         ball.y += ball.vy;
         
         // Подбрасывание при наведении мышки
-        const dx = ball.x - mouseX;
-        const dy = ball.y - mouseY;
+        const dx = ball.x - ballMouseX;
+        const dy = ball.y - ballMouseY;
         const dist = Math.sqrt(dx * dx + dy * dy);
         
         if (dist < 50 + ball.radius) {
@@ -961,7 +960,7 @@ function updateBalls() {
 }
 
 function animate() {
-    ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     updateBalls();
     balls.forEach(drawBall);
     requestAnimationFrame(animate);
@@ -969,14 +968,13 @@ function animate() {
 
 canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
-    mouseX = e.clientX - rect.left;
-    mouseY = e.clientY - rect.top;
+    ballMouseX = e.clientX - rect.left;
+    ballMouseY = e.clientY - rect.top;
 });
 
 window.addEventListener('resize', () => {
-    canvas.width = canvas.offsetWidth * window.devicePixelRatio;
-    canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
 });
 
 // ========== АДМИН АВТОРИЗАЦИЯ (Alt+N) ==========
