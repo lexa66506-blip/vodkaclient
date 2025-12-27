@@ -68,11 +68,6 @@ body {
     background: rgba(138, 43, 226, 0.2);
 }
 
-.nav-links a .icon {
-    font-size: 12px;
-    opacity: 0.7;
-}
-
 .nav-user {
     display: flex;
     align-items: center;
@@ -86,12 +81,13 @@ body {
     cursor: pointer;
 }
 
-/* Лучи эффект */
+/* Лучи эффект - солнечные лучи */
 .rays-container {
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200%;
     height: 100%;
     z-index: 1;
     pointer-events: none;
@@ -100,10 +96,13 @@ body {
 
 .ray {
     position: absolute;
-    width: 2px;
-    height: 100%;
-    background: linear-gradient(180deg, transparent, rgba(138, 43, 226, 0.12), transparent);
-    transform-origin: top center;
+    top: -50%;
+    left: 50%;
+    width: 3px;
+    height: 150%;
+    background: linear-gradient(180deg, rgba(138, 43, 226, 0.3), rgba(138, 43, 226, 0.08), transparent);
+    transform-origin: 50% 0%;
+    filter: blur(1px);
 }
 
 /* Основной контейнер */
@@ -208,26 +207,29 @@ body {
     color: #a855f7;
 }
 
+/* Кнопка Download - темная с блюром */
 .btn-download {
     width: 100%;
     padding: 14px;
-    background: rgba(138, 43, 226, 0.15);
-    border: 1px solid rgba(138, 43, 226, 0.3);
+    background: rgba(20, 10, 30, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(138, 43, 226, 0.2);
     border-radius: 10px;
-    color: #aaa;
+    color: #888;
     font-size: 14px;
     cursor: pointer;
     transition: all 0.3s;
 }
 
 .btn-download:hover {
-    background: rgba(138, 43, 226, 0.25);
+    background: rgba(30, 15, 45, 0.8);
+    border-color: rgba(138, 43, 226, 0.4);
 }
 
 .btn-download.active {
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
-    border: none;
-    color: #fff;
+    background: rgba(40, 20, 60, 0.8);
+    border: 1px solid rgba(138, 43, 226, 0.4);
+    color: #a855f7;
 }
 
 /* Правая панель */
@@ -446,14 +448,13 @@ body {
 <!-- Лучи эффект -->
 <div class="rays-container" id="raysContainer"></div>
 
-<!-- Плавающая навигация -->
+<!-- Плавающая навигация (без Rules) -->
 <nav class="floating-nav">
     <div class="nav-logo">VodkaClient</div>
     <div class="nav-links">
-        <a href="/"><span class="icon">🏠</span> Home</a>
-        <a href="/#pricingModal" onclick="openPricing()"><span class="icon">📦</span> Products</a>
-        <a href="/#hero"><span class="icon">📜</span> Rules</a>
-        <a href="https://t.me/SmertnixVteste" target="_blank"><span class="icon">�<//span> Support</a>
+        <a href="/">🏠 Home</a>
+        <a href="/" onclick="setTimeout(() => document.getElementById('buyBtn').click(), 100)">📦 Products</a>
+        <a href="https://t.me/SmertnixVteste" target="_blank">💬 Support</a>
     </div>
     <div class="nav-user" id="navUser">
         <span>👤</span>
@@ -565,7 +566,7 @@ body {
     <div class="modal-content">
         <div class="modal-title">Смена пароля</div>
         <input type="password" class="modal-input" id="oldPassword" placeholder="Текущий пароль">
-        <input type="password" class="modal-input" id="newPassword" placeholder="Новый пароль">
+        <input type="password" class="modal-input" id="newPassword" placeholder="Новый пароль (мин. 6 символов)">
         <div class="modal-buttons">
             <button class="modal-btn secondary" onclick="closeModal('password')">Отмена</button>
             <button class="modal-btn primary" onclick="changePassword()">Сменить</button>
@@ -611,19 +612,21 @@ body {
 <script>
 let userData = null;
 let mouseX = 0, mouseY = 0;
-let adminAuthorized = false;
+let adminAuthorized = localStorage.getItem('adminAuth') === 'true';
 
-// ========== ЛУЧИ ЭФФЕКТ ==========
+// ========== СОЛНЕЧНЫЕ ЛУЧИ ==========
 function createRays() {
     const container = document.getElementById('raysContainer');
-    const rayCount = 25;
+    const rayCount = 30;
     
     for (let i = 0; i < rayCount; i++) {
         const ray = document.createElement('div');
         ray.className = 'ray';
-        ray.style.left = (i / rayCount * 100) + '%';
-        ray.style.opacity = Math.random() * 0.25 + 0.05;
-        ray.style.transform = `rotate(${(i - rayCount/2) * 2.5}deg)`;
+        const angle = (i / rayCount) * 360 - 180;
+        ray.style.transform = `rotate(${angle}deg)`;
+        ray.style.opacity = Math.random() * 0.15 + 0.05;
+        ray.style.width = (Math.random() * 2 + 1) + 'px';
+        ray.dataset.baseAngle = angle;
         container.appendChild(ray);
     }
 }
@@ -634,11 +637,14 @@ document.addEventListener('mousemove', (e) => {
     
     const rays = document.querySelectorAll('.ray');
     const centerX = window.innerWidth / 2;
-    const offsetX = (mouseX - centerX) / centerX * 8;
+    const centerY = 0;
+    const offsetX = (mouseX - centerX) / centerX * 5;
     
     rays.forEach((ray, i) => {
-        const baseAngle = (i - rays.length/2) * 2.5;
-        ray.style.transform = `rotate(${baseAngle + offsetX}deg)`;
+        const baseAngle = parseFloat(ray.dataset.baseAngle);
+        // Некоторые лучи следуют за мышкой больше
+        const followFactor = (i % 3 === 0) ? 2 : 0.5;
+        ray.style.transform = `rotate(${baseAngle + offsetX * followFactor}deg)`;
     });
 });
 
@@ -702,10 +708,6 @@ function closeModal(type) {
     document.getElementById(type + 'Modal').classList.remove('active');
 }
 
-function openPricing() {
-    window.location.href = '/#pricingModal';
-}
-
 async function activateKey() {
     const keyCode = document.getElementById('keyInput').value.trim();
     const messageDiv = document.getElementById('keyMessage');
@@ -743,7 +745,11 @@ async function changePassword() {
         });
         const data = await response.json();
         showMessage(messageDiv, data.message, data.success);
-        if (data.success) setTimeout(() => closeModal('password'), 1500);
+        if (data.success) {
+            document.getElementById('oldPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            setTimeout(() => closeModal('password'), 1500);
+        }
     } catch (error) { showMessage(messageDiv, 'Ошибка соединения', false); }
 }
 
@@ -787,7 +793,7 @@ function initBalls() {
     
     balls = [];
     for (let i = 0; i < 35; i++) {
-        const radius = Math.random() * 18 + 12; // Больше размер: 12-30
+        const radius = Math.random() * 18 + 12;
         balls.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height * 0.6,
@@ -802,7 +808,7 @@ function initBalls() {
 }
 
 function drawBall(ball) {
-    // Свечение (glow)
+    // Свечение
     ctx.save();
     ctx.globalAlpha = ball.alpha * 0.4;
     ctx.shadowColor = ball.color;
@@ -813,7 +819,6 @@ function drawBall(ball) {
     ctx.fill();
     ctx.restore();
     
-    // Основной шарик
     ctx.globalAlpha = ball.alpha;
     
     const gradient = ctx.createRadialGradient(
@@ -834,7 +839,6 @@ function drawBall(ball) {
     ctx.fillStyle = gradient;
     ctx.fill();
     
-    // Блик
     ctx.beginPath();
     ctx.arc(ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, ball.radius * 0.2, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
@@ -844,26 +848,25 @@ function drawBall(ball) {
 }
 
 function updateBall(ball) {
-    ball.vy += 0.015; // Медленная гравитация
+    ball.vy += 0.015;
     ball.vx *= 0.99;
     ball.vy *= 0.99;
     
     ball.x += ball.vx;
     ball.y += ball.vy;
     
-    // Курсор пинает шарики (сильнее)
+    // Меньше сила отталкивания
     const dx = ball.x - ballMouse.x;
     const dy = ball.y - ballMouse.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
     
-    if (dist < 70 + ball.radius) {
+    if (dist < 50 + ball.radius) {
         const angle = Math.atan2(dy, dx);
-        const force = (70 + ball.radius - dist) * 0.15 / ball.mass; // Сильнее отталкивание
-        ball.vx += Math.cos(angle) * force + ballMouse.vx * 0.25;
-        ball.vy += Math.sin(angle) * force + ballMouse.vy * 0.25;
+        const force = (50 + ball.radius - dist) * 0.05 / ball.mass; // Меньше сила
+        ball.vx += Math.cos(angle) * force + ballMouse.vx * 0.1;
+        ball.vy += Math.sin(angle) * force + ballMouse.vy * 0.1;
     }
     
-    // Границы
     if (ball.x - ball.radius < 0) { ball.x = ball.radius; ball.vx *= -0.6; }
     if (ball.x + ball.radius > canvas.width) { ball.x = canvas.width - ball.radius; ball.vx *= -0.6; }
     if (ball.y - ball.radius < 0) { ball.y = ball.radius; ball.vy *= -0.6; }
@@ -927,13 +930,15 @@ window.addEventListener('resize', initBalls);
 
 // ========== АДМИН АВТОРИЗАЦИЯ (Alt+N) ==========
 document.addEventListener('keydown', (e) => {
-    if (e.altKey && e.key.toLowerCase() === 'n') {
+    if (e.altKey && (e.key === 'n' || e.key === 'N' || e.key === 'т' || e.key === 'Т')) {
         e.preventDefault();
+        e.stopPropagation();
+        
         if (adminAuthorized) {
             window.location.href = '/admin.html';
         } else {
             openModal('admin');
-            document.getElementById('adminPassword').focus();
+            setTimeout(() => document.getElementById('adminPassword').focus(), 100);
         }
     }
 });
@@ -945,6 +950,7 @@ function adminLogin() {
     
     if (password === ADMIN_PASSWORD) {
         adminAuthorized = true;
+        localStorage.setItem('adminAuth', 'true');
         showMessage(messageDiv, 'Доступ разрешен!', true);
         setTimeout(() => { window.location.href = '/admin.html'; }, 500);
     } else {
