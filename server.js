@@ -35,12 +35,16 @@ async function initDB() {
                 uid SERIAL PRIMARY KEY,
                 username VARCHAR(255) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
+                email VARCHAR(255) DEFAULT NULL,
                 hwid VARCHAR(255) DEFAULT NULL,
                 subscription_type VARCHAR(50) DEFAULT NULL,
                 subscription_expires TIMESTAMP DEFAULT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+        
+        // Добавляем колонку email если её нет
+        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255) DEFAULT NULL`).catch(() => {});
         
         await pool.query(`
             CREATE TABLE IF NOT EXISTS keys (
@@ -65,16 +69,17 @@ initDB();
 
 // API: Регистрация
 app.post('/api/register', async (req, res) => {
-    const { username, password } = req.body;
-    if (!username || !password) return res.status(400).json({ success: false, message: 'Заполните все поля' });
+    const { username, password, email } = req.body;
+    if (!username || !password || !email) return res.status(400).json({ success: false, message: 'Заполните все поля' });
     if (username.length < 3) return res.status(400).json({ success: false, message: 'Логин минимум 3 символа' });
     if (password.length < 6) return res.status(400).json({ success: false, message: 'Пароль минимум 6 символов' });
+    if (!email.includes('@')) return res.status(400).json({ success: false, message: 'Некорректный email' });
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const result = await pool.query(
-            'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING uid',
-            [username, hashedPassword]
+            'INSERT INTO users (username, password, email) VALUES ($1, $2, $3) RETURNING uid',
+            [username, hashedPassword, email]
         );
         
         req.session.userId = result.rows[0].uid;
@@ -115,7 +120,7 @@ app.get('/api/check-auth', async (req, res) => {
 
     try {
         const result = await pool.query(
-            'SELECT uid, username, created_at, subscription_type, subscription_expires FROM users WHERE uid = $1',
+            'SELECT uid, username, email, hwid, created_at, subscription_type, subscription_expires FROM users WHERE uid = $1',
             [req.session.userId]
         );
         
@@ -132,6 +137,8 @@ app.get('/api/check-auth', async (req, res) => {
             authenticated: true,
             uid: user.uid,
             username: user.username,
+            email: user.email,
+            hwid: user.hwid,
             created_at: user.created_at,
             subscription_type: user.subscription_type,
             subscription_expires: user.subscription_expires,
