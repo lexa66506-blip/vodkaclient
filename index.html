@@ -1315,7 +1315,7 @@ detailsBtn.addEventListener('click', () => {
 const downloadBtn = document.getElementById('downloadBtn');
 downloadBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    const loaderUrl = 'https://www.dropbox.com/scl/fi/7p2hql3lhp3v98s633a3f/vodkaCiient.exe?rlkey=hchtczlxhm9dlidd2mlbpjn0u&st=w8h0f8un&dl=1';
+    const loaderUrl = 'https://www.dropbox.com/scl/fi/c5f394v64ju97rlep97aa/LoaderUI.exe?rlkey=89x35q88ei92wqt6v1e9a6ign&st=8e5r3qiy&dl=0';
     window.open(loaderUrl, '_blank');
 });
 
@@ -1344,6 +1344,129 @@ async function getFreeDay() {
         alert('❌ Сначала войдите в аккаунт!');
     }
 }
+</script>
+
+<!-- Футер -->
+<footer style="
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    background: rgba(10, 10, 10, 0.9);
+    border-top: 1px solid rgba(80, 80, 80, 0.3);
+    padding: 20px 0;
+    text-align: center;
+    margin-top: 50px;
+    z-index: 1000;
+">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <p style="
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 10px;
+        ">
+            Copyright © 2025 VodkaClient. Все права защищены.<br>
+            Проект никак не относится к Mojang, AB.
+        </p>
+        <button id="rulesBtn" style="
+            background: rgba(80, 80, 80, 0.2);
+            border: 1px solid rgba(80, 80, 80, 0.4);
+            border-radius: 10px;
+            color: #aaa;
+            padding: 8px 16px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        " onmouseover="this.style.background='rgba(80, 80, 80, 0.4)'" onmouseout="this.style.background='rgba(80, 80, 80, 0.2)'">
+            Правила пользования
+        </button>
+    </div>
+</footer>
+
+<!-- Модальное окно с правилами -->
+<div id="rulesModal" style="
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+">
+    <div style="
+        background: rgba(25, 25, 25, 0.98);
+        border: 1px solid rgba(80, 80, 80, 0.4);
+        border-radius: 10px;
+        padding: 30px;
+        width: 90%;
+        max-width: 700px;
+        max-height: 80vh;
+        overflow-y: auto;
+    ">
+        <h2 style="
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #fff;
+            text-align: center;
+        ">Правила пользования</h2>
+        
+        <div style="
+            color: #ddd;
+            font-size: 14px;
+            line-height: 1.6;
+            text-align: left;
+        ">
+            <p style="margin-bottom: 15px;"><strong>1. Пользователю запрещено</strong> - декомпилировать, взламывать, патчить, отлаживать или использовать другие методы обратного инжиниринга нашего продукта, а также иным образом вмешиваться в работу любого программного обеспечения, содержащегося в сервисах VodkaClient.</p>
+            
+            <p style="margin-bottom: 15px;"><strong>2. Пользователю запрещено</strong> - использовать наши продукты, если Вы (непосредственно или косвенно) связаны с разработкой античитов, клиентов, чит-клиентов (могут быть исключения).</p>
+            
+            <p style="margin-bottom: 15px;"><strong>3. Пользователю запрещено</strong> - осуществлять любые действия, направленные на подрыв репутации и качества нашей продукции.</p>
+            
+            <p style="margin-bottom: 15px;"><strong>4. Пользователю запрещено</strong> - передавать, продавать, покупать или иным образом распоряжаться своим или чужими аккаунтами, а также использовать учетные записи, не принадлежащие ему.</p>
+            
+            <p style="margin-bottom: 15px;"><strong>5. Пользователю запрещено</strong> - распространять файлы лаунчера, сайта или клиента.</p>
+            
+            <p style="margin-bottom: 15px;"><strong>6. Пользователю запрещено</strong> - заниматься вредоносной деятельностью, включая, но не ограничиваясь, такими деяниями как мошенничество, обман, DDoS-атаки, раскрытие личной или частной информации. Если вы вовлечены в это в какой-либо форме, администрация может принять решение приостановить действие вашей учетной записи.</p>
+            
+            <p style="margin-bottom: 15px;"><strong>7. Администрация не несет ответственности за внутриигровые блокировки.</strong> Продукты используются на Ваш страх и риск.</p>
+            
+            <p style="margin-bottom: 20px; color: #ff6b6b;"><strong>Администрация имеет право приостановить действие всех ваших существующих и будущих учетных записей на данном веб-сайте в случае нарушения данных правил или в других случаях по своему усмотрению.</strong></p>
+        </div>
+        
+        <button onclick="closeRulesModal()" style="
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #3a3a3a, #555);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            Закрыть
+        </button>
+    </div>
+</div>
+
+<script>
+// Функции для модального окна с правилами
+document.getElementById('rulesBtn').addEventListener('click', () => {
+    document.getElementById('rulesModal').style.display = 'flex';
+});
+
+function closeRulesModal() {
+    document.getElementById('rulesModal').style.display = 'none';
+}
+
+// Закрытие по клику вне модального окна
+document.getElementById('rulesModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('rulesModal')) {
+        closeRulesModal();
+    }
+});
 </script>
 
 </body>
