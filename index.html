@@ -906,6 +906,107 @@ nav {
 
 <body>
 
+<!-- Кнопка "WebSite created by:" в правом верхнем углу -->
+<div id="creditsBtn" style="
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+    <span style="
+        color: #888;
+        font-size: 12px;
+        font-weight: 500;
+    ">WebSite created by:</span>
+</div>
+
+<!-- Модальное окно с информацией о создателях -->
+<div id="creditsModal" style="
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+">
+    <div style="
+        background: rgba(25, 25, 25, 0.98);
+        border: 1px solid rgba(80, 80, 80, 0.4);
+        border-radius: 10px;
+        padding: 30px;
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+    ">
+        <h2 style="
+            font-size: 24px;
+            margin-bottom: 25px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        ">🎨 Создатели проекта</h2>
+        
+        <div style="
+            color: #ddd;
+            font-size: 15px;
+            line-height: 1.8;
+            text-align: left;
+            margin-bottom: 25px;
+        ">
+            <p style="margin-bottom: 12px;">
+                <span style="color: #aaa;">📐 Общий дизайн:</span> 
+                <span style="color: #fff; font-weight: 600;">Zhenkam aka LexaBLR</span>
+            </p>
+            
+            <p style="margin-bottom: 12px;">
+                <span style="color: #aaa;">⚙️ Функции:</span> 
+                <span style="color: #fff; font-weight: 600;">Zhenkam aka LexaBLR</span>
+            </p>
+            
+            <p style="margin-bottom: 12px;">
+                <span style="color: #aaa;">🚀 Лоудер и система HWID:</span> 
+                <span style="color: #fff; font-weight: 600;">LexaBLR</span>
+            </p>
+            
+            <p style="margin-bottom: 20px;">
+                <span style="color: #aaa;">🗄️ База данных:</span> 
+                <span style="color: #fff; font-weight: 600;">Zhenkam aka LexaBLR</span>
+            </p>
+            
+            <div style="
+                background: rgba(80, 80, 80, 0.2);
+                border-radius: 10px;
+                padding: 15px;
+                margin: 20px 0;
+                text-align: center;
+            ">
+                <p style="color: #fff; font-weight: 600; margin-bottom: 8px;">💪 Наша первая работа, мы старались!</p>
+                <p style="color: #aaa; font-size: 14px;">⏱️ Сайт был сделан за 3 дня</p>
+            </div>
+        </div>
+        
+        <button onclick="closeCreditsModal()" style="
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #3a3a3a, #555);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+            Закрыть
+        </button>
+    </div>
+</div>
+
 <!-- Анимированный фон -->
 <div class="particles" id="particles"></div>
 
@@ -1465,6 +1566,22 @@ function closeRulesModal() {
 document.getElementById('rulesModal').addEventListener('click', (e) => {
     if (e.target === document.getElementById('rulesModal')) {
         closeRulesModal();
+    }
+});
+
+// Функции для модального окна с информацией о создателях
+document.getElementById('creditsBtn').addEventListener('click', () => {
+    document.getElementById('creditsModal').style.display = 'flex';
+});
+
+function closeCreditsModal() {
+    document.getElementById('creditsModal').style.display = 'none';
+}
+
+// Закрытие по клику вне модального окна
+document.getElementById('creditsModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('creditsModal')) {
+        closeCreditsModal();
     }
 });
 </script>
