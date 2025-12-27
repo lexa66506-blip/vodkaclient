@@ -820,106 +820,140 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     window.location.href = '/';
 });
 
-// ========== ШАРИКИ ОПТИМИЗИРОВАННЫЕ ==========
+// ========== ШАРИКИ КАК НА KLERPIK ==========
 const canvas = document.getElementById('ballsCanvas');
 const ctx = canvas.getContext('2d');
 
 let balls = [];
-let ballMouse = { x: 0, y: 0, vx: 0, vy: 0, prevX: 0, prevY: 0 };
-let frameCount = 0;
+let mouseX = 0, mouseY = 0;
 
-const colors = ['#a855f7', '#7c3aed', '#8b5cf6', '#c084fc', '#9333ea', '#d946ef'];
+const colors = [
+    '#a855f7', '#7c3aed', '#8b5cf6', '#c084fc', '#9333ea', '#d946ef',
+    '#6b21a8', '#581c87', '#a78bfa', '#e879f9'
+];
 
 function initBalls() {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+    canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     
     balls = [];
-    for (let i = 0; i < 18; i++) { // Больше шариков
-        const radius = Math.random() * 10 + 7; // Больше: 7-17
+    const count = 60; // Много шариков как на скрине
+    
+    for (let i = 0; i < count; i++) {
+        const radius = Math.random() * 12 + 8; // 8-20px
         balls.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height * 0.6,
-            vx: (Math.random() - 0.5) * 0.15,
-            vy: Math.random() * 0.15,
+            x: Math.random() * canvas.offsetWidth,
+            y: canvas.offsetHeight - radius - Math.random() * 150, // Внизу
+            vx: 0,
+            vy: 0,
             radius: radius,
             color: colors[Math.floor(Math.random() * colors.length)],
-            mass: radius * 0.1,
-            alpha: Math.random() * 0.4 + 0.4
+            mass: radius
         });
     }
 }
 
 function drawBall(ball) {
-    ctx.globalAlpha = ball.alpha;
-    
-    // Простой круг без градиента (максимальная оптимизация)
+    // Основной круг
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
     ctx.fillStyle = ball.color;
     ctx.fill();
     
-    // Маленький блик
+    // Блик сверху-слева (как на скрине)
     ctx.beginPath();
-    ctx.arc(ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, ball.radius * 0.2, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.arc(ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, ball.radius * 0.35, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.fill();
     
-    ctx.globalAlpha = 1;
+    // Маленький блик
+    ctx.beginPath();
+    ctx.arc(ball.x - ball.radius * 0.15, ball.y - ball.radius * 0.45, ball.radius * 0.12, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.fill();
 }
 
-function updateBall(ball) {
-    ball.vy += 0.012;
-    ball.vx *= 0.995;
-    ball.vy *= 0.995;
+function updateBalls() {
+    const gravity = 0.3;
+    const friction = 0.98;
+    const bounce = 0.6;
+    const w = canvas.offsetWidth;
+    const h = canvas.offsetHeight;
     
-    ball.x += ball.vx;
-    ball.y += ball.vy;
-    
-    const dx = ball.x - ballMouse.x;
-    const dy = ball.y - ballMouse.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    
-    if (dist < 40 + ball.radius) {
-        const angle = Math.atan2(dy, dx);
-        const force = (40 + ball.radius - dist) * 0.04 / ball.mass;
-        ball.vx += Math.cos(angle) * force + ballMouse.vx * 0.08;
-        ball.vy += Math.sin(angle) * force + ballMouse.vy * 0.08;
+    for (let ball of balls) {
+        // Гравитация
+        ball.vy += gravity;
+        
+        // Трение
+        ball.vx *= friction;
+        ball.vy *= friction;
+        
+        // Движение
+        ball.x += ball.vx;
+        ball.y += ball.vy;
+        
+        // Подбрасывание при наведении мышки
+        const dx = ball.x - mouseX;
+        const dy = ball.y - mouseY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < 50 + ball.radius) {
+            // Подбрасываем вверх и в сторону
+            ball.vy -= 3 + Math.random() * 2;
+            ball.vx += (dx / dist) * 2;
+        }
+        
+        // Границы
+        if (ball.x - ball.radius < 0) {
+            ball.x = ball.radius;
+            ball.vx *= -bounce;
+        }
+        if (ball.x + ball.radius > w) {
+            ball.x = w - ball.radius;
+            ball.vx *= -bounce;
+        }
+        if (ball.y - ball.radius < 0) {
+            ball.y = ball.radius;
+            ball.vy *= -bounce;
+        }
+        if (ball.y + ball.radius > h) {
+            ball.y = h - ball.radius;
+            ball.vy *= -bounce;
+        }
     }
     
-    if (ball.x - ball.radius < 0) { ball.x = ball.radius; ball.vx *= -0.5; }
-    if (ball.x + ball.radius > canvas.width) { ball.x = canvas.width - ball.radius; ball.vx *= -0.5; }
-    if (ball.y - ball.radius < 0) { ball.y = ball.radius; ball.vy *= -0.5; }
-    if (ball.y + ball.radius > canvas.height) { ball.y = canvas.height - ball.radius; ball.vy *= -0.5; }
-}
-
-function checkCollisions() {
+    // Коллизии между шариками (упрощённые)
     for (let i = 0; i < balls.length; i++) {
         for (let j = i + 1; j < balls.length; j++) {
             const b1 = balls[i], b2 = balls[j];
-            const dx = b2.x - b1.x, dy = b2.y - b1.y;
-            const distSq = dx * dx + dy * dy;
+            const dx = b2.x - b1.x;
+            const dy = b2.y - b1.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
             const minDist = b1.radius + b2.radius;
             
-            if (distSq < minDist * minDist) {
-                const dist = Math.sqrt(distSq);
+            if (dist < minDist && dist > 0) {
                 const overlap = (minDist - dist) / 2;
-                const angle = Math.atan2(dy, dx);
+                const nx = dx / dist;
+                const ny = dy / dist;
                 
-                b1.x -= Math.cos(angle) * overlap;
-                b1.y -= Math.sin(angle) * overlap;
-                b2.x += Math.cos(angle) * overlap;
-                b2.y += Math.sin(angle) * overlap;
+                b1.x -= nx * overlap;
+                b1.y -= ny * overlap;
+                b2.x += nx * overlap;
+                b2.y += ny * overlap;
                 
-                const nx = dx / dist, ny = dy / dist;
-                const dvn = (b1.vx - b2.vx) * nx + (b1.vy - b2.vy) * ny;
+                // Обмен скоростями
+                const dvx = b1.vx - b2.vx;
+                const dvy = b1.vy - b2.vy;
+                const dvn = dvx * nx + dvy * ny;
                 
                 if (dvn > 0) {
-                    const factor = dvn / (b1.mass + b2.mass) * 0.4;
-                    b1.vx -= factor * b2.mass * nx;
-                    b1.vy -= factor * b2.mass * ny;
-                    b2.vx += factor * b1.mass * nx;
-                    b2.vy += factor * b1.mass * ny;
+                    const m1 = b1.mass, m2 = b2.mass;
+                    const f = dvn / (m1 + m2) * 0.8;
+                    b1.vx -= f * m2 * nx;
+                    b1.vy -= f * m2 * ny;
+                    b2.vx += f * m1 * nx;
+                    b2.vy += f * m1 * ny;
                 }
             }
         }
@@ -927,27 +961,23 @@ function checkCollisions() {
 }
 
 function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    ballMouse.vx = (ballMouse.x - ballMouse.prevX) * 0.5;
-    ballMouse.vy = (ballMouse.y - ballMouse.prevY) * 0.5;
-    ballMouse.prevX = ballMouse.x;
-    ballMouse.prevY = ballMouse.y;
-    
-    balls.forEach(updateBall);
-    checkCollisions();
+    ctx.clearRect(0, 0, canvas.offsetWidth, canvas.offsetHeight);
+    updateBalls();
     balls.forEach(drawBall);
-    
     requestAnimationFrame(animate);
 }
 
 canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
-    ballMouse.x = e.clientX - rect.left;
-    ballMouse.y = e.clientY - rect.top;
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
 });
 
-window.addEventListener('resize', initBalls);
+window.addEventListener('resize', () => {
+    canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+    canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+});
 
 // ========== АДМИН АВТОРИЗАЦИЯ (Alt+N) ==========
 document.addEventListener('keydown', (e) => {
