@@ -67,6 +67,17 @@ async function initDB() {
             )
         `);
         
+        // Таблица для отслеживания бесплатных ключей (защита от абуза)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS free_keys_used (
+                id SERIAL PRIMARY KEY,
+                ip_address VARCHAR(255),
+                hwid VARCHAR(255),
+                user_id INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
         console.log('✅ Таблицы PostgreSQL созданы');
     } catch (err) {
         console.error('❌ Ошибка создания таблиц:', err);
@@ -341,10 +352,27 @@ app.post('/api/launcher/check-subscription', async (req, res) => {
             return res.status(401).json({ success: false, message: 'Неверный логин или пароль', has_subscription: false });
         }
 
+        // Проверка: этот HWID уже использовался для бесплатного ключа на другом аккаунте?
+        const freeKeyCheck = await pool.query(
+            'SELECT * FROM free_keys_used WHERE hwid = $1 AND user_id != $2',
+            [hwid, user.uid]
+        );
+        if (freeKeyCheck.rows.length > 0) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Вы уже получали бесплатный ключ на другой аккаунт! Доступ запрещён.', 
+                has_subscription: false,
+                banned: true
+            });
+        }
+
         // HWID логика
         if (!user.hwid) {
             await pool.query('UPDATE users SET hwid = $1 WHERE uid = $2', [hwid, user.uid]);
             console.log(`✅ HWID записан для ${username}: ${hwid}`);
+            
+            // Обновляем HWID в таблице бесплатных ключей если есть
+            await pool.query('UPDATE free_keys_used SET hwid = $1 WHERE user_id = $2', [hwid, user.uid]);
         } else if (user.hwid !== hwid) {
             return res.status(403).json({ success: false, message: 'Аккаунт привязан к другому ПК', has_subscription: false });
         }
@@ -416,6 +444,60 @@ app.post('/api/admin/reset-hwid', async (req, res) => {
     try {
         await pool.query('UPDATE users SET hwid = NULL WHERE uid = $1', [uid]);
         res.json({ success: true, message: 'HWID сброшен' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка сервера' });
+    }
+});
+
+// API: Получить бесплатный 1 день (с защитой от абуза)
+app.post('/api/get-free-day', async (req, res) => {
+    const userId = req.session.userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    
+    // Получаем IP
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.ip;
+    
+    try {
+        // Проверяем, получал ли этот IP уже бесплатный ключ
+        const ipCheck = await pool.query('SELECT * FROM free_keys_used WHERE ip_address = $1', [ip]);
+        if (ipCheck.rows.length > 0) {
+            return res.status(403).json({ success: false, message: 'Вы уже получали бесплатный ключ с этого IP!' });
+        }
+        
+        // Проверяем, получал ли этот пользователь уже бесплатный ключ
+        const userCheck = await pool.query('SELECT * FROM free_keys_used WHERE user_id = $1', [userId]);
+        if (userCheck.rows.length > 0) {
+            return res.status(403).json({ success: false, message: 'Вы уже получали бесплатный ключ!' });
+        }
+        
+        // Проверяем HWID пользователя
+        const userResult = await pool.query('SELECT hwid FROM users WHERE uid = $1', [userId]);
+        const userHwid = userResult.rows[0]?.hwid;
+        
+        if (userHwid) {
+            const hwidCheck = await pool.query('SELECT * FROM free_keys_used WHERE hwid = $1', [userHwid]);
+            if (hwidCheck.rows.length > 0) {
+                return res.status(403).json({ success: false, message: 'Бесплатный ключ уже был получен на этом ПК!' });
+            }
+        }
+        
+        // Выдаём подписку на 1 день
+        const expiresDate = new Date();
+        expiresDate.setDate(expiresDate.getDate() + 1);
+        
+        await pool.query(
+            'UPDATE users SET subscription_type = $1, subscription_expires = $2 WHERE uid = $3',
+            ['1day', expiresDate.toISOString(), userId]
+        );
+        
+        // Записываем в таблицу использованных бесплатных ключей
+        await pool.query(
+            'INSERT INTO free_keys_used (ip_address, hwid, user_id) VALUES ($1, $2, $3)',
+            [ip, userHwid || null, userId]
+        );
+        
+        res.json({ success: true, message: 'Бесплатный день активирован! Подписка до ' + expiresDate.toLocaleString('ru-RU') });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: 'Ошибка сервера' });
