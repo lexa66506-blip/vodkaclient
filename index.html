@@ -1579,12 +1579,13 @@ function closeOrderModal() {
     document.getElementById('orderModal').style.display = 'none';
 }
 
-function applyPromo() {
+async function applyPromo() {
     const promo = document.getElementById('orderPromo').value.trim();
     const promoInfo = document.getElementById('promoInfo');
     const discountNote = document.getElementById('discountNote');
     const priceEl = document.getElementById('orderPrice');
     
+    // Сначала проверяем стандартные промокоды
     if (promoCodes[promo]) {
         const discount = promoCodes[promo];
         const newPrice = Math.round(currentOrderPrice * (100 - discount) / 100);
@@ -1592,7 +1593,24 @@ function applyPromo() {
         promoInfo.style.color = '#55ff55';
         promoInfo.textContent = '✓ Промокод применён: -' + discount + '%';
         discountNote.textContent = 'Скидка действует только для Telegram';
-    } else if (promo) {
+        return;
+    }
+    
+    // Проверяем промокоды Media (5%)
+    if (promo) {
+        try {
+            const response = await fetch('/api/check-promo/' + encodeURIComponent(promo));
+            const data = await response.json();
+            if (data.valid) {
+                const newPrice = Math.round(currentOrderPrice * 0.95);
+                priceEl.textContent = newPrice + ' ₽';
+                promoInfo.style.color = '#9370db';
+                promoInfo.textContent = '✓ Промокод от ' + data.author + ': -5%';
+                discountNote.textContent = 'Скидка действует только для Telegram';
+                return;
+            }
+        } catch (e) {}
+        
         priceEl.textContent = currentOrderPrice + ' ₽';
         promoInfo.style.color = '#ff5555';
         promoInfo.textContent = '✗ Промокод не найден';
