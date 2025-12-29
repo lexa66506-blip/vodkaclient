@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Marketplace - VodkaClient</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
+}
+
+/* Плавающая навигация */
+.floating-nav {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 25px;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(80, 80, 80, 0.25);
+    border-radius: 10px;
+}
+
+.nav-logo {
+    font-size: 18px;
+    font-weight: 700;
+    color: #888;
+    letter-spacing: 1px;
+    margin-right: 15px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.nav-links a {
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.nav-links a:hover {
+    color: #fff;
+    background: rgba(80, 80, 80, 0.2);
+}
+
+.nav-links a.active {
+    color: #fff;
+    background: rgba(80, 80, 80, 0.3);
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #3a3a3a, #555);
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-left: 15px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #fff;
+}
+
+/* Основной контейнер */
+.main-container {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    min-height: 100vh;
+    padding: 100px 30px 30px;
+}
+
+/* Боковое меню */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 99;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-toggle {
+    width: 28px;
+    height: 70px;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(80, 80, 80, 0.25);
+    border-left: none;
+    border-radius: 0 12px 12px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #666;
+    font-size: 20px;
+    transition: all 0.3s;
+}
+
+.sidebar-toggle:hover {
+    background: rgba(30, 30, 30, 0.9);
+    color: #fff;
+}
+
+.sidebar.open .sidebar-toggle {
+    border-radius: 0;
+}
+
+.sidebar-content {
+    width: 0;
+    height: 400px;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(80, 80, 80, 0.25);
+    border-left: none;
+    border-radius: 0 12px 12px 0;
+    overflow: hidden;
+    transition: width 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar.open .sidebar-content {
+    width: 220px;
+    padding: 20px 15px;
+}
+
+.sidebar-header {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(80, 80, 80, 0.3);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.sidebar.open .sidebar-header {
+    opacity: 1;
+}
+
+.sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.sidebar.open .sidebar-menu {
+    opacity: 1;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(40, 40, 40, 0.5);
+    border: 1px solid rgba(80, 80, 80, 0.2);
+    border-radius: 10px;
+    color: #888;
+    text-decoration: none;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sidebar-item:hover {
+    background: rgba(60, 60, 60, 0.5);
+    color: #fff;
+}
+
+.sidebar-item.active {
+    background: rgba(80, 80, 80, 0.4);
+    border-color: rgba(100, 100, 100, 0.4);
+    color: #fff;
+}
+
+.sidebar-item span {
+    font-size: 16px;
+}
+
+/* Контент */
+.content-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding-left: 50px;
+}
+
+.content-panel {
+    width: 100%;
+    max-width: 900px;
+    background: rgba(25, 25, 25, 0.85);
+    border: 1px solid rgba(80, 80, 80, 0.25);
+    border-radius: 12px;
+    backdrop-filter: blur(15px);
+    overflow: hidden;
+}
+
+.content-header {
+    padding: 25px 30px;
+    border-bottom: 1px solid rgba(80, 80, 80, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.content-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    width: 280px;
+    padding: 10px 15px;
+    background: rgba(15, 15, 15, 0.9);
+    border: 1px solid rgba(80, 80, 80, 0.3);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 13px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #666;
+}
+
+.search-btn {
+    padding: 10px 20px;
+    background: rgba(80, 80, 80, 0.3);
+    border: 1px solid rgba(80, 80, 80, 0.3);
+    border-radius: 10px;
+    color: #aaa;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.search-btn:hover {
+    background: rgba(100, 100, 100, 0.4);
+    color: #fff;
+}
+
+.content-body {
+    padding: 25px 30px;
+    min-height: 400px;
+}
+
+/* Табы контента */
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+/* Список конфигов */
+.configs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 15px;
+}
+
+.config-card {
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid rgba(80, 80, 80, 0.25);
+    border-radius: 10px;
+    padding: 18px;
+    transition: all 0.2s;
+}
+
+.config-card:hover {
+    background: rgba(40, 40, 40, 0.8);
+    border-color: rgba(100, 100, 100, 0.3);
+    transform: translateY(-2px);
+}
+
+.config-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.config-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.config-badge {
+    padding: 3px 8px;
+    background: rgba(80, 80, 80, 0.3);
+    border-radius: 6px;
+    font-size: 10px;
+    color: #888;
+}
+
+.config-badge.private {
+    background: rgba(255, 100, 100, 0.2);
+    color: #ff8888;
+}
+
+.config-author {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.config-desc {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+
+.config-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.config-btn {
+    flex: 1;
+    padding: 8px 12px;
+    background: rgba(80, 80, 80, 0.2);
+    border: 1px solid rgba(80, 80, 80, 0.3);
+    border-radius: 8px;
+    color: #aaa;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.config-btn:hover {
+    background: rgba(100, 100, 100, 0.3);
+    color: #fff;
+}
+
+.config-btn.primary {
+    background: rgba(100, 100, 100, 0.3);
+    color: #fff;
+}
+
+/* Пустое состояние */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #555;
+}
+
+.empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.empty-state-text {
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.upload-btn {
+    padding: 12px 25px;
+    background: rgba(80, 80, 80, 0.3);
+    border: 1px dashed rgba(80, 80, 80, 0.5);
+    border-radius: 10px;
+    color: #888;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.upload-btn:hover {
+    background: rgba(100, 100, 100, 0.3);
+    color: #aaa;
+}
+
+.loading {
+    text-align: center;
+    padding: 100px 20px;
+    font-size: 18px;
+    color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Плавающая навигация -->
+<nav class="floating-nav">
+    <div class="nav-logo">VodkaClient</div>
+    <div class="nav-links">
+        <a href="/">🏠 Home</a>
+        <a href="/marketplace.html" class="active">🛒 Marketplace</a>
+        <a href="https://t.me/SmertnixVteste" target="_blank">💬 Support</a>
+    </div>
+    <a href="/cabinet.html" class="nav-user" id="navUser">
+        <span>👤</span>
+        <span id="navUsername">username</span>
+    </a>
+</nav>
+
+<!-- Боковое меню -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-content">
+        <div class="sidebar-header">📦 Меню</div>
+        <div class="sidebar-menu">
+            <div class="sidebar-item active" data-tab="search">
+                <span>🔍</span> Поиск
+            </div>
+            <div class="sidebar-item" data-tab="my-configs">
+                <span>📁</span> Мои конфиги
+            </div>
+            <div class="sidebar-item" data-tab="private">
+                <span>🔒</span> Приватные конфиги
+            </div>
+        </div>
+    </div>
+    <div class="sidebar-toggle" id="sidebarToggle">›</div>
+</div>
+
+<div class="main-container">
+    <div class="content-wrapper">
+        <div class="content-panel">
+            
+            <!-- Поиск -->
+            <div class="tab-panel active" id="tab-search">
+                <div class="content-header">
+                    <div class="content-title">🔍 Поиск конфигов</div>
+                    <div class="search-box">
+                        <input type="text" class="search-input" id="searchInput" placeholder="Название или автор...">
+                        <button class="search-btn" id="searchBtn">Найти</button>
+                    </div>
+                </div>
+                <div class="content-body">
+                    <div class="configs-grid" id="searchResults">
+                        <!-- Примеры конфигов -->
+                        <div class="config-card">
+                            <div class="config-card-header">
+                                <div class="config-name">HvH Config v2</div>
+                                <div class="config-badge">Public</div>
+                            </div>
+                            <div class="config-author">by Player123</div>
+                            <div class="config-desc">Лучший конфиг для hvh, протестирован на серверах</div>
+                            <div class="config-actions">
+                                <button class="config-btn">👁 Просмотр</button>
+                                <button class="config-btn primary">⬇ Скачать</button>
+                            </div>
+                        </div>
+                        <div class="config-card">
+                            <div class="config-card-header">
+                                <div class="config-name">Legit Rage</div>
+                                <div class="config-badge">Public</div>
+                            </div>
+                            <div class="config-author">by ProGamer</div>
+                            <div class="config-desc">Легит конфиг с минимальным детектом</div>
+                            <div class="config-actions">
+                                <button class="config-btn">👁 Просмотр</button>
+                                <button class="config-btn primary">⬇ Скачать</button>
+                            </div>
+                        </div>
+                        <div class="config-card">
+                            <div class="config-card-header">
+                                <div class="config-name">Blatant Config</div>
+                                <div class="config-badge">Public</div>
+                            </div>
+                            <div class="config-author">by Cheater007</div>
+                            <div class="config-desc">Максимальные настройки для фана</div>
+                            <div class="config-actions">
+                                <button class="config-btn">👁 Просмотр</button>
+                                <button class="config-btn primary">⬇ Скачать</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Мои конфиги -->
+            <div class="tab-panel" id="tab-my-configs">
+                <div class="content-header">
+                    <div class="content-title">📁 Мои конфиги</div>
+                    <button class="upload-btn" id="uploadBtn">+ Загрузить конфиг</button>
+                </div>
+                <div class="content-body">
+                    <div class="empty-state" id="myConfigsEmpty">
+                        <div class="empty-state-icon">📂</div>
+                        <div class="empty-state-text">У вас пока нет загруженных конфигов</div>
+                        <button class="upload-btn">+ Загрузить первый конфиг</button>
+                    </div>
+                    <div class="configs-grid" id="myConfigsGrid" style="display: none;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Приватные конфиги -->
+            <div class="tab-panel" id="tab-private">
+                <div class="content-header">
+                    <div class="content-title">🔒 Приватные конфиги</div>
+                </div>
+                <div class="content-body">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔐</div>
+                        <div class="empty-state-text">У вас нет доступа к приватным конфигам</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+// Проверка авторизации
+async function checkAuth() {
+    try {
+        const response = await fetch('/api/check-auth');
+        const data = await response.json();
+        
+        if (!data.authenticated) {
+            window.location.href = '/';
+            return;
+        }
+        
+        document.getElementById('navUsername').textContent = data.username;
+    } catch (error) {
+        console.error('Auth error:', error);
+        window.location.href = '/';
+    }
+}
+
+// Боковое меню
+const sidebar = document.getElementById('sidebar');
+const sidebarToggle = document.getElementById('sidebarToggle');
+const sidebarItems = document.querySelectorAll('.sidebar-item');
+const tabPanels = document.querySelectorAll('.tab-panel');
+
+sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    sidebarToggle.textContent = sidebar.classList.contains('open') ? '‹' : '›';
+});
+
+// Переключение вкладок
+sidebarItems.forEach(item => {
+    item.addEventListener('click', () => {
+        const tabId = item.dataset.tab;
+        
+        sidebarItems.forEach(i => i.classList.remove('active'));
+        tabPanels.forEach(p => p.classList.remove('active'));
+        
+        item.classList.add('active');
+        document.getElementById('tab-' + tabId).classList.add('active');
+    });
+});
+
+// Поиск
+document.getElementById('searchBtn').addEventListener('click', () => {
+    const query = document.getElementById('searchInput').value;
+    if (query) {
+        alert('Поиск: ' + query + '\n\nФункция в разработке');
+    }
+});
+
+document.getElementById('searchInput').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        document.getElementById('searchBtn').click();
+    }
+});
+
+// Загрузка конфига
+document.querySelectorAll('.upload-btn, #uploadBtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        alert('Загрузка конфигов в разработке');
+    });
+});
+
+// Запуск
+checkAuth();
+</script>
+
+</body>
+</html>
