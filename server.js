@@ -697,7 +697,7 @@ app.get('/api/configs/download/:id', async (req, res) => {
     
     try {
         const result = await pool.query('SELECT * FROM configs WHERE id = $1', [req.params.id]);
-        if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Не найден' });
+        if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Конфиг не найден' });
         const config = result.rows[0];
         if (config.private && config.author_id !== userId) return res.status(403).json({ success: false, message: 'Нет доступа' });
         await pool.query('UPDATE configs SET downloads = downloads + 1 WHERE id = $1', [req.params.id]);
@@ -708,14 +708,11 @@ app.get('/api/configs/download/:id', async (req, res) => {
             res.setHeader('Content-Disposition', 'attachment; filename="' + config.name + '.json"');
             res.send(config.content);
         } else {
-            // Старый способ - из файла (для старых конфигов)
-            const filePath = path.join(configsDir, config.filename);
-            if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, message: 'Файл не найден' });
-            res.download(filePath, config.name + path.extname(config.filename));
+            return res.status(404).json({ success: false, message: 'Конфиг повреждён, перезагрузите его' });
         }
     } catch (err) { 
         console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка' }); 
+        res.status(500).json({ success: false, message: 'Ошибка сервера' }); 
     }
 });
 
