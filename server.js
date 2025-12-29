@@ -100,6 +100,15 @@ async function initDB() {
             )
         `);
         
+        // Таблица для media пользователей
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS media_users (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
         console.log('✅ Таблицы PostgreSQL созданы');
     } catch (err) {
         console.error('❌ Ошибка создания таблиц:', err);
@@ -250,13 +259,37 @@ app.get('/api/admin/users', async (req, res) => {
 
 // API: Выдать роль media
 app.post('/api/admin/set-role', async (req, res) => {
-    const { uid, role } = req.body;
+    const { uid, role, username } = req.body;
     try {
-        await pool.query('UPDATE users SET role = $1 WHERE uid = $2', [role, uid]);
+        if (role === 'media') {
+            await pool.query('INSERT INTO media_users (username) VALUES ($1) ON CONFLICT (username) DO NOTHING', [username]);
+        } else {
+            await pool.query('DELETE FROM media_users WHERE username = $1', [username]);
+        }
         res.json({ success: true, message: 'Роль обновлена' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: 'Ошибка сервера' });
+    }
+});
+
+// API: Проверить media роль
+app.get('/api/check-media/:username', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM media_users WHERE username = $1', [req.params.username]);
+        res.json({ isMedia: result.rows.length > 0 });
+    } catch (err) {
+        res.json({ isMedia: false });
+    }
+});
+
+// API: Список всех media юзеров
+app.get('/api/admin/media-users', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT username FROM media_users');
+        res.json({ success: true, users: result.rows.map(r => r.username) });
+    } catch (err) {
+        res.json({ success: false, users: [] });
     }
 });
 
