@@ -45,6 +45,7 @@ async function initDB() {
                 password VARCHAR(255) NOT NULL,
                 email VARCHAR(255) DEFAULT NULL,
                 hwid VARCHAR(255) DEFAULT NULL,
+                role VARCHAR(50) DEFAULT 'user',
                 subscription_type VARCHAR(50) DEFAULT NULL,
                 subscription_expires TIMESTAMP DEFAULT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -53,6 +54,8 @@ async function initDB() {
         
         // Добавляем колонку email если её нет
         await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255) DEFAULT NULL`).catch(() => {});
+        // Добавляем колонку role если её нет
+        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'user'`).catch(() => {});
         
         await pool.query(`
             CREATE TABLE IF NOT EXISTS keys (
@@ -74,6 +77,23 @@ async function initDB() {
                 ip_address VARCHAR(255),
                 hwid VARCHAR(255),
                 user_id INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        // Таблица для media конфигов
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS media_configs (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                filename VARCHAR(255) NOT NULL,
+                author_id INTEGER REFERENCES users(uid),
+                author_name VARCHAR(255),
+                price INTEGER DEFAULT 0,
+                funpay_url VARCHAR(500),
+                promo_code VARCHAR(50),
+                downloads INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
@@ -150,7 +170,7 @@ app.get('/api/check-auth', async (req, res) => {
 
     try {
         const result = await pool.query(
-            'SELECT uid, username, email, hwid, created_at, subscription_type, subscription_expires FROM users WHERE uid = $1',
+            'SELECT uid, username, email, hwid, role, created_at, subscription_type, subscription_expires FROM users WHERE uid = $1',
             [req.session.userId]
         );
         
@@ -169,6 +189,7 @@ app.get('/api/check-auth', async (req, res) => {
             username: user.username,
             email: user.email,
             hwid: user.hwid,
+            role: user.role || 'user',
             created_at: user.created_at,
             subscription_type: user.subscription_type,
             subscription_expires: user.subscription_expires,
@@ -216,9 +237,21 @@ app.post('/api/change-password', async (req, res) => {
 app.get('/api/admin/users', async (req, res) => {
     try {
         const result = await pool.query(
-            'SELECT uid, username, hwid, created_at, subscription_type, subscription_expires FROM users ORDER BY uid'
+            'SELECT uid, username, hwid, role, created_at, subscription_type, subscription_expires FROM users ORDER BY uid'
         );
         res.json({ success: true, users: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка сервера' });
+    }
+});
+
+// API: Выдать роль media
+app.post('/api/admin/set-role', async (req, res) => {
+    const { uid, role } = req.body;
+    try {
+        await pool.query('UPDATE users SET role = $1 WHERE uid = $2', [role, uid]);
+        res.json({ success: true, message: 'Роль обновлена' });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: 'Ошибка сервера' });
@@ -638,4 +671,91 @@ app.delete('/api/configs/:id', async (req, res) => {
         await pool.query('DELETE FROM configs WHERE id = $1', [req.params.id]);
         res.json({ success: true, message: 'Удалён' });
     } catch (err) { res.status(500).json({ success: false, message: 'Ошибка' }); }
+});
+
+// ========================================
+// API ДЛЯ MEDIA КОНФИГОВ
+// ========================================
+
+// Загрузка media конфига (только для роли media)
+app.post('/api/media-configs/upload', upload.single('file'), async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    
+    // Проверка роли
+    const userResult = await pool.query('SELECT username, role FROM users WHERE uid = $1', [req.session.userId]);
+    if (!userResult.rows[0] || userResult.rows[0].role !== 'media') {
+        return res.status(403).json({ success: false, message: 'Нет доступа. Нужна роль Media' });
+    }
+    
+    if (!req.file) return res.status(400).json({ success: false, message: 'Файл не загружен' });
+    const { name, description, promo_code } = req.body;
+    if (!name) return res.status(400).json({ success: false, message: 'Введите название' });
+    
+    try {
+        await pool.query(
+            'INSERT INTO media_configs (name, description, filename, author_id, author_name, promo_code) VALUES ($1, $2, $3, $4, $5, $6)',
+            [name, description || '', req.file.filename, req.session.userId, userResult.rows[0].username, promo_code || null]
+        );
+        res.json({ success: true, message: 'Media конфиг загружен!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка загрузки' });
+    }
+});
+
+// Получить все media конфиги (для маркетплейса)
+app.get('/api/media-configs', async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT id, name, description, author_name, price, funpay_url, promo_code, downloads FROM media_configs ORDER BY created_at DESC'
+        );
+        res.json({ success: true, configs: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка' });
+    }
+});
+
+// Админ: получить все media конфиги для управления
+app.get('/api/admin/media-configs', async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT * FROM media_configs ORDER BY created_at DESC'
+        );
+        res.json({ success: true, configs: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка' });
+    }
+});
+
+// Админ: обновить цену и ссылку FunPay для media конфига
+app.post('/api/admin/media-configs/update', async (req, res) => {
+    const { id, price, funpay_url } = req.body;
+    try {
+        await pool.query(
+            'UPDATE media_configs SET price = $1, funpay_url = $2 WHERE id = $3',
+            [price || 0, funpay_url || null, id]
+        );
+        res.json({ success: true, message: 'Обновлено' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка' });
+    }
+});
+
+// Админ: удалить media конфиг
+app.delete('/api/admin/media-configs/:id', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT filename FROM media_configs WHERE id = $1', [req.params.id]);
+        if (result.rows.length > 0) {
+            const filePath = path.join(configsDir, result.rows[0].filename);
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        }
+        await pool.query('DELETE FROM media_configs WHERE id = $1', [req.params.id]);
+        res.json({ success: true, message: 'Удалён' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка' });
+    }
 });
