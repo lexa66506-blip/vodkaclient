@@ -161,6 +161,7 @@ body {
             <div class="sidebar-item active" data-tab="search"><span>🏠</span> Главная</div>
             <div class="sidebar-item" data-tab="my-configs"><span>📁</span> Мои конфиги</div>
             <div class="sidebar-item" data-tab="private"><span>🔒</span> Приватные конфиги</div>
+            <div class="sidebar-item" data-tab="media"><span>🎬</span> От Media</div>
             <div class="sidebar-item upload-sidebar-btn" id="uploadSidebarBtn"><span>📤</span> Загрузить</div>
         </div>
     </div>
@@ -212,6 +213,19 @@ body {
                         <div class="empty-state-icon">🔐</div>
                         <div class="empty-state-text">У вас нет доступа к приватным конфигам</div>
                     </div>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="tab-media">
+                <div class="content-header">
+                    <div class="content-title">🎬 Конфиги от Media</div>
+                </div>
+                <div class="content-body">
+                    <div class="empty-state" id="mediaEmpty">
+                        <div class="empty-state-icon">🎬</div>
+                        <div class="empty-state-text">Загрузка...</div>
+                    </div>
+                    <div class="configs-grid" id="mediaConfigsGrid" style="display: none;"></div>
                 </div>
             </div>
 
@@ -289,6 +303,7 @@ sidebarItems.forEach(item => {
         item.classList.add('active');
         document.getElementById('tab-' + tabId).classList.add('active');
         if (tabId === 'my-configs') loadMyConfigs();
+        if (tabId === 'media') loadMediaConfigs();
     });
 });
 
@@ -439,6 +454,62 @@ document.getElementById('uploadSubmit').addEventListener('click', async () => {
 });
 
 checkAuth();
+
+// Загрузка media конфигов
+async function loadMediaConfigs() {
+    try {
+        const response = await fetch('/api/media-configs');
+        const data = await response.json();
+        const grid = document.getElementById('mediaConfigsGrid');
+        const empty = document.getElementById('mediaEmpty');
+        
+        if (data.configs && data.configs.length > 0) {
+            empty.style.display = 'none';
+            grid.style.display = 'grid';
+            grid.innerHTML = data.configs.map(c => renderMediaConfigCard(c)).join('');
+        } else {
+            empty.querySelector('.empty-state-text').textContent = 'Пока нет конфигов от Media';
+            empty.style.display = 'block';
+            grid.style.display = 'none';
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+function renderMediaConfigCard(config) {
+    const hasPrice = config.price && config.price > 0 && config.funpay_url;
+    const promoDiscount = config.promo_code ? 5 : 0;
+    const discountedPrice = config.price ? Math.round(config.price * (100 - promoDiscount) / 100) : 0;
+    
+    return `
+        <div class="config-card" style="border-color: rgba(138, 43, 226, 0.3);">
+            <div class="config-card-header">
+                <div class="config-name">${config.name}</div>
+                <div class="config-badge" style="background: rgba(138, 43, 226, 0.3); color: #9370db;">Media</div>
+            </div>
+            <div class="config-author" style="color: #9370db;">от ${config.author_name}</div>
+            <div class="config-desc">${config.description || 'Без описания'}</div>
+            ${hasPrice ? `
+                <div style="margin-bottom: 10px;">
+                    <span style="font-size: 18px; font-weight: 600; color: #fff;">${config.price} ₽</span>
+                    ${config.promo_code ? `<span style="font-size: 11px; color: #55ff55; margin-left: 8px;">Промокод: ${config.promo_code} (-5%)</span>` : ''}
+                </div>
+                <div class="config-actions">
+                    <button class="config-btn primary" onclick="buyMediaConfig('${config.funpay_url}', '${config.name}', ${config.price})" style="background: rgba(138, 43, 226, 0.3); border-color: rgba(138, 43, 226, 0.4); color: #9370db;">💳 Купить</button>
+                </div>
+            ` : `
+                <div style="color: #666; font-size: 12px;">Цена ещё не установлена</div>
+            `}
+        </div>
+    `;
+}
+
+function buyMediaConfig(funpayUrl, name, price) {
+    if (confirm('Купить конфиг "' + name + '" за ' + price + '₽ на FunPay?')) {
+        window.open(funpayUrl, '_blank');
+    }
+}
 
 // Защита от ПКМ и DevTools
 document.addEventListener('contextmenu', e => e.preventDefault());
