@@ -419,6 +419,236 @@ body {
     font-size: 18px;
     color: #666;
 }
+
+/* Модалка загрузки */
+.upload-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.upload-modal.active {
+    display: flex;
+}
+
+.upload-modal-content {
+    width: 90%;
+    max-width: 600px;
+    height: 400px;
+    background: rgba(25, 25, 25, 0.98);
+    border: 1px solid rgba(80, 80, 80, 0.4);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.upload-modal-header {
+    padding: 20px 25px;
+    border-bottom: 1px solid rgba(80, 80, 80, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.upload-modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.upload-modal-close {
+    width: 32px;
+    height: 32px;
+    background: rgba(80, 80, 80, 0.3);
+    border: none;
+    border-radius: 8px;
+    color: #888;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.upload-modal-close:hover {
+    background: rgba(255, 80, 80, 0.3);
+    color: #ff8888;
+}
+
+.upload-dropzone {
+    flex: 1;
+    margin: 25px;
+    border: 2px dashed rgba(80, 80, 80, 0.5);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.upload-dropzone:hover {
+    border-color: rgba(120, 120, 120, 0.6);
+    background: rgba(40, 40, 40, 0.3);
+}
+
+.upload-dropzone.dragover {
+    border-color: rgba(100, 200, 100, 0.6);
+    background: rgba(100, 200, 100, 0.1);
+}
+
+.upload-dropzone-icon {
+    font-size: 64px;
+    color: #555;
+}
+
+.upload-dropzone-text {
+    font-size: 16px;
+    color: #888;
+}
+
+.upload-dropzone-hint {
+    font-size: 12px;
+    color: #555;
+}
+
+.upload-dropzone input[type="file"] {
+    display: none;
+}
+
+.upload-progress {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.upload-progress.active {
+    display: flex;
+}
+
+.upload-progress-text {
+    font-size: 14px;
+    color: #aaa;
+}
+
+.upload-progress-bar {
+    width: 200px;
+    height: 6px;
+    background: rgba(80, 80, 80, 0.3);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.upload-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #666, #888);
+    border-radius: 3px;
+    transition: width 0.3s;
+}
+
+/* Форма деталей конфига */
+.upload-form {
+    display: none;
+    padding: 25px;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.upload-form.active {
+    display: flex;
+}
+
+.upload-form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.upload-form-label {
+    font-size: 12px;
+    color: #888;
+}
+
+.upload-form-input {
+    padding: 12px 15px;
+    background: rgba(15, 15, 15, 0.9);
+    border: 1px solid rgba(80, 80, 80, 0.3);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+}
+
+.upload-form-input:focus {
+    outline: none;
+    border-color: #666;
+}
+
+.upload-form-textarea {
+    padding: 12px 15px;
+    background: rgba(15, 15, 15, 0.9);
+    border: 1px solid rgba(80, 80, 80, 0.3);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    resize: none;
+    height: 80px;
+}
+
+.upload-form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #888;
+    cursor: pointer;
+}
+
+.upload-form-checkbox input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.upload-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.upload-form-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.upload-form-btn.cancel {
+    background: transparent;
+    border: 1px solid rgba(80, 80, 80, 0.4);
+    color: #888;
+}
+
+.upload-form-btn.submit {
+    background: rgba(80, 80, 80, 0.4);
+    border: 1px solid rgba(100, 100, 100, 0.4);
+    color: #fff;
+}
+
+.upload-form-btn:hover {
+    background: rgba(100, 100, 100, 0.4);
+}
 </style>
 </head>
 
@@ -514,7 +744,52 @@ body {
     </div>
 </div>
 
-<script>
+<!-- Модалка загрузки конфига -->
+<div class="upload-modal" id="uploadModal">
+    <div class="upload-modal-content">
+        <div class="upload-modal-header">
+            <div class="upload-modal-title">📤 Загрузить конфиг</div>
+            <button class="upload-modal-close" id="uploadModalClose">✕</button>
+        </div>
+        
+        <!-- Зона перетаскивания -->
+        <div class="upload-dropzone" id="uploadDropzone">
+            <div class="upload-dropzone-icon">📁</div>
+            <div class="upload-dropzone-text">Перетащите конфиг сюда</div>
+            <div class="upload-dropzone-hint">или нажмите для выбора файла (.json, .cfg, .txt)</div>
+            <input type="file" id="fileInput" accept=".json,.cfg,.txt,.yaml,.yml">
+            
+            <div class="upload-progress" id="uploadProgress">
+                <div class="upload-progress-text">Загрузка...</div>
+                <div class="upload-progress-bar">
+                    <div class="upload-progress-fill" id="uploadProgressFill"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Форма деталей -->
+        <div class="upload-form" id="uploadForm">
+            <div class="upload-form-row">
+                <label class="upload-form-label">Название конфига</label>
+                <input type="text" class="upload-form-input" id="configName" placeholder="Мой крутой конфиг">
+            </div>
+            <div class="upload-form-row">
+                <label class="upload-form-label">Описание</label>
+                <textarea class="upload-form-textarea" id="configDesc" placeholder="Описание конфига..."></textarea>
+            </div>
+            <label class="upload-form-checkbox">
+                <input type="checkbox" id="configPrivate">
+                Приватный конфиг (только для меня)
+            </label>
+            <div class="upload-form-actions">
+                <button class="upload-form-btn cancel" id="uploadCancel">Отмена</button>
+                <button class="upload-form-btn submit" id="uploadSubmit">Загрузить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script></script>
 // Проверка авторизации
 async function checkAuth() {
     try {
@@ -571,12 +846,181 @@ document.getElementById('searchInput').addEventListener('keypress', (e) => {
     }
 });
 
-// Загрузка конфига
+// Загрузка конфига - открытие модалки
+const uploadModal = document.getElementById('uploadModal');
+const uploadDropzone = document.getElementById('uploadDropzone');
+const uploadForm = document.getElementById('uploadForm');
+const uploadProgress = document.getElementById('uploadProgress');
+const fileInput = document.getElementById('fileInput');
+let selectedFile = null;
+
 document.querySelectorAll('.upload-btn, #uploadBtn').forEach(btn => {
     btn.addEventListener('click', () => {
-        alert('Загрузка конфигов в разработке');
+        uploadModal.classList.add('active');
+        resetUploadModal();
     });
 });
+
+document.getElementById('uploadModalClose').addEventListener('click', () => {
+    uploadModal.classList.remove('active');
+});
+
+uploadModal.addEventListener('click', (e) => {
+    if (e.target === uploadModal) {
+        uploadModal.classList.remove('active');
+    }
+});
+
+// Drag & Drop
+uploadDropzone.addEventListener('click', () => {
+    if (!uploadForm.classList.contains('active')) {
+        fileInput.click();
+    }
+});
+
+uploadDropzone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadDropzone.classList.add('dragover');
+});
+
+uploadDropzone.addEventListener('dragleave', () => {
+    uploadDropzone.classList.remove('dragover');
+});
+
+uploadDropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadDropzone.classList.remove('dragover');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        handleFile(files[0]);
+    }
+});
+
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+    }
+});
+
+function handleFile(file) {
+    const allowedTypes = ['.json', '.cfg', '.txt', '.yaml', '.yml'];
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    
+    if (!allowedTypes.includes(ext)) {
+        alert('Неподдерживаемый формат файла!\n\nРазрешены: ' + allowedTypes.join(', '));
+        return;
+    }
+    
+    selectedFile = file;
+    
+    // Показываем прогресс
+    uploadProgress.classList.add('active');
+    let progress = 0;
+    const progressFill = document.getElementById('uploadProgressFill');
+    
+    const interval = setInterval(() => {
+        progress += 10;
+        progressFill.style.width = progress + '%';
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                uploadDropzone.style.display = 'none';
+                uploadForm.classList.add('active');
+                document.getElementById('configName').value = file.name.replace(/\.[^/.]+$/, '');
+            }, 300);
+        }
+    }, 50);
+}
+
+function resetUploadModal() {
+    uploadDropzone.style.display = 'flex';
+    uploadForm.classList.remove('active');
+    uploadProgress.classList.remove('active');
+    document.getElementById('uploadProgressFill').style.width = '0%';
+    document.getElementById('configName').value = '';
+    document.getElementById('configDesc').value = '';
+    document.getElementById('configPrivate').checked = false;
+    selectedFile = null;
+    fileInput.value = '';
+}
+
+document.getElementById('uploadCancel').addEventListener('click', () => {
+    resetUploadModal();
+});
+
+document.getElementById('uploadSubmit').addEventListener('click', async () => {
+    const name = document.getElementById('configName').value.trim();
+    const desc = document.getElementById('configDesc').value.trim();
+    const isPrivate = document.getElementById('configPrivate').checked;
+    
+    if (!name) {
+        alert('Введите название конфига');
+        return;
+    }
+    
+    if (!selectedFile) {
+        alert('Файл не выбран');
+        return;
+    }
+    
+    // Отправка на сервер
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    formData.append('name', name);
+    formData.append('description', desc);
+    formData.append('private', isPrivate);
+    
+    try {
+        const response = await fetch('/api/configs/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Конфиг успешно загружен!');
+            uploadModal.classList.remove('active');
+            loadMyConfigs();
+        } else {
+            alert('Ошибка: ' + data.message);
+        }
+    } catch (error) {
+        alert('Ошибка загрузки: ' + error.message);
+    }
+});
+
+// Загрузка моих конфигов
+async function loadMyConfigs() {
+    try {
+        const response = await fetch('/api/configs/my');
+        const data = await response.json();
+        
+        if (data.configs && data.configs.length > 0) {
+            document.getElementById('myConfigsEmpty').style.display = 'none';
+            const grid = document.getElementById('myConfigsGrid');
+            grid.style.display = 'grid';
+            grid.innerHTML = data.configs.map(config => `
+                <div class="config-card">
+                    <div class="config-card-header">
+                        <div class="config-name">${config.name}</div>
+                        <div class="config-badge ${config.private ? 'private' : ''}">${config.private ? 'Private' : 'Public'}</div>
+                    </div>
+                    <div class="config-author">by ${config.author}</div>
+                    <div class="config-desc">${config.description || 'Без описания'}</div>
+                    <div class="config-actions">
+                        <button class="config-btn" onclick="deleteConfig('${config.id}')">🗑 Удалить</button>
+                        <button class="config-btn primary" onclick="downloadConfig('${config.id}')">⬇ Скачать</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error loading configs:', error);
+    }
+}
 
 // Запуск
 checkAuth();
