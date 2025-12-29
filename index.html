@@ -1776,6 +1776,41 @@ document.addEventListener('keydown', e => {
 });
 </script>
 
+<!-- Блокировка просмотра исходного кода -->
+<script>
+// Блокировка Ctrl+U (просмотр исходного кода)
+document.addEventListener('keydown', function(e) {
+    if (e.ctrlKey && e.key === 'u') {
+        e.preventDefault();
+        return false;
+    }
+    // Блокировка Ctrl+Shift+I (DevTools)
+    if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+        e.preventDefault();
+        return false;
+    }
+    // Блокировка F12 (DevTools)
+    if (e.key === 'F12') {
+        e.preventDefault();
+        return false;
+    }
+    // Блокировка Ctrl+Shift+J (Console)
+    if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+        e.preventDefault();
+        return false;
+    }
+    // Блокировка Ctrl+Shift+C (Inspect Element)
+    if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+        e.preventDefault();
+        return false;
+    }
+});
+
+// Блокировка правой кнопки мыши
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+});
+</script>
 </body>
 </html>
-
