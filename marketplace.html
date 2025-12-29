@@ -310,9 +310,27 @@ sidebarItems.forEach(item => {
 document.getElementById('searchBtn').addEventListener('click', searchConfigs);
 document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') searchConfigs(); });
 
+// Загрузка всех публичных конфигов при старте
+async function loadAllConfigs() {
+    try {
+        const response = await fetch('/api/configs/search?q=');
+        const data = await response.json();
+        const grid = document.getElementById('searchResults');
+        const empty = document.getElementById('searchEmpty');
+        if (data.configs && data.configs.length > 0) {
+            empty.style.display = 'none';
+            grid.style.display = 'grid';
+            grid.innerHTML = data.configs.map(c => renderConfigCard(c, false)).join('');
+        } else {
+            empty.style.display = 'block';
+            empty.querySelector('.empty-state-text').textContent = 'Пока нет конфигов';
+            grid.style.display = 'none';
+        }
+    } catch (error) { console.error(error); }
+}
+
 async function searchConfigs() {
     const query = document.getElementById('searchInput').value.trim();
-    if (!query) return;
     try {
         const response = await fetch('/api/configs/search?q=' + encodeURIComponent(query));
         const data = await response.json();
@@ -453,7 +471,7 @@ document.getElementById('uploadSubmit').addEventListener('click', async () => {
     } catch (error) { alert('Ошибка загрузки'); }
 });
 
-checkAuth();
+checkAuth().then(() => loadAllConfigs());
 
 // Загрузка media конфигов
 async function loadMediaConfigs() {
@@ -521,3 +539,4 @@ document.addEventListener('keydown', e => {
 </script>
 </body>
 </html>
+
