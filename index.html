@@ -901,6 +901,143 @@ nav {
         display: none;
     }
 }
+
+/* Hero центральная секция */
+.hero-center {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.hero-center-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.hero-cube-wrapper {
+    position: relative;
+    width: 350px;
+    height: 350px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: floatCube 4s ease-in-out infinite;
+}
+
+@keyframes floatCube {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.hero-title {
+    font-size: 72px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #fff 0%, #888 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    animation: titleGlow 3s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(255,255,255,0.3)); }
+    50% { filter: drop-shadow(0 0 40px rgba(255,255,255,0.5)); }
+}
+
+.hero-subtitle {
+    font-size: 22px;
+    color: rgba(255, 255, 255, 0.6);
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+.scroll-indicator {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 14px;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+.scroll-arrow {
+    font-size: 24px;
+    animation: arrowBounce 1.5s ease-in-out infinite;
+}
+
+@keyframes arrowBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(10px); }
+}
+
+/* Анимации при скролле */
+.scroll-animate {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.8s ease-out;
+}
+
+.scroll-animate.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.scroll-animate-left {
+    opacity: 0;
+    transform: translateX(-100px);
+    transition: all 0.8s ease-out;
+}
+
+.scroll-animate-left.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.scroll-animate-right {
+    opacity: 0;
+    transform: translateX(100px);
+    transition: all 0.8s ease-out;
+}
+
+.scroll-animate-right.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.scroll-animate-scale {
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.8s ease-out;
+}
+
+.scroll-animate-scale.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 42px;
+    }
+    .hero-subtitle {
+        font-size: 16px;
+        padding: 0 20px;
+    }
+    .hero-cube-wrapper {
+        width: 250px;
+        height: 250px;
+    }
+}
 </style>
 </head>
 
@@ -1010,6 +1147,37 @@ nav {
 <!-- Анимированный фон -->
 <div class="particles" id="particles"></div>
 
+<!-- Hero секция с кубиком по центру -->
+<section class="hero-center">
+    <div class="hero-center-content">
+        <div class="hero-cube-wrapper">
+            <div class="model-glow"></div>
+            <div class="model-cube">
+                <div class="cube-face"></div>
+                <div class="cube-face"></div>
+                <div class="cube-face"></div>
+                <div class="cube-face"></div>
+                <div class="cube-face"></div>
+                <div class="cube-face"></div>
+                <div class="inner-cube">
+                    <div class="inner-face"><img src="logo.png" alt="Logo"></div>
+                    <div class="inner-face"><img src="logo.png" alt="Logo"></div>
+                    <div class="inner-face"><img src="logo.png" alt="Logo"></div>
+                    <div class="inner-face"><img src="logo.png" alt="Logo"></div>
+                    <div class="inner-face"><img src="logo.png" alt="Logo"></div>
+                    <div class="inner-face"><img src="logo.png" alt="Logo"></div>
+                </div>
+            </div>
+        </div>
+        <h1 class="hero-title">VodkaClient</h1>
+        <p class="hero-subtitle">Выведи свою игру на совершенно новый уровень</p>
+        <div class="scroll-indicator">
+            <span>Листай вниз</span>
+            <div class="scroll-arrow">↓</div>
+        </div>
+    </div>
+</section>
+
 <!-- Навигация -->
 <nav>
     <div class="logo">VodkaClient</div>
@@ -1064,39 +1232,39 @@ nav {
 </section>
 
 <!-- Секция преимуществ -->
-<section class="features">
-    <div class="features-header">
+<section class="features scroll-animate">
+    <div class="features-header scroll-animate">
         <h2>Наши преимущества</h2>
         <p>Мы кратко изложили вам то, что вы гарантированно получите после покупки нашего клиента.</p>
     </div>
     
     <div class="features-grid">
-        <div class="feature-card">
+        <div class="feature-card scroll-animate-left">
             <h3>Красивый внешний вид</h3>
             <p>В нашем клиенте присутствует большое количество визуальных функций, которые сделают вашу игру более красочной. А так же вы можете настроить оформление клиента под себя, сделав его по настоящему красивым.</p>
         </div>
         
-        <div class="feature-card">
+        <div class="feature-card scroll-animate-scale">
             <h3>Настраиваемость</h3>
             <p>В нашем клиенте вы можете настроить практически любую функцию под себя, а так же использовать конфигурации других пользователей, благодаря этому вы сможете использовать наш клиент максимуме его возможностей.</p>
         </div>
         
-        <div class="feature-card">
+        <div class="feature-card scroll-animate-right">
             <h3>Оптимизация</h3>
             <p>Мы постоянно улучшаем оптимизацию нашего клиента с самой первой версии. Благодаря этому вы сможете запустить наш клиент даже на слабых компьютерах.</p>
         </div>
         
-        <div class="feature-card">
+        <div class="feature-card scroll-animate-left">
             <h3>Частые обновления</h3>
             <p>Мы регулярно обновляем функционал в нашем клиенте, добавляя новые функции, а так же совершенствуя уже существующие. Благодаря этому наш клиент имеет преимущество над существующие сервера.</p>
         </div>
         
-        <div class="feature-card">
+        <div class="feature-card scroll-animate-scale">
             <h3>Лучшая поддержка</h3>
             <p>У нас самая лучшая поддержка, которая разбирается в своем деле и сможет помочь вам по любому вопросу связанному с нашим клиетом.</p>
         </div>
         
-        <div class="feature-card">
+        <div class="feature-card scroll-animate-right">
             <h3>Удобство использования</h3>
             <p>Наш клиент разработан с учетом удобства использования. Интуитивно понятный интерфейс и простая настройка позволят вам быстро освоиться и начать играть с максимальным комфортом.</p>
         </div>
@@ -1104,7 +1272,7 @@ nav {
 </section>
 
 <!-- Секция с изображением -->
-<section class="vodka-section">
+<section class="vodka-section scroll-animate-scale">
     <div class="vodka-container">
         <img src="Vodka.png" alt="Vodka" class="vodka-image">
     </div>
@@ -1787,6 +1955,35 @@ document.onkeydown = function(e) {
     if (e.ctrlKey && e.code === 'KeyS') return false;
 };
 document.oncontextmenu = function() { return false; };
+</script>
+
+<!-- Анимации при скролле -->
+<script>
+const scrollElements = document.querySelectorAll('.scroll-animate, .scroll-animate-left, .scroll-animate-right, .scroll-animate-scale');
+
+const elementInView = (el, offset = 100) => {
+    const elementTop = el.getBoundingClientRect().top;
+    return elementTop <= (window.innerHeight || document.documentElement.clientHeight) - offset;
+};
+
+const displayScrollElement = (element) => {
+    element.classList.add('visible');
+};
+
+const handleScrollAnimation = () => {
+    scrollElements.forEach((el) => {
+        if (elementInView(el, 100)) {
+            displayScrollElement(el);
+        }
+    });
+};
+
+window.addEventListener('scroll', () => {
+    handleScrollAnimation();
+});
+
+// Запуск при загрузке
+handleScrollAnimation();
 </script>
 </body>
 </html>
