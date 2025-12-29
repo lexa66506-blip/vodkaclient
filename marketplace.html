@@ -160,6 +160,7 @@ body {
         <div class="sidebar-menu">
             <div class="sidebar-item active" data-tab="search"><span>🏠</span> Главная</div>
             <div class="sidebar-item" data-tab="my-configs"><span>📁</span> Мои конфиги</div>
+            <div class="sidebar-item" data-tab="saved"><span>💾</span> Сохранённые</div>
             <div class="sidebar-item" data-tab="owner"><span>⚙️</span> От разработчиков</div>
             <div class="sidebar-item" data-tab="media"><span>🎬</span> От Media</div>
             <div class="sidebar-item upload-sidebar-btn" id="uploadSidebarBtn"><span>📤</span> Загрузить</div>
@@ -204,10 +205,23 @@ body {
                 </div>
             </div>
 
+            <div class="tab-panel" id="tab-saved">
+                <div class="content-header">
+                    <div class="content-title">💾 Сохранённые конфиги</div>
+                </div>
+                <div class="content-body">
+                    <div class="empty-state" id="savedEmpty">
+                        <div class="empty-state-icon">💾</div>
+                        <div class="empty-state-text">Нет сохранённых конфигов</div>
+                    </div>
+                    <div class="configs-grid" id="savedConfigsGrid" style="display: none;"></div>
+                </div>
+            </div>
+
             <div class="tab-panel" id="tab-owner">
                 <div class="content-header">
                     <div class="content-title">⚙️ Конфиги от разработчиков</div>
-                    <button class="upload-btn" id="ownerUploadBtn" style="display: none; background: rgba(255,165,0,0.3); border-color: rgba(255,165,0,0.5); color: #ffa500; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,165,0,0.5)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,165,0,0.3)';this.style.transform=''">+ Загрузить конфиг</button>
+                    <button class="upload-btn" id="ownerUploadBtn" style="display: none; background: rgba(255,165,0,0.3); border-color: rgba(255,165,0,0.5); color: #ffa500; transition: all 0.3s;" onmouseover="this.style.background='rgba(255,165,0,0.5)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(255,165,0,0.3)';this.style.transform=''">⚙️ Загрузить конфиг</button>
                 </div>
                 <div class="content-body">
                     <div class="empty-state" id="ownerEmpty">
@@ -390,6 +404,7 @@ sidebarItems.forEach(item => {
         if (tabId === 'my-configs') loadMyConfigs();
         if (tabId === 'media') loadMediaConfigs();
         if (tabId === 'owner') loadOwnerConfigs();
+        if (tabId === 'saved') loadSavedConfigs();
     });
 });
 
@@ -444,13 +459,78 @@ function renderConfigCard(config, isOwner) {
             </div>
             <div class="config-author">by ${config.author}</div>
             <div class="config-desc">${config.description || 'Без описания'}</div>
-            <div class="config-actions">
+            <div class="config-actions" id="config-actions-${config.id}">
                 ${isOwner ? `<button class="config-btn delete" onclick="deleteConfig('${config.id}')">🗑 Удалить</button>` : ''}
-                <button class="config-btn primary" onclick="downloadConfig('${config.id}')" ${!canDownload ? 'disabled' : ''}>⬇ Скачать</button>
+                <button class="config-btn primary" onclick="downloadAndSaveConfig('${config.id}', '${config.name}')" ${!canDownload ? 'disabled' : ''}>⬇ Скачать</button>
             </div>
             ${!canDownload ? '<div class="no-sub-msg">Нужна подписка для скачивания</div>' : ''}
         </div>
     `;
+}
+
+async function downloadAndSaveConfig(id, name) {
+    if (!hasSubscription) { alert('Нужна активная подписка'); return; }
+    
+    window.open('/api/configs/download/' + id, '_blank');
+    
+    await fetch('/api/saved-configs/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config_id: id, config_type: 'user', config_name: name })
+    });
+}
+
+// ========== СОХРАНЁННЫЕ КОНФИГИ ==========
+async function loadSavedConfigs() {
+    try {
+        const response = await fetch('/api/saved-configs');
+        const data = await response.json();
+        const grid = document.getElementById('savedConfigsGrid');
+        const empty = document.getElementById('savedEmpty');
+        
+        if (data.configs && data.configs.length > 0) {
+            empty.style.display = 'none';
+            grid.style.display = 'grid';
+            grid.innerHTML = data.configs.map(c => renderSavedConfigCard(c)).join('');
+        } else {
+            empty.style.display = 'block';
+            grid.style.display = 'none';
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+function renderSavedConfigCard(config) {
+    const typeColors = {
+        'user': { bg: 'rgba(80,80,80,0.3)', color: '#888', label: 'User' },
+        'owner': { bg: 'rgba(255,165,0,0.3)', color: '#ffa500', label: 'Owner' },
+        'media': { bg: 'rgba(138,43,226,0.3)', color: '#9370db', label: 'Media' }
+    };
+    const style = typeColors[config.config_type] || typeColors.user;
+    
+    return `
+        <div class="config-card" style="border-color: ${style.bg};">
+            <div class="config-card-header">
+                <div class="config-name">${config.config_name}</div>
+                <div class="config-badge" style="background: ${style.bg}; color: ${style.color};">${style.label}</div>
+            </div>
+            <div class="config-author" style="color: #666;">Сохранён: ${new Date(config.saved_at).toLocaleDateString('ru-RU')}</div>
+            <div class="config-actions">
+                <button class="config-btn delete" onclick="removeSavedConfig(${config.id})">🗑 Удалить</button>
+            </div>
+        </div>
+    `;
+}
+
+async function removeSavedConfig(savedId) {
+    if (!confirm('Удалить из сохранённых?')) return;
+    try {
+        await fetch('/api/saved-configs/' + savedId, { method: 'DELETE' });
+        loadSavedConfigs();
+    } catch (error) {
+        alert('Ошибка удаления');
+    }
 }
 </script>
 
@@ -470,11 +550,6 @@ async function loadMyConfigs() {
             grid.style.display = 'none';
         }
     } catch (error) { console.error(error); }
-}
-
-async function downloadConfig(id) {
-    if (!hasSubscription) { alert('Нужна активная подписка для скачивания конфигов'); return; }
-    window.open('/api/configs/download/' + id, '_blank');
 }
 
 async function deleteConfig(id) {
@@ -694,8 +769,6 @@ async function loadMediaConfigs() {
 
 function renderMediaConfigCard(config) {
     const hasPrice = config.price && config.price > 0 && config.funpay_url;
-    const promoDiscount = config.promo_code ? 5 : 0;
-    const discountedPrice = config.price ? Math.round(config.price * (100 - promoDiscount) / 100) : 0;
     
     return `
         <div class="config-card" style="border-color: rgba(138, 43, 226, 0.3);">
@@ -711,19 +784,13 @@ function renderMediaConfigCard(config) {
                     ${config.promo_code ? `<span style="font-size: 11px; color: #55ff55; margin-left: 8px;">Промокод: ${config.promo_code} (-5%)</span>` : ''}
                 </div>
                 <div class="config-actions">
-                    <button class="config-btn primary" onclick="buyMediaConfig('${config.funpay_url}', '${config.name}', ${config.price})" style="background: rgba(138, 43, 226, 0.3); border-color: rgba(138, 43, 226, 0.4); color: #9370db;">💳 Купить</button>
+                    <a href="${config.funpay_url}" target="_blank" class="config-btn primary" style="background: rgba(138, 43, 226, 0.3); border-color: rgba(138, 43, 226, 0.4); color: #9370db; text-decoration: none; text-align: center; display: block;">💳 Купить на FunPay</a>
                 </div>
             ` : `
                 <div style="color: #666; font-size: 12px;">Цена ещё не установлена</div>
             `}
         </div>
     `;
-}
-
-function buyMediaConfig(funpayUrl, name, price) {
-    if (confirm('Купить конфиг "' + name + '" за ' + price + '₽ на FunPay?')) {
-        window.open(funpayUrl, '_blank');
-    }
 }
 
 // ========== OWNER КОНФИГИ ==========
@@ -864,17 +931,35 @@ function renderOwnerConfigCard(config) {
             </div>
             <div class="config-author" style="color: #ffa500;">от ${config.author_name}</div>
             <div class="config-desc">${config.description || 'Без описания'}</div>
-            <div class="config-actions">
-                <button class="config-btn primary" onclick="downloadOwnerConfig('${config.id}')" ${!canDownload ? 'disabled' : ''} style="background: rgba(255, 165, 0, 0.2); border-color: rgba(255, 165, 0, 0.3); color: #ffa500;">⬇ Скачать</button>
+            <div class="config-actions" id="owner-actions-${config.id}">
+                <button class="config-btn primary" onclick="downloadAndSaveOwnerConfig('${config.id}', '${config.name}')" ${!canDownload ? 'disabled' : ''} style="background: rgba(255, 165, 0, 0.2); border-color: rgba(255, 165, 0, 0.3); color: #ffa500;">⬇ Скачать</button>
             </div>
             ${!canDownload ? '<div class="no-sub-msg">Нужна подписка для скачивания</div>' : ''}
         </div>
     `;
 }
 
-async function downloadOwnerConfig(id) {
-    if (!hasSubscription) { alert('Нужна активная подписка для скачивания конфигов'); return; }
+async function downloadAndSaveOwnerConfig(id, name) {
+    if (!hasSubscription) { alert('Нужна активная подписка'); return; }
+    
+    // Скачиваем
     window.open('/api/owner-configs/download/' + id, '_blank');
+    
+    // Сохраняем в базу
+    await fetch('/api/saved-configs/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config_id: id, config_type: 'owner', config_name: name })
+    });
+    
+    // Обновляем кнопки
+    const actionsDiv = document.getElementById('owner-actions-' + id);
+    if (actionsDiv) {
+        actionsDiv.innerHTML = `
+            <button class="config-btn" onclick="downloadAndSaveOwnerConfig('${id}', '${name}')" style="background: rgba(255, 165, 0, 0.2); border-color: rgba(255, 165, 0, 0.3); color: #ffa500;">⬇ Скачать</button>
+            <button class="config-btn delete" onclick="removeSavedConfig('${id}', 'owner')">🗑 Удалить</button>
+        `;
+    }
 }
 
 // Защита от ПКМ и DevTools
