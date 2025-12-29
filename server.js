@@ -633,10 +633,13 @@ const upload = multer({
     try {
         await pool.query(`CREATE TABLE IF NOT EXISTS configs (
             id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, description TEXT,
-            filename VARCHAR(255) NOT NULL, author_id INTEGER REFERENCES users(uid),
+            filename VARCHAR(255) NOT NULL, content TEXT,
+            author_id INTEGER REFERENCES users(uid),
             author_name VARCHAR(255), private BOOLEAN DEFAULT FALSE,
             downloads INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )`);
+        // Добавляем колонку content если её нет
+        await pool.query(`ALTER TABLE configs ADD COLUMN IF NOT EXISTS content TEXT`).catch(() => {});
     } catch (err) { console.error('Configs table error:', err); }
 })();
 
@@ -647,10 +650,18 @@ app.post('/api/configs/upload', upload.single('file'), async (req, res) => {
     if (!name) return res.status(400).json({ success: false, message: 'Введите название' });
     try {
         const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [req.session.userId]);
-        await pool.query('INSERT INTO configs (name, description, filename, author_id, author_name, private) VALUES ($1, $2, $3, $4, $5, $6)',
-            [name, description || '', req.file.filename, req.session.userId, userResult.rows[0]?.username || 'Unknown', isPrivate === 'true']);
+        // Читаем содержимое файла и сохраняем в базу
+        const filePath = path.join(configsDir, req.file.filename);
+        const content = fs.readFileSync(filePath, 'utf8');
+        await pool.query('INSERT INTO configs (name, description, filename, content, author_id, author_name, private) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+            [name, description || '', req.file.filename, content, req.session.userId, userResult.rows[0]?.username || 'Unknown', isPrivate === 'true']);
+        // Удаляем файл - он больше не нужен
+        fs.unlinkSync(filePath);
         res.json({ success: true, message: 'Конфиг загружен!' });
-    } catch (err) { res.status(500).json({ success: false, message: 'Ошибка загрузки' }); }
+    } catch (err) { 
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка загрузки' }); 
+    }
 });
 
 app.get('/api/configs/my', async (req, res) => {
@@ -690,10 +701,22 @@ app.get('/api/configs/download/:id', async (req, res) => {
         const config = result.rows[0];
         if (config.private && config.author_id !== userId) return res.status(403).json({ success: false, message: 'Нет доступа' });
         await pool.query('UPDATE configs SET downloads = downloads + 1 WHERE id = $1', [req.params.id]);
-        const filePath = path.join(configsDir, config.filename);
-        if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, message: 'Файл не найден' });
-        res.download(filePath, config.name + path.extname(config.filename));
-    } catch (err) { res.status(500).json({ success: false, message: 'Ошибка' }); }
+        
+        // Отдаём содержимое из базы данных
+        if (config.content) {
+            res.setHeader('Content-Type', 'application/octet-stream');
+            res.setHeader('Content-Disposition', 'attachment; filename="' + config.name + '.json"');
+            res.send(config.content);
+        } else {
+            // Старый способ - из файла (для старых конфигов)
+            const filePath = path.join(configsDir, config.filename);
+            if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, message: 'Файл не найден' });
+            res.download(filePath, config.name + path.extname(config.filename));
+        }
+    } catch (err) { 
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка' }); 
+    }
 });
 
 app.delete('/api/configs/:id', async (req, res) => {
@@ -701,8 +724,6 @@ app.delete('/api/configs/:id', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM configs WHERE id = $1 AND author_id = $2', [req.params.id, req.session.userId]);
         if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Не найден' });
-        const filePath = path.join(configsDir, result.rows[0].filename);
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
         await pool.query('DELETE FROM configs WHERE id = $1', [req.params.id]);
         res.json({ success: true, message: 'Удалён' });
     } catch (err) { res.status(500).json({ success: false, message: 'Ошибка' }); }
