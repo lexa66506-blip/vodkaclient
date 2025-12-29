@@ -18,10 +18,8 @@ body {
     color: #fff;
     min-height: 100vh;
     overflow-x: hidden;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
 }
 
-/* Плавающая навигация */
 .floating-nav {
     position: fixed;
     top: 20px;
@@ -38,623 +36,16 @@ body {
     border-radius: 10px;
 }
 
-.nav-logo {
-    font-size: 18px;
-    font-weight: 700;
-    color: #888;
-    letter-spacing: 1px;
-    margin-right: 15px;
-}
-
-.nav-links {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-}
-
-.nav-links a {
-    color: rgba(255, 255, 255, 0.5);
-    text-decoration: none;
-    font-size: 13px;
-    padding: 8px 14px;
-    border-radius: 10px;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.nav-links a:hover {
-    color: #fff;
-    background: rgba(80, 80, 80, 0.2);
-}
-
-.nav-links a.active {
-    color: #fff;
-    background: rgba(80, 80, 80, 0.3);
-}
-
-.nav-user {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, #3a3a3a, #555);
-    padding: 8px 16px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    margin-left: 15px;
-    cursor: pointer;
-    text-decoration: none;
-    color: #fff;
-}
-
-/* Основной контейнер */
-.main-container {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    min-height: 100vh;
-    padding: 100px 30px 30px;
-}
-
-/* Боковое меню */
-.sidebar {
-    position: fixed;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 99;
-    display: flex;
-    align-items: center;
-}
-
-.sidebar-toggle {
-    width: 28px;
-    height: 70px;
-    background: rgba(20, 20, 20, 0.85);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(80, 80, 80, 0.25);
-    border-left: none;
-    border-radius: 0 12px 12px 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #666;
-    font-size: 20px;
-    transition: all 0.3s;
-}
-
-.sidebar-toggle:hover {
-    background: rgba(30, 30, 30, 0.9);
-    color: #fff;
-}
-
-.sidebar.open .sidebar-toggle {
-    border-radius: 0;
-}
-
-.sidebar-content {
-    width: 0;
-    height: 400px;
-    background: rgba(20, 20, 20, 0.95);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(80, 80, 80, 0.25);
-    border-left: none;
-    border-radius: 0 12px 12px 0;
-    overflow: hidden;
-    transition: width 0.3s ease;
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar.open .sidebar-content {
-    width: 220px;
-    padding: 20px 15px;
-}
-
-.sidebar-header {
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    padding-bottom: 15px;
-    margin-bottom: 15px;
-    border-bottom: 1px solid rgba(80, 80, 80, 0.3);
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.sidebar.open .sidebar-header {
-    opacity: 1;
-}
-
-.sidebar-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    opacity: 0;
-    transition: opacity 0.2s;
-}
-
-.sidebar.open .sidebar-menu {
-    opacity: 1;
-}
-
-.sidebar-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
-    background: rgba(40, 40, 40, 0.5);
-    border: 1px solid rgba(80, 80, 80, 0.2);
-    border-radius: 10px;
-    color: #888;
-    text-decoration: none;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.sidebar-item:hover {
-    background: rgba(60, 60, 60, 0.5);
-    color: #fff;
-}
-
-.sidebar-item.active {
-    background: rgba(80, 80, 80, 0.4);
-    border-color: rgba(100, 100, 100, 0.4);
-    color: #fff;
-}
-
-.sidebar-item span {
-    font-size: 16px;
-}
-
-/* Контент */
-.content-wrapper {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    padding-left: 50px;
-}
-
-.content-panel {
-    width: 100%;
-    max-width: 900px;
-    background: rgba(25, 25, 25, 0.85);
-    border: 1px solid rgba(80, 80, 80, 0.25);
-    border-radius: 12px;
-    backdrop-filter: blur(15px);
-    overflow: hidden;
-}
-
-.content-header {
-    padding: 25px 30px;
-    border-bottom: 1px solid rgba(80, 80, 80, 0.2);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.content-title {
-    font-size: 22px;
-    font-weight: 600;
-    color: #fff;
-}
-
-.search-box {
-    display: flex;
-    gap: 10px;
-}
-
-.search-input {
-    width: 280px;
-    padding: 10px 15px;
-    background: rgba(15, 15, 15, 0.9);
-    border: 1px solid rgba(80, 80, 80, 0.3);
-    border-radius: 10px;
-    color: #fff;
-    font-size: 13px;
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: #666;
-}
-
-.search-btn {
-    padding: 10px 20px;
-    background: rgba(80, 80, 80, 0.3);
-    border: 1px solid rgba(80, 80, 80, 0.3);
-    border-radius: 10px;
-    color: #aaa;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.search-btn:hover {
-    background: rgba(100, 100, 100, 0.4);
-    color: #fff;
-}
-
-.content-body {
-    padding: 25px 30px;
-    min-height: 400px;
-}
-
-/* Табы контента */
-.tab-panel {
-    display: none;
-}
-
-.tab-panel.active {
-    display: block;
-}
-
-/* Список конфигов */
-.configs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 15px;
-}
-
-.config-card {
-    background: rgba(30, 30, 30, 0.8);
-    border: 1px solid rgba(80, 80, 80, 0.25);
-    border-radius: 10px;
-    padding: 18px;
-    transition: all 0.2s;
-}
-
-.config-card:hover {
-    background: rgba(40, 40, 40, 0.8);
-    border-color: rgba(100, 100, 100, 0.3);
-    transform: translateY(-2px);
-}
-
-.config-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 12px;
-}
-
-.config-name {
-    font-size: 15px;
-    font-weight: 600;
-    color: #fff;
-}
-
-.config-badge {
-    padding: 3px 8px;
-    background: rgba(80, 80, 80, 0.3);
-    border-radius: 6px;
-    font-size: 10px;
-    color: #888;
-}
-
-.config-badge.private {
-    background: rgba(255, 100, 100, 0.2);
-    color: #ff8888;
-}
-
-.config-author {
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 10px;
-}
-
-.config-desc {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 15px;
-    line-height: 1.4;
-}
-
-.config-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.config-btn {
-    flex: 1;
-    padding: 8px 12px;
-    background: rgba(80, 80, 80, 0.2);
-    border: 1px solid rgba(80, 80, 80, 0.3);
-    border-radius: 8px;
-    color: #aaa;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.config-btn:hover {
-    background: rgba(100, 100, 100, 0.3);
-    color: #fff;
-}
-
-.config-btn.primary {
-    background: rgba(100, 100, 100, 0.3);
-    color: #fff;
-}
-
-/* Пустое состояние */
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: #555;
-}
-
-.empty-state-icon {
-    font-size: 48px;
-    margin-bottom: 15px;
-}
-
-.empty-state-text {
-    font-size: 14px;
-    margin-bottom: 20px;
-}
-
-.upload-btn {
-    padding: 12px 25px;
-    background: rgba(80, 80, 80, 0.3);
-    border: 1px dashed rgba(80, 80, 80, 0.5);
-    border-radius: 10px;
-    color: #888;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.upload-btn:hover {
-    background: rgba(100, 100, 100, 0.3);
-    color: #aaa;
-}
-
-.loading {
-    text-align: center;
-    padding: 100px 20px;
-    font-size: 18px;
-    color: #666;
-}
-
-/* Модалка загрузки */
-.upload-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
-
-.upload-modal.active {
-    display: flex;
-}
-
-.upload-modal-content {
-    width: 90%;
-    max-width: 600px;
-    height: 400px;
-    background: rgba(25, 25, 25, 0.98);
-    border: 1px solid rgba(80, 80, 80, 0.4);
-    border-radius: 20px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.upload-modal-header {
-    padding: 20px 25px;
-    border-bottom: 1px solid rgba(80, 80, 80, 0.3);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.upload-modal-title {
-    font-size: 18px;
-    font-weight: 600;
-    color: #fff;
-}
-
-.upload-modal-close {
-    width: 32px;
-    height: 32px;
-    background: rgba(80, 80, 80, 0.3);
-    border: none;
-    border-radius: 8px;
-    color: #888;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.upload-modal-close:hover {
-    background: rgba(255, 80, 80, 0.3);
-    color: #ff8888;
-}
-
-.upload-dropzone {
-    flex: 1;
-    margin: 25px;
-    border: 2px dashed rgba(80, 80, 80, 0.5);
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    transition: all 0.3s;
-    cursor: pointer;
-}
-
-.upload-dropzone:hover {
-    border-color: rgba(120, 120, 120, 0.6);
-    background: rgba(40, 40, 40, 0.3);
-}
-
-.upload-dropzone.dragover {
-    border-color: rgba(100, 200, 100, 0.6);
-    background: rgba(100, 200, 100, 0.1);
-}
-
-.upload-dropzone-icon {
-    font-size: 64px;
-    color: #555;
-}
-
-.upload-dropzone-text {
-    font-size: 16px;
-    color: #888;
-}
-
-.upload-dropzone-hint {
-    font-size: 12px;
-    color: #555;
-}
-
-.upload-dropzone input[type="file"] {
-    display: none;
-}
-
-.upload-progress {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-}
-
-.upload-progress.active {
-    display: flex;
-}
-
-.upload-progress-text {
-    font-size: 14px;
-    color: #aaa;
-}
-
-.upload-progress-bar {
-    width: 200px;
-    height: 6px;
-    background: rgba(80, 80, 80, 0.3);
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.upload-progress-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #666, #888);
-    border-radius: 3px;
-    transition: width 0.3s;
-}
-
-/* Форма деталей конфига */
-.upload-form {
-    display: none;
-    padding: 25px;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.upload-form.active {
-    display: flex;
-}
-
-.upload-form-row {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.upload-form-label {
-    font-size: 12px;
-    color: #888;
-}
-
-.upload-form-input {
-    padding: 12px 15px;
-    background: rgba(15, 15, 15, 0.9);
-    border: 1px solid rgba(80, 80, 80, 0.3);
-    border-radius: 10px;
-    color: #fff;
-    font-size: 14px;
-}
-
-.upload-form-input:focus {
-    outline: none;
-    border-color: #666;
-}
-
-.upload-form-textarea {
-    padding: 12px 15px;
-    background: rgba(15, 15, 15, 0.9);
-    border: 1px solid rgba(80, 80, 80, 0.3);
-    border-radius: 10px;
-    color: #fff;
-    font-size: 14px;
-    resize: none;
-    height: 80px;
-}
-
-.upload-form-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 13px;
-    color: #888;
-    cursor: pointer;
-}
-
-.upload-form-checkbox input {
-    width: 18px;
-    height: 18px;
-    cursor: pointer;
-}
-
-.upload-form-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.upload-form-btn {
-    flex: 1;
-    padding: 12px;
-    border-radius: 10px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.upload-form-btn.cancel {
-    background: transparent;
-    border: 1px solid rgba(80, 80, 80, 0.4);
-    color: #888;
-}
-
-.upload-form-btn.submit {
-    background: rgba(80, 80, 80, 0.4);
-    border: 1px solid rgba(100, 100, 100, 0.4);
-    color: #fff;
-}
-
-.upload-form-btn:hover {
-    background: rgba(100, 100, 100, 0.4);
-}
+.nav-logo { font-size: 18px; font-weight: 700; color: #888; margin-right: 15px; }
+.nav-links { display: flex; gap: 4px; }
+.nav-links a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 13px; padding: 8px 14px; border-radius: 10px; transition: all 0.3s; }
+.nav-links a:hover { color: #fff; background: rgba(80,80,80,0.2); }
+.nav-links a.active { color: #fff; background: rgba(80,80,80,0.3); }
+.nav-user { display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #3a3a3a, #555); padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-left: 15px; cursor: pointer; text-decoration: none; color: #fff; }
 </style>
 </head>
-
 <body>
 
-<!-- Плавающая навигация -->
 <nav class="floating-nav">
     <div class="nav-logo">VodkaClient</div>
     <div class="nav-links">
@@ -662,26 +53,111 @@ body {
         <a href="/marketplace.html" class="active">🛒 Marketplace</a>
         <a href="https://t.me/SmertnixVteste" target="_blank">💬 Support</a>
     </div>
-    <a href="/cabinet.html" class="nav-user" id="navUser">
+    <a href="/cabinet.html" class="nav-user">
         <span>👤</span>
         <span id="navUsername">username</span>
     </a>
 </nav>
 
-<!-- Боковое меню -->
+<style>
+.main-container { position: relative; z-index: 10; display: flex; min-height: 100vh; padding: 100px 30px 30px; }
+
+.sidebar { position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 99; display: flex; align-items: center; }
+.sidebar-toggle { width: 28px; height: 70px; background: rgba(20,20,20,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(80,80,80,0.25); border-left: none; border-radius: 0 12px 12px 0; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #666; font-size: 20px; transition: all 0.3s; }
+.sidebar-toggle:hover { background: rgba(30,30,30,0.9); color: #fff; }
+.sidebar.open .sidebar-toggle { border-radius: 0; }
+.sidebar-content { width: 0; height: 400px; background: rgba(20,20,20,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(80,80,80,0.25); border-left: none; border-radius: 0 12px 12px 0; overflow: hidden; transition: width 0.3s ease; display: flex; flex-direction: column; }
+.sidebar.open .sidebar-content { width: 220px; padding: 20px 15px; }
+.sidebar-header { font-size: 16px; font-weight: 600; color: #fff; padding-bottom: 15px; margin-bottom: 15px; border-bottom: 1px solid rgba(80,80,80,0.3); opacity: 0; transition: opacity 0.2s; }
+.sidebar.open .sidebar-header { opacity: 1; }
+.sidebar-menu { display: flex; flex-direction: column; gap: 6px; opacity: 0; transition: opacity 0.2s; }
+.sidebar.open .sidebar-menu { opacity: 1; }
+.sidebar-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(40,40,40,0.5); border: 1px solid rgba(80,80,80,0.2); border-radius: 10px; color: #888; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.sidebar-item:hover { background: rgba(60,60,60,0.5); color: #fff; }
+.sidebar-item.active { background: rgba(80,80,80,0.4); border-color: rgba(100,100,100,0.4); color: #fff; }
+.sidebar-item span { font-size: 16px; }
+
+.content-wrapper { flex: 1; display: flex; justify-content: center; padding-left: 50px; }
+.content-panel { width: 100%; max-width: 900px; background: rgba(25,25,25,0.85); border: 1px solid rgba(80,80,80,0.25); border-radius: 12px; backdrop-filter: blur(15px); overflow: hidden; }
+.content-header { padding: 25px 30px; border-bottom: 1px solid rgba(80,80,80,0.2); display: flex; justify-content: space-between; align-items: center; }
+.content-title { font-size: 22px; font-weight: 600; color: #fff; }
+.search-box { display: flex; gap: 10px; }
+.search-input { width: 280px; padding: 10px 15px; background: rgba(15,15,15,0.9); border: 1px solid rgba(80,80,80,0.3); border-radius: 10px; color: #fff; font-size: 13px; }
+.search-input:focus { outline: none; border-color: #666; }
+.search-btn { padding: 10px 20px; background: rgba(80,80,80,0.3); border: 1px solid rgba(80,80,80,0.3); border-radius: 10px; color: #aaa; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.search-btn:hover { background: rgba(100,100,100,0.4); color: #fff; }
+.content-body { padding: 25px 30px; min-height: 400px; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+.configs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; }
+.config-card { background: rgba(30,30,30,0.8); border: 1px solid rgba(80,80,80,0.25); border-radius: 10px; padding: 18px; transition: all 0.2s; }
+.config-card:hover { background: rgba(40,40,40,0.8); border-color: rgba(100,100,100,0.3); transform: translateY(-2px); }
+.config-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.config-name { font-size: 15px; font-weight: 600; color: #fff; }
+.config-badge { padding: 3px 8px; background: rgba(80,80,80,0.3); border-radius: 6px; font-size: 10px; color: #888; }
+.config-badge.private { background: rgba(255,100,100,0.2); color: #ff8888; }
+.config-author { font-size: 12px; color: #666; margin-bottom: 10px; }
+.config-desc { font-size: 12px; color: #888; margin-bottom: 15px; line-height: 1.4; }
+.config-actions { display: flex; gap: 8px; }
+.config-btn { flex: 1; padding: 8px 12px; background: rgba(80,80,80,0.2); border: 1px solid rgba(80,80,80,0.3); border-radius: 8px; color: #aaa; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+.config-btn:hover { background: rgba(100,100,100,0.3); color: #fff; }
+.config-btn.primary { background: rgba(100,100,100,0.3); color: #fff; }
+.config-btn.delete { background: rgba(255,50,50,0.2); border-color: rgba(255,50,50,0.3); color: #ff6b6b; }
+.config-btn.delete:hover { background: rgba(255,50,50,0.3); }
+.config-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.empty-state { text-align: center; padding: 60px 20px; color: #555; }
+.empty-state-icon { font-size: 48px; margin-bottom: 15px; }
+.empty-state-text { font-size: 14px; margin-bottom: 20px; }
+.upload-btn { padding: 12px 25px; background: rgba(80,80,80,0.3); border: 1px dashed rgba(80,80,80,0.5); border-radius: 10px; color: #888; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+.upload-btn:hover { background: rgba(100,100,100,0.3); color: #aaa; }
+</style>
+
+<style>
+.upload-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; }
+.upload-modal.active { display: flex; }
+.upload-modal-content { width: 90%; max-width: 600px; height: 400px; background: rgba(25,25,25,0.98); border: 1px solid rgba(80,80,80,0.4); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
+.upload-modal-header { padding: 20px 25px; border-bottom: 1px solid rgba(80,80,80,0.3); display: flex; justify-content: space-between; align-items: center; }
+.upload-modal-title { font-size: 18px; font-weight: 600; color: #fff; }
+.upload-modal-close { width: 32px; height: 32px; background: rgba(80,80,80,0.3); border: none; border-radius: 8px; color: #888; font-size: 18px; cursor: pointer; transition: all 0.2s; }
+.upload-modal-close:hover { background: rgba(255,80,80,0.3); color: #ff8888; }
+.upload-dropzone { flex: 1; margin: 25px; border: 2px dashed rgba(80,80,80,0.5); border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; transition: all 0.3s; cursor: pointer; }
+.upload-dropzone:hover { border-color: rgba(120,120,120,0.6); background: rgba(40,40,40,0.3); }
+.upload-dropzone.dragover { border-color: rgba(100,200,100,0.6); background: rgba(100,200,100,0.1); }
+.upload-dropzone-icon { font-size: 64px; color: #555; }
+.upload-dropzone-text { font-size: 16px; color: #888; }
+.upload-dropzone-hint { font-size: 12px; color: #555; }
+.upload-dropzone input[type="file"] { display: none; }
+.upload-progress { display: none; flex-direction: column; align-items: center; gap: 15px; }
+.upload-progress.active { display: flex; }
+.upload-progress-bar { width: 200px; height: 6px; background: rgba(80,80,80,0.3); border-radius: 3px; overflow: hidden; }
+.upload-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #666, #888); border-radius: 3px; transition: width 0.3s; }
+.upload-form { display: none; padding: 25px; flex-direction: column; gap: 15px; }
+.upload-form.active { display: flex; }
+.upload-form-row { display: flex; flex-direction: column; gap: 6px; }
+.upload-form-label { font-size: 12px; color: #888; }
+.upload-form-input { padding: 12px 15px; background: rgba(15,15,15,0.9); border: 1px solid rgba(80,80,80,0.3); border-radius: 10px; color: #fff; font-size: 14px; }
+.upload-form-input:focus { outline: none; border-color: #666; }
+.upload-form-textarea { padding: 12px 15px; background: rgba(15,15,15,0.9); border: 1px solid rgba(80,80,80,0.3); border-radius: 10px; color: #fff; font-size: 14px; resize: none; height: 80px; }
+.upload-form-checkbox { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #888; cursor: pointer; }
+.upload-form-checkbox input { width: 18px; height: 18px; cursor: pointer; }
+.upload-form-actions { display: flex; gap: 10px; margin-top: 10px; }
+.upload-form-btn { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.upload-form-btn.cancel { background: transparent; border: 1px solid rgba(80,80,80,0.4); color: #888; }
+.upload-form-btn.submit { background: rgba(80,80,80,0.4); border: 1px solid rgba(100,100,100,0.4); color: #fff; }
+.upload-form-btn:hover { background: rgba(100,100,100,0.4); }
+.no-sub-msg { color: #ff6b6b; font-size: 11px; margin-top: 5px; }
+</style>
+
 <div class="sidebar" id="sidebar">
     <div class="sidebar-content">
         <div class="sidebar-header">📦 Меню</div>
         <div class="sidebar-menu">
-            <div class="sidebar-item active" data-tab="search">
-                <span>🔍</span> Поиск
-            </div>
-            <div class="sidebar-item" data-tab="my-configs">
-                <span>📁</span> Мои конфиги
-            </div>
-            <div class="sidebar-item" data-tab="private">
-                <span>🔒</span> Приватные конфиги
-            </div>
+            <div class="sidebar-item active" data-tab="search"><span>🔍</span> Поиск</div>
+            <div class="sidebar-item" data-tab="my-configs"><span>📁</span> Мои конфиги</div>
+            <div class="sidebar-item" data-tab="private"><span>🔒</span> Приватные конфиги</div>
         </div>
     </div>
     <div class="sidebar-toggle" id="sidebarToggle">›</div>
@@ -691,7 +167,6 @@ body {
     <div class="content-wrapper">
         <div class="content-panel">
             
-            <!-- Поиск -->
             <div class="tab-panel active" id="tab-search">
                 <div class="content-header">
                     <div class="content-title">🔍 Поиск конфигов</div>
@@ -705,12 +180,10 @@ body {
                         <div class="empty-state-icon">🔍</div>
                         <div class="empty-state-text">Введите запрос для поиска конфигов</div>
                     </div>
-                    <div class="configs-grid" id="searchResults" style="display: none;">
-                    </div>
+                    <div class="configs-grid" id="searchResults" style="display: none;"></div>
                 </div>
             </div>
 
-            <!-- Мои конфиги -->
             <div class="tab-panel" id="tab-my-configs">
                 <div class="content-header">
                     <div class="content-title">📁 Мои конфиги</div>
@@ -720,14 +193,12 @@ body {
                     <div class="empty-state" id="myConfigsEmpty">
                         <div class="empty-state-icon">📂</div>
                         <div class="empty-state-text">У вас пока нет загруженных конфигов</div>
-                        <button class="upload-btn">+ Загрузить первый конфиг</button>
+                        <button class="upload-btn" id="uploadBtn2">+ Загрузить первый конфиг</button>
                     </div>
-                    <div class="configs-grid" id="myConfigsGrid" style="display: none;">
-                    </div>
+                    <div class="configs-grid" id="myConfigsGrid" style="display: none;"></div>
                 </div>
             </div>
 
-            <!-- Приватные конфиги -->
             <div class="tab-panel" id="tab-private">
                 <div class="content-header">
                     <div class="content-title">🔒 Приватные конфиги</div>
@@ -744,30 +215,22 @@ body {
     </div>
 </div>
 
-<!-- Модалка загрузки конфига -->
 <div class="upload-modal" id="uploadModal">
     <div class="upload-modal-content">
         <div class="upload-modal-header">
             <div class="upload-modal-title">📤 Загрузить конфиг</div>
             <button class="upload-modal-close" id="uploadModalClose">✕</button>
         </div>
-        
-        <!-- Зона перетаскивания -->
         <div class="upload-dropzone" id="uploadDropzone">
             <div class="upload-dropzone-icon">📁</div>
             <div class="upload-dropzone-text">Перетащите конфиг сюда</div>
             <div class="upload-dropzone-hint">или нажмите для выбора файла (.json, .cfg, .txt)</div>
             <input type="file" id="fileInput" accept=".json,.cfg,.txt,.yaml,.yml">
-            
             <div class="upload-progress" id="uploadProgress">
                 <div class="upload-progress-text">Загрузка...</div>
-                <div class="upload-progress-bar">
-                    <div class="upload-progress-fill" id="uploadProgressFill"></div>
-                </div>
+                <div class="upload-progress-bar"><div class="upload-progress-fill" id="uploadProgressFill"></div></div>
             </div>
         </div>
-        
-        <!-- Форма деталей -->
         <div class="upload-form" id="uploadForm">
             <div class="upload-form-row">
                 <label class="upload-form-label">Название конфига</label>
@@ -789,26 +252,21 @@ body {
     </div>
 </div>
 
-<script></script>
-// Проверка авторизации
+<script>
+let userData = null;
+let hasSubscription = false;
+
 async function checkAuth() {
     try {
         const response = await fetch('/api/check-auth');
         const data = await response.json();
-        
-        if (!data.authenticated) {
-            window.location.href = '/';
-            return;
-        }
-        
+        if (!data.authenticated) { window.location.href = '/'; return; }
+        userData = data;
+        hasSubscription = data.subscription_active;
         document.getElementById('navUsername').textContent = data.username;
-    } catch (error) {
-        console.error('Auth error:', error);
-        window.location.href = '/';
-    }
+    } catch (error) { window.location.href = '/'; }
 }
 
-// Боковое меню
 const sidebar = document.getElementById('sidebar');
 const sidebarToggle = document.getElementById('sidebarToggle');
 const sidebarItems = document.querySelectorAll('.sidebar-item');
@@ -819,34 +277,94 @@ sidebarToggle.addEventListener('click', () => {
     sidebarToggle.textContent = sidebar.classList.contains('open') ? '‹' : '›';
 });
 
-// Переключение вкладок
 sidebarItems.forEach(item => {
     item.addEventListener('click', () => {
         const tabId = item.dataset.tab;
-        
         sidebarItems.forEach(i => i.classList.remove('active'));
         tabPanels.forEach(p => p.classList.remove('active'));
-        
         item.classList.add('active');
         document.getElementById('tab-' + tabId).classList.add('active');
+        if (tabId === 'my-configs') loadMyConfigs();
     });
 });
 
-// Поиск
-document.getElementById('searchBtn').addEventListener('click', () => {
-    const query = document.getElementById('searchInput').value;
-    if (query) {
-        alert('Поиск: ' + query + '\n\nФункция в разработке');
-    }
-});
+document.getElementById('searchBtn').addEventListener('click', searchConfigs);
+document.getElementById('searchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') searchConfigs(); });
 
-document.getElementById('searchInput').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        document.getElementById('searchBtn').click();
-    }
-});
+async function searchConfigs() {
+    const query = document.getElementById('searchInput').value.trim();
+    if (!query) return;
+    try {
+        const response = await fetch('/api/configs/search?q=' + encodeURIComponent(query));
+        const data = await response.json();
+        const grid = document.getElementById('searchResults');
+        const empty = document.getElementById('searchEmpty');
+        if (data.configs && data.configs.length > 0) {
+            empty.style.display = 'none';
+            grid.style.display = 'grid';
+            grid.innerHTML = data.configs.map(c => renderConfigCard(c, false)).join('');
+        } else {
+            empty.style.display = 'block';
+            empty.querySelector('.empty-state-text').textContent = 'Ничего не найдено';
+            grid.style.display = 'none';
+        }
+    } catch (error) { console.error(error); }
+}
 
-// Загрузка конфига - открытие модалки
+function renderConfigCard(config, isOwner) {
+    const canDownload = hasSubscription;
+    return `
+        <div class="config-card">
+            <div class="config-card-header">
+                <div class="config-name">${config.name}</div>
+                <div class="config-badge ${config.private ? 'private' : ''}">${config.private ? 'Private' : 'Public'}</div>
+            </div>
+            <div class="config-author">by ${config.author}</div>
+            <div class="config-desc">${config.description || 'Без описания'}</div>
+            <div class="config-actions">
+                ${isOwner ? `<button class="config-btn delete" onclick="deleteConfig('${config.id}')">🗑 Удалить</button>` : ''}
+                <button class="config-btn primary" onclick="downloadConfig('${config.id}')" ${!canDownload ? 'disabled' : ''}>⬇ Скачать</button>
+            </div>
+            ${!canDownload ? '<div class="no-sub-msg">Нужна подписка для скачивания</div>' : ''}
+        </div>
+    `;
+}
+</script>
+
+<script>
+async function loadMyConfigs() {
+    try {
+        const response = await fetch('/api/configs/my');
+        const data = await response.json();
+        const grid = document.getElementById('myConfigsGrid');
+        const empty = document.getElementById('myConfigsEmpty');
+        if (data.configs && data.configs.length > 0) {
+            empty.style.display = 'none';
+            grid.style.display = 'grid';
+            grid.innerHTML = data.configs.map(c => renderConfigCard(c, true)).join('');
+        } else {
+            empty.style.display = 'block';
+            grid.style.display = 'none';
+        }
+    } catch (error) { console.error(error); }
+}
+
+async function downloadConfig(id) {
+    if (!hasSubscription) { alert('Нужна активная подписка для скачивания конфигов'); return; }
+    window.open('/api/configs/download/' + id, '_blank');
+}
+
+async function deleteConfig(id) {
+    if (!confirm('Удалить этот конфиг?')) return;
+    try {
+        const response = await fetch('/api/configs/' + id, { method: 'DELETE' });
+        const data = await response.json();
+        if (data.success) { alert('Конфиг удалён'); loadMyConfigs(); }
+        else alert('Ошибка: ' + data.message);
+    } catch (error) { alert('Ошибка удаления'); }
+}
+
+// Upload modal
 const uploadModal = document.getElementById('uploadModal');
 const uploadDropzone = document.getElementById('uploadDropzone');
 const uploadForm = document.getElementById('uploadForm');
@@ -854,82 +372,31 @@ const uploadProgress = document.getElementById('uploadProgress');
 const fileInput = document.getElementById('fileInput');
 let selectedFile = null;
 
-document.querySelectorAll('.upload-btn, #uploadBtn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        uploadModal.classList.add('active');
-        resetUploadModal();
-    });
-});
+document.getElementById('uploadBtn').addEventListener('click', () => { uploadModal.classList.add('active'); resetUploadModal(); });
+document.getElementById('uploadBtn2').addEventListener('click', () => { uploadModal.classList.add('active'); resetUploadModal(); });
+document.getElementById('uploadModalClose').addEventListener('click', () => { uploadModal.classList.remove('active'); });
+uploadModal.addEventListener('click', (e) => { if (e.target === uploadModal) uploadModal.classList.remove('active'); });
 
-document.getElementById('uploadModalClose').addEventListener('click', () => {
-    uploadModal.classList.remove('active');
-});
-
-uploadModal.addEventListener('click', (e) => {
-    if (e.target === uploadModal) {
-        uploadModal.classList.remove('active');
-    }
-});
-
-// Drag & Drop
-uploadDropzone.addEventListener('click', () => {
-    if (!uploadForm.classList.contains('active')) {
-        fileInput.click();
-    }
-});
-
-uploadDropzone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadDropzone.classList.add('dragover');
-});
-
-uploadDropzone.addEventListener('dragleave', () => {
-    uploadDropzone.classList.remove('dragover');
-});
-
-uploadDropzone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadDropzone.classList.remove('dragover');
-    
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-        handleFile(files[0]);
-    }
-});
-
-fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-        handleFile(e.target.files[0]);
-    }
-});
+uploadDropzone.addEventListener('click', () => { if (!uploadForm.classList.contains('active')) fileInput.click(); });
+uploadDropzone.addEventListener('dragover', (e) => { e.preventDefault(); uploadDropzone.classList.add('dragover'); });
+uploadDropzone.addEventListener('dragleave', () => { uploadDropzone.classList.remove('dragover'); });
+uploadDropzone.addEventListener('drop', (e) => { e.preventDefault(); uploadDropzone.classList.remove('dragover'); if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', (e) => { if (e.target.files.length > 0) handleFile(e.target.files[0]); });
 
 function handleFile(file) {
     const allowedTypes = ['.json', '.cfg', '.txt', '.yaml', '.yml'];
     const ext = '.' + file.name.split('.').pop().toLowerCase();
-    
-    if (!allowedTypes.includes(ext)) {
-        alert('Неподдерживаемый формат файла!\n\nРазрешены: ' + allowedTypes.join(', '));
-        return;
-    }
-    
+    if (!allowedTypes.includes(ext)) { alert('Неподдерживаемый формат!\nРазрешены: ' + allowedTypes.join(', ')); return; }
     selectedFile = file;
-    
-    // Показываем прогресс
     uploadProgress.classList.add('active');
     let progress = 0;
     const progressFill = document.getElementById('uploadProgressFill');
-    
     const interval = setInterval(() => {
         progress += 10;
         progressFill.style.width = progress + '%';
-        
         if (progress >= 100) {
             clearInterval(interval);
-            setTimeout(() => {
-                uploadDropzone.style.display = 'none';
-                uploadForm.classList.add('active');
-                document.getElementById('configName').value = file.name.replace(/\.[^/.]+$/, '');
-            }, 300);
+            setTimeout(() => { uploadDropzone.style.display = 'none'; uploadForm.classList.add('active'); document.getElementById('configName').value = file.name.replace(/\.[^/.]+$/, ''); }, 300);
         }
     }, 50);
 }
@@ -946,85 +413,27 @@ function resetUploadModal() {
     fileInput.value = '';
 }
 
-document.getElementById('uploadCancel').addEventListener('click', () => {
-    resetUploadModal();
-});
-
+document.getElementById('uploadCancel').addEventListener('click', resetUploadModal);
 document.getElementById('uploadSubmit').addEventListener('click', async () => {
     const name = document.getElementById('configName').value.trim();
     const desc = document.getElementById('configDesc').value.trim();
     const isPrivate = document.getElementById('configPrivate').checked;
-    
-    if (!name) {
-        alert('Введите название конфига');
-        return;
-    }
-    
-    if (!selectedFile) {
-        alert('Файл не выбран');
-        return;
-    }
-    
-    // Отправка на сервер
+    if (!name) { alert('Введите название'); return; }
+    if (!selectedFile) { alert('Файл не выбран'); return; }
     const formData = new FormData();
     formData.append('file', selectedFile);
     formData.append('name', name);
     formData.append('description', desc);
     formData.append('private', isPrivate);
-    
     try {
-        const response = await fetch('/api/configs/upload', {
-            method: 'POST',
-            body: formData
-        });
-        
+        const response = await fetch('/api/configs/upload', { method: 'POST', body: formData });
         const data = await response.json();
-        
-        if (data.success) {
-            alert('Конфиг успешно загружен!');
-            uploadModal.classList.remove('active');
-            loadMyConfigs();
-        } else {
-            alert('Ошибка: ' + data.message);
-        }
-    } catch (error) {
-        alert('Ошибка загрузки: ' + error.message);
-    }
+        if (data.success) { alert('Конфиг загружен!'); uploadModal.classList.remove('active'); loadMyConfigs(); }
+        else alert('Ошибка: ' + data.message);
+    } catch (error) { alert('Ошибка загрузки'); }
 });
 
-// Загрузка моих конфигов
-async function loadMyConfigs() {
-    try {
-        const response = await fetch('/api/configs/my');
-        const data = await response.json();
-        
-        if (data.configs && data.configs.length > 0) {
-            document.getElementById('myConfigsEmpty').style.display = 'none';
-            const grid = document.getElementById('myConfigsGrid');
-            grid.style.display = 'grid';
-            grid.innerHTML = data.configs.map(config => `
-                <div class="config-card">
-                    <div class="config-card-header">
-                        <div class="config-name">${config.name}</div>
-                        <div class="config-badge ${config.private ? 'private' : ''}">${config.private ? 'Private' : 'Public'}</div>
-                    </div>
-                    <div class="config-author">by ${config.author}</div>
-                    <div class="config-desc">${config.description || 'Без описания'}</div>
-                    <div class="config-actions">
-                        <button class="config-btn" onclick="deleteConfig('${config.id}')">🗑 Удалить</button>
-                        <button class="config-btn primary" onclick="downloadConfig('${config.id}')">⬇ Скачать</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-    } catch (error) {
-        console.error('Error loading configs:', error);
-    }
-}
-
-// Запуск
 checkAuth();
 </script>
-
 </body>
 </html>
