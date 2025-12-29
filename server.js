@@ -360,7 +360,7 @@ app.post('/api/launcher/check-subscription', async (req, res) => {
         if (freeKeyCheck.rows.length > 0) {
             return res.status(403).json({ 
                 success: false, 
-                message: 'Вы уже получали бесплатный ключ на другой аккаунт! Доступ запрещён.', 
+                message: 'Вы уже получали бесплатный ключ на другом аккаунте', 
                 has_subscription: false,
                 banned: true
             });
@@ -527,6 +527,194 @@ app.post('/api/admin/reset-database', async (req, res) => {
     } catch (err) {
         console.error('Ошибка сброса БД:', err);
         res.status(500).json({ success: false, message: 'Ошибка сброса базы данных' });
+    }
+});
+
+// ========================================
+// API ДЛЯ КОНФИГОВ (MARKETPLACE)
+// ========================================
+
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Папка для хранения конфигов
+const configsDir = path.join(__dirname, 'configs');
+if (!fs.existsSync(configsDir)) {
+    fs.mkdirSync(configsDir, { recursive: true });
+}
+
+// Настройка загрузки файлов
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, configsDir),
+    filename: (req, file, cb) => {
+        const uniqueName = Date.now() + '-' + Math.random().toString(36).substring(7) + path.extname(file.originalname);
+        cb(null, uniqueName);
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB макс
+    fileFilter: (req, file, cb) => {
+        const allowedExt = ['.json', '.cfg', '.txt', '.yaml', '.yml'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowedExt.includes(ext)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Неподдерживаемый формат файла'));
+        }
+    }
+});
+
+// Инициализация таблицы конфигов
+async function initConfigsTable() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS configs (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                filename VARCHAR(255) NOT NULL,
+                author_id INTEGER REFERENCES users(uid),
+                author_name VARCHAR(255),
+                private BOOLEAN DEFAULT FALSE,
+                downloads INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        console.log('✅ Таблица configs создана');
+    } catch (err) {
+        console.error('❌ Ошибка создания таблицы configs:', err);
+    }
+}
+initConfigsTable();
+
+// API: Загрузка конфига
+app.post('/api/configs/upload', upload.single('file'), async (req, res) => {
+    const userId = req.session.userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    
+    if (!req.file) return res.status(400).json({ success: false, message: 'Файл не загружен' });
+    
+    const { name, description, private: isPrivate } = req.body;
+    if (!name) return res.status(400).json({ success: false, message: 'Введите название' });
+    
+    try {
+        const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [userId]);
+        const username = userResult.rows[0]?.username || 'Unknown';
+        
+        await pool.query(
+            'INSERT INTO configs (name, description, filename, author_id, author_name, private) VALUES ($1, $2, $3, $4, $5, $6)',
+            [name, description || '', req.file.filename, userId, username, isPrivate === 'true']
+        );
+        
+        res.json({ success: true, message: 'Конфиг загружен!' });
+    } catch (err) {
+        console.error('Upload error:', err);
+        res.status(500).json({ success: false, message: 'Ошибка загрузки' });
+    }
+});
+
+// API: Мои конфиги
+app.get('/api/configs/my', async (req, res) => {
+    const userId = req.session.userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    
+    try {
+        const result = await pool.query(
+            'SELECT id, name, description, filename, author_name as author, private, downloads, created_at FROM configs WHERE author_id = $1 ORDER BY created_at DESC',
+            [userId]
+        );
+        res.json({ success: true, configs: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка сервера' });
+    }
+});
+
+// API: Поиск конфигов (публичные)
+app.get('/api/configs/search', async (req, res) => {
+    const { q } = req.query;
+    
+    try {
+        let result;
+        if (q) {
+            result = await pool.query(
+                `SELECT id, name, description, author_name as author, downloads, created_at 
+                 FROM configs WHERE private = FALSE AND (name ILIKE $1 OR author_name ILIKE $1) 
+                 ORDER BY downloads DESC LIMIT 50`,
+                [`%${q}%`]
+            );
+        } else {
+            result = await pool.query(
+                `SELECT id, name, description, author_name as author, downloads, created_at 
+                 FROM configs WHERE private = FALSE ORDER BY created_at DESC LIMIT 50`
+            );
+        }
+        res.json({ success: true, configs: result.rows });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка сервера' });
+    }
+});
+
+// API: Скачать конфиг
+app.get('/api/configs/download/:id', async (req, res) => {
+    const { id } = req.params;
+    const userId = req.session.userId;
+    
+    try {
+        const result = await pool.query('SELECT * FROM configs WHERE id = $1', [id]);
+        if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Конфиг не найден' });
+        
+        const config = result.rows[0];
+        
+        // Проверка доступа к приватному конфигу
+        if (config.private && config.author_id !== userId) {
+            return res.status(403).json({ success: false, message: 'Нет доступа к приватному конфигу' });
+        }
+        
+        // Увеличиваем счётчик скачиваний
+        await pool.query('UPDATE configs SET downloads = downloads + 1 WHERE id = $1', [id]);
+        
+        const filePath = path.join(configsDir, config.filename);
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ success: false, message: 'Файл не найден' });
+        }
+        
+        res.download(filePath, config.name + path.extname(config.filename));
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка сервера' });
+    }
+});
+
+// API: Удалить конфиг
+app.delete('/api/configs/:id', async (req, res) => {
+    const { id } = req.params;
+    const userId = req.session.userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    
+    try {
+        const result = await pool.query('SELECT * FROM configs WHERE id = $1 AND author_id = $2', [id, userId]);
+        if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Конфиг не найден' });
+        
+        const config = result.rows[0];
+        
+        // Удаляем файл
+        const filePath = path.join(configsDir, config.filename);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+        
+        // Удаляем из БД
+        await pool.query('DELETE FROM configs WHERE id = $1', [id]);
+        
+        res.json({ success: true, message: 'Конфиг удалён' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка сервера' });
     }
 });
 
