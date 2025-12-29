@@ -3,6 +3,7 @@ const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,6 +13,32 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
+
+// ========== АНТИ-DDOS ЗАЩИТА ==========
+// Общий лимит - 100 запросов в минуту
+const generalLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 100,
+    message: { success: false, message: 'Слишком много запросов. Подождите минуту.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+// Строгий лимит для авторизации - 5 попыток в 15 минут
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { success: false, message: 'Слишком много попыток входа. Подождите 15 минут.' }
+});
+
+// Лимит для API - 30 запросов в минуту
+const apiLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 30,
+    message: { success: false, message: 'Слишком много запросов к API.' }
+});
+
+app.use(generalLimiter);
 
 // Middleware
 app.use(express.json());
@@ -137,6 +164,19 @@ async function initDB() {
             )
         `);
         
+        // Таблица для сохранённых конфигов пользователей
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS saved_configs (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                config_id INTEGER NOT NULL,
+                config_type VARCHAR(50) NOT NULL,
+                config_name VARCHAR(255),
+                saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(user_id, config_id, config_type)
+            )
+        `);
+        
         console.log('✅ Таблицы PostgreSQL созданы');
     } catch (err) {
         console.error('❌ Ошибка создания таблиц:', err);
@@ -145,8 +185,8 @@ async function initDB() {
 
 initDB();
 
-// API: Регистрация
-app.post('/api/register', async (req, res) => {
+// API: Регистрация (с защитой от спама)
+app.post('/api/register', authLimiter, async (req, res) => {
     const { username, password, email } = req.body;
     if (!username || !password || !email) return res.status(400).json({ success: false, message: 'Заполните все поля' });
     if (username.length < 3) return res.status(400).json({ success: false, message: 'Логин минимум 3 символа' });
@@ -181,8 +221,8 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// API: Вход
-app.post('/api/login', async (req, res) => {
+// API: Вход (с защитой от брутфорса)
+app.post('/api/login', authLimiter, async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ success: false, message: 'Заполните все поля' });
 
@@ -779,6 +819,62 @@ app.post('/api/admin/reset-database', async (req, res) => {
     } catch (err) {
         console.error('Ошибка сброса БД:', err);
         res.status(500).json({ success: false, message: 'Ошибка сброса базы данных' });
+    }
+});
+
+// ========== СОХРАНЁННЫЕ КОНФИГИ ==========
+
+// API: Сохранить конфиг после скачивания
+app.post('/api/saved-configs/add', apiLimiter, async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    const { config_id, config_type, config_name } = req.body;
+    try {
+        await pool.query(
+            'INSERT INTO saved_configs (user_id, config_id, config_type, config_name) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, config_id, config_type) DO NOTHING',
+            [req.session.userId, config_id, config_type, config_name]
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Ошибка сохранения' });
+    }
+});
+
+// API: Получить сохранённые конфиги
+app.get('/api/saved-configs', apiLimiter, async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ success: false, configs: [] });
+    try {
+        const result = await pool.query(
+            'SELECT * FROM saved_configs WHERE user_id = $1 ORDER BY saved_at DESC',
+            [req.session.userId]
+        );
+        res.json({ success: true, configs: result.rows });
+    } catch (err) {
+        res.json({ success: false, configs: [] });
+    }
+});
+
+// API: Удалить из сохранённых
+app.delete('/api/saved-configs/:id', apiLimiter, async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ success: false });
+    try {
+        await pool.query('DELETE FROM saved_configs WHERE id = $1 AND user_id = $2', [req.params.id, req.session.userId]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
+
+// API: Проверить сохранён ли конфиг
+app.get('/api/saved-configs/check/:config_id/:config_type', async (req, res) => {
+    if (!req.session.userId) return res.json({ saved: false });
+    try {
+        const result = await pool.query(
+            'SELECT id FROM saved_configs WHERE user_id = $1 AND config_id = $2 AND config_type = $3',
+            [req.session.userId, req.params.config_id, req.params.config_type]
+        );
+        res.json({ saved: result.rows.length > 0, savedId: result.rows[0]?.id });
+    } catch (err) {
+        res.json({ saved: false });
     }
 });
 
