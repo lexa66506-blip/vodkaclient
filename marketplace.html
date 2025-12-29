@@ -458,17 +458,23 @@ document.getElementById('uploadSubmit').addEventListener('click', async () => {
     const isPrivate = document.getElementById('configPrivate').checked;
     if (!name) { alert('Введите название'); return; }
     if (!selectedFile) { alert('Файл не выбран'); return; }
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('name', name);
-    formData.append('description', desc);
-    formData.append('private', isPrivate);
-    try {
-        const response = await fetch('/api/configs/upload', { method: 'POST', body: formData });
-        const data = await response.json();
-        if (data.success) { alert('Конфиг загружен!'); uploadModal.classList.remove('active'); loadMyConfigs(); }
-        else alert('Ошибка: ' + data.message);
-    } catch (error) { alert('Ошибка загрузки'); }
+    
+    // Читаем файл как текст
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const content = e.target.result;
+        try {
+            const response = await fetch('/api/configs/upload', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description: desc, content, private: isPrivate })
+            });
+            const data = await response.json();
+            if (data.success) { alert('Конфиг загружен!'); uploadModal.classList.remove('active'); loadAllConfigs(); loadMyConfigs(); }
+            else alert('Ошибка: ' + data.message);
+        } catch (error) { alert('Ошибка загрузки'); }
+    };
+    reader.readAsText(selectedFile);
 });
 
 checkAuth().then(() => loadAllConfigs());
@@ -539,4 +545,3 @@ document.addEventListener('keydown', e => {
 </script>
 </body>
 </html>
-
