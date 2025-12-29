@@ -168,9 +168,41 @@ nav {
     z-index: 10;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 100px 60px;
-    min-height: 80vh;
+    justify-content: center;
+    padding: 60px 60px;
+    min-height: 60vh;
+}
+
+/* Секция О нас */
+.about-section {
+    position: relative;
+    z-index: 10;
+    padding: 80px 60px;
+    text-align: center;
+    background: rgba(5, 5, 5, 0.6);
+}
+
+.about-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.about-content h2 {
+    font-size: 52px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.about-content p {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.about-content .hero-buttons {
+    justify-content: center;
 }
 
 .hero-content {
@@ -797,23 +829,20 @@ nav {
 /* Адаптивность */
 @media (max-width: 1024px) {
     .hero {
-        flex-direction: column;
-        text-align: center;
-        padding: 60px 30px;
-    }
-    
-    .hero-content {
-        max-width: 100%;
-    }
-    
-    .hero-buttons {
-        justify-content: center;
+        padding: 40px 30px;
     }
     
     .hero-visual {
-        margin-top: 60px;
         width: 400px;
         height: 400px;
+    }
+    
+    .about-section {
+        padding: 60px 30px;
+    }
+    
+    .about-content h2 {
+        font-size: 36px;
     }
     
     nav {
@@ -838,11 +867,11 @@ nav {
 }
 
 @media (max-width: 768px) {
-    .hero-content h1 {
-        font-size: 36px;
+    .about-content h2 {
+        font-size: 32px;
     }
     
-    .hero-content p {
+    .about-content p {
         font-size: 16px;
     }
     
@@ -902,35 +931,24 @@ nav {
     }
 }
 
-/* Текст под кубиком */
-.cube-text {
-    position: absolute;
-    bottom: -80px;
-    left: 50%;
-    transform: translateX(-50%);
+/* Главный заголовок VodkaClient */
+.main-title {
+    position: relative;
+    z-index: 10;
     text-align: center;
-    width: 100%;
+    padding: 80px 60px 20px;
 }
 
-.cube-title {
-    font-size: 42px;
+.main-title h1 {
+    font-size: 72px;
     font-weight: 800;
-    letter-spacing: 3px;
-    background: linear-gradient(135deg, #fff 0%, #888 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: titlePulse 3s ease-in-out infinite;
-    margin-bottom: 10px;
+    letter-spacing: 4px;
+    color: #fff;
+    margin-bottom: 15px;
 }
 
-@keyframes titlePulse {
-    0%, 100% { filter: drop-shadow(0 0 15px rgba(255,255,255,0.2)); }
-    50% { filter: drop-shadow(0 0 30px rgba(255,255,255,0.4)); }
-}
-
-.cube-subtitle {
-    font-size: 16px;
+.main-title p {
+    font-size: 18px;
     color: rgba(255, 255, 255, 0.5);
     letter-spacing: 1px;
 }
@@ -981,14 +999,14 @@ nav {
 }
 
 @media (max-width: 768px) {
-    .cube-title {
-        font-size: 28px;
+    .main-title h1 {
+        font-size: 42px;
     }
-    .cube-subtitle {
+    .main-title p {
         font-size: 14px;
     }
-    .cube-text {
-        bottom: -60px;
+    .main-title {
+        padding: 50px 30px 10px;
     }
 }
 </style>
@@ -1117,17 +1135,14 @@ nav {
     </div>
 </nav>
 
-<!-- Главная секция -->
+<!-- Главный заголовок VodkaClient -->
+<section class="main-title">
+    <h1>VodkaClient</h1>
+    <p>Выведи игру на новый уровень</p>
+</section>
+
+<!-- Главная секция с кубиком -->
 <section class="hero" id="hero">
-    <div class="hero-content">
-        <h1>О нас</h1>
-        <p>Мы предоставляем вам лучший клиент для комфортной игры, который даст вам наилучшие впечатления от игры.</p>
-        <div class="hero-buttons">
-            <button class="btn-primary" id="watchBtn">Смотреть</button>
-            <button class="btn-secondary" id="detailsBtn">Подробнее</button>
-        </div>
-    </div>
-    
     <div class="hero-visual">
         <div class="model-container">
             <div class="model-glow"></div>
@@ -1150,10 +1165,17 @@ nav {
                 </div>
             </div>
         </div>
-        <!-- Текст под кубиком -->
-        <div class="cube-text">
-            <h2 class="cube-title">VodkaClient</h2>
-            <p class="cube-subtitle">Выведи игру на новый уровень</p>
+    </div>
+</section>
+
+<!-- Секция О нас -->
+<section class="about-section scroll-animate">
+    <div class="about-content">
+        <h2>О нас</h2>
+        <p>Мы предоставляем вам лучший клиент для комфортной игры, который даст вам наилучшие впечатления от игры.</p>
+        <div class="hero-buttons">
+            <button class="btn-primary" id="watchBtn">Смотреть</button>
+            <button class="btn-secondary" id="detailsBtn">Подробнее</button>
         </div>
     </div>
 </section>
