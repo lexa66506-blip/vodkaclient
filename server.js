@@ -643,20 +643,15 @@ const upload = multer({
     } catch (err) { console.error('Configs table error:', err); }
 })();
 
-app.post('/api/configs/upload', upload.single('file'), async (req, res) => {
+app.post('/api/configs/upload', async (req, res) => {
     if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    if (!req.file) return res.status(400).json({ success: false, message: 'Файл не загружен' });
-    const { name, description, private: isPrivate } = req.body;
+    const { name, description, content, private: isPrivate } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'Введите название' });
+    if (!content) return res.status(400).json({ success: false, message: 'Конфиг пустой' });
     try {
         const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [req.session.userId]);
-        // Читаем содержимое файла и сохраняем в базу
-        const filePath = path.join(configsDir, req.file.filename);
-        const content = fs.readFileSync(filePath, 'utf8');
         await pool.query('INSERT INTO configs (name, description, filename, content, author_id, author_name, private) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-            [name, description || '', req.file.filename, content, req.session.userId, userResult.rows[0]?.username || 'Unknown', isPrivate === 'true']);
-        // Удаляем файл - он больше не нужен
-        fs.unlinkSync(filePath);
+            [name, description || '', name + '.json', content, req.session.userId, userResult.rows[0]?.username || 'Unknown', isPrivate === 'true' || isPrivate === true]);
         res.json({ success: true, message: 'Конфиг загружен!' });
     } catch (err) { 
         console.error(err);
