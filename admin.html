@@ -525,7 +525,7 @@ async function setRole(uid, role) {
         });
         const data = await response.json();
         if (data.success) {
-            console.log('Роль обновлена');
+            alert('Роль изменена на: ' + role);
         } else {
             alert('Ошибка: ' + data.message);
         }
