@@ -646,6 +646,11 @@ async function loadUserData() {
             roleEl.style.color = '#9370db';
             roleEl.style.background = 'rgba(138, 43, 226, 0.2)';
             document.getElementById('mediaUploadRow').style.display = 'flex';
+            // Beta Access для media
+            const betaEl = document.getElementById('infoBeta');
+            betaEl.textContent = 'Да';
+            betaEl.style.color = '#55ff55';
+            betaEl.style.background = 'rgba(50, 255, 50, 0.2)';
         }
         
         if (data.subscription_active) {
