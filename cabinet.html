@@ -498,10 +498,6 @@ body {
                     <div class="info-label">⚡ Role:</div>
                     <div class="info-value status" id="infoRole">User</div>
                 </div>
-                <div class="info-row" id="mediaUploadRow" style="display: none;">
-                    <div class="info-label">🎬 Media:</div>
-                    <button class="action-btn" onclick="openModal('mediaUpload')" style="background: rgba(138,43,226,0.2); border-color: rgba(138,43,226,0.4); color: #9370db;">Загрузить конфиг</button>
-                </div>
                 <div class="info-row">
                     <div class="info-label">⭐ Beta Access:</div>
                     <div class="info-value" id="infoBeta">Нет</div>
@@ -645,7 +641,6 @@ async function loadUserData() {
         if (role === 'media') {
             roleEl.style.color = '#9370db';
             roleEl.style.background = 'rgba(138, 43, 226, 0.2)';
-            document.getElementById('mediaUploadRow').style.display = 'flex';
             // Beta Access для media
             const betaEl = document.getElementById('infoBeta');
             betaEl.textContent = 'Да';
