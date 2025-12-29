@@ -485,16 +485,14 @@ async function loadAdminData() {
                 
                 const roleColor = user.role === 'media' ? '#9370db' : '#888';
                 const roleText = user.role || 'user';
+                const roleBtn = user.role === 'media' 
+                    ? `<button onclick="setRole(${user.uid}, 'user')" style="padding: 4px 10px; background: rgba(138,43,226,0.3); border: 1px solid rgba(138,43,226,0.5); border-radius: 4px; color: #9370db; cursor: pointer; font-size: 12px;">Media ✓</button>`
+                    : `<button onclick="setRole(${user.uid}, 'media')" style="padding: 4px 10px; background: rgba(60,60,60,0.5); border: 1px solid rgba(80,80,80,0.5); border-radius: 4px; color: #888; cursor: pointer; font-size: 12px;">User → Media</button>`;
                 
                 tr.innerHTML = `
                     <td><strong>${user.uid}</strong></td>
                     <td>${user.username}</td>
-                    <td>
-                        <select onchange="setRole(${user.uid}, this.value)" style="padding: 4px 8px; background: rgba(20,20,20,0.8); border: 1px solid rgba(60,60,60,0.5); border-radius: 4px; color: ${roleColor}; font-size: 12px;">
-                            <option value="user" ${roleText === 'user' ? 'selected' : ''}>user</option>
-                            <option value="media" ${roleText === 'media' ? 'selected' : ''}>media</option>
-                        </select>
-                    </td>
+                    <td>${roleBtn}</td>
                     <td>${hwidText}</td>
                     <td>${subscriptionText}</td>
                     <td>${date}</td>
@@ -525,12 +523,13 @@ async function setRole(uid, role) {
         });
         const data = await response.json();
         if (data.success) {
-            alert('Роль изменена на: ' + role);
+            alert('Роль изменена на: ' + role + '\nПерезагружаю список...');
+            loadAdminData(); // Перезагрузить таблицу
         } else {
             alert('Ошибка: ' + data.message);
         }
     } catch (error) {
-        alert('Ошибка соединения');
+        alert('Ошибка соединения: ' + error);
     }
 }
 
