@@ -56,6 +56,8 @@ async function initDB() {
         await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255) DEFAULT NULL`).catch(() => {});
         // Добавляем колонку role если её нет
         await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'user'`).catch(() => {});
+        // Устанавливаем дефолтную роль для существующих пользователей без роли
+        await pool.query(`UPDATE users SET role = 'user' WHERE role IS NULL`).catch(() => {});
         
         await pool.query(`
             CREATE TABLE IF NOT EXISTS keys (
