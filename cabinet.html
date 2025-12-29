@@ -635,7 +635,9 @@ async function loadUserData() {
         document.getElementById('infoEmail').textContent = data.email || 'Не указан';
         document.getElementById('infoHwid').textContent = data.hwid ? data.hwid.substring(0, 20) + '...' : 'Не привязан';
         
-        // Роль
+        // Роль - отладка
+        console.log('Данные пользователя:', data);
+        console.log('Роль из API:', data.role);
         const role = data.role || 'user';
         const roleEl = document.getElementById('infoRole');
         roleEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
