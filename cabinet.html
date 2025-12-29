@@ -498,6 +498,10 @@ body {
                     <div class="info-label">⚡ Role:</div>
                     <div class="info-value status" id="infoRole">User</div>
                 </div>
+                <div class="info-row" id="mediaUploadRow" style="display: none;">
+                    <div class="info-label">🎬 Media:</div>
+                    <button class="action-btn" onclick="openModal('mediaUpload')" style="background: rgba(138,43,226,0.2); border-color: rgba(138,43,226,0.4); color: #9370db;">Загрузить конфиг</button>
+                </div>
                 <div class="info-row">
                     <div class="info-label">⭐ Beta Access:</div>
                     <div class="info-value" id="infoBeta">Нет</div>
@@ -588,6 +592,22 @@ body {
     </div>
 </div>
 
+<!-- Модалка загрузки media конфига -->
+<div class="modal" id="mediaUploadModal">
+    <div class="modal-content" style="border-color: rgba(138, 43, 226, 0.4);">
+        <div class="modal-title" style="color: #9370db;">🎬 Загрузить Media конфиг</div>
+        <input type="text" class="modal-input" id="mediaConfigName" placeholder="Название конфига">
+        <textarea class="modal-input" id="mediaConfigDesc" placeholder="Описание конфига" style="height: 80px; resize: none;"></textarea>
+        <input type="text" class="modal-input" id="mediaPromoCode" placeholder="Промокод (даёт 5% скидки покупателям)">
+        <input type="file" id="mediaFileInput" accept=".json,.cfg,.txt,.yaml,.yml" style="margin-bottom: 15px;">
+        <div class="modal-buttons">
+            <button class="modal-btn secondary" onclick="closeModal('mediaUpload')">Отмена</button>
+            <button class="modal-btn primary" onclick="uploadMediaConfig()" style="background: linear-gradient(135deg, #6b21a8, #9333ea);">Загрузить</button>
+        </div>
+        <div class="modal-message" id="mediaUploadMessage"></div>
+    </div>
+</div>
+
 <script>
 let userData = null;
 let adminAuthorized = localStorage.getItem('adminAuth') === 'true';
@@ -614,6 +634,16 @@ async function loadUserData() {
         document.getElementById('infoUsername').textContent = data.username;
         document.getElementById('infoEmail').textContent = data.email || 'Не указан';
         document.getElementById('infoHwid').textContent = data.hwid ? data.hwid.substring(0, 20) + '...' : 'Не привязан';
+        
+        // Роль
+        const role = data.role || 'user';
+        const roleEl = document.getElementById('infoRole');
+        roleEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+        if (role === 'media') {
+            roleEl.style.color = '#9370db';
+            roleEl.style.background = 'rgba(138, 43, 226, 0.2)';
+            document.getElementById('mediaUploadRow').style.display = 'flex';
+        }
         
         if (data.subscription_active) {
             const expires = new Date(data.subscription_expires);
@@ -912,6 +942,41 @@ function adminLogin() {
 document.getElementById('adminPassword').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') adminLogin();
 });
+
+// Загрузка media конфига
+async function uploadMediaConfig() {
+    const name = document.getElementById('mediaConfigName').value.trim();
+    const desc = document.getElementById('mediaConfigDesc').value.trim();
+    const promoCode = document.getElementById('mediaPromoCode').value.trim();
+    const fileInput = document.getElementById('mediaFileInput');
+    const messageDiv = document.getElementById('mediaUploadMessage');
+    
+    if (!name) { showMessage(messageDiv, 'Введите название', false); return; }
+    if (!fileInput.files[0]) { showMessage(messageDiv, 'Выберите файл', false); return; }
+    
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    formData.append('name', name);
+    formData.append('description', desc);
+    formData.append('promo_code', promoCode);
+    
+    try {
+        const response = await fetch('/api/media-configs/upload', { method: 'POST', body: formData });
+        const data = await response.json();
+        if (data.success) {
+            showMessage(messageDiv, 'Конфиг загружен! Ожидайте установки цены админом.', true);
+            document.getElementById('mediaConfigName').value = '';
+            document.getElementById('mediaConfigDesc').value = '';
+            document.getElementById('mediaPromoCode').value = '';
+            fileInput.value = '';
+            setTimeout(() => closeModal('mediaUpload'), 2000);
+        } else {
+            showMessage(messageDiv, data.message, false);
+        }
+    } catch (error) {
+        showMessage(messageDiv, 'Ошибка загрузки', false);
+    }
+}
 
 // Запуск
 loadUserData();
