@@ -90,6 +90,7 @@ async function initDB() {
                 name VARCHAR(255) NOT NULL,
                 description TEXT,
                 filename VARCHAR(255) NOT NULL,
+                content TEXT,
                 author_id INTEGER REFERENCES users(uid),
                 author_name VARCHAR(255),
                 price INTEGER DEFAULT 0,
@@ -99,15 +100,20 @@ async function initDB() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+        // Добавляем колонку content если её нет
+        await pool.query(`ALTER TABLE media_configs ADD COLUMN IF NOT EXISTS content TEXT`).catch(() => {});
         
         // Таблица для media пользователей
         await pool.query(`
             CREATE TABLE IF NOT EXISTS media_users (
                 id SERIAL PRIMARY KEY,
                 username VARCHAR(255) UNIQUE NOT NULL,
+                promo_code VARCHAR(50) DEFAULT NULL,
                 added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         `);
+        // Добавляем колонку promo_code если её нет
+        await pool.query(`ALTER TABLE media_users ADD COLUMN IF NOT EXISTS promo_code VARCHAR(50) DEFAULT NULL`).catch(() => {});
         
         console.log('✅ Таблицы PostgreSQL созданы');
     } catch (err) {
@@ -277,9 +283,57 @@ app.post('/api/admin/set-role', async (req, res) => {
 app.get('/api/check-media/:username', async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM media_users WHERE username = $1', [req.params.username]);
-        res.json({ isMedia: result.rows.length > 0 });
+        if (result.rows.length > 0) {
+            res.json({ isMedia: true, promoCode: result.rows[0].promo_code });
+        } else {
+            res.json({ isMedia: false, promoCode: null });
+        }
     } catch (err) {
-        res.json({ isMedia: false });
+        res.json({ isMedia: false, promoCode: null });
+    }
+});
+
+// API: Создать промокод для media (только 1 раз)
+app.post('/api/media/create-promo', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    const { promo_code } = req.body;
+    if (!promo_code || promo_code.length < 3) return res.status(400).json({ success: false, message: 'Промокод минимум 3 символа' });
+    
+    try {
+        // Получаем username
+        const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [req.session.userId]);
+        const username = userResult.rows[0]?.username;
+        if (!username) return res.status(400).json({ success: false, message: 'Пользователь не найден' });
+        
+        // Проверяем что это media
+        const mediaResult = await pool.query('SELECT * FROM media_users WHERE username = $1', [username]);
+        if (mediaResult.rows.length === 0) return res.status(403).json({ success: false, message: 'Вы не Media' });
+        
+        // Проверяем что промокод ещё не создан
+        if (mediaResult.rows[0].promo_code) {
+            return res.status(400).json({ success: false, message: 'Промокод уже создан: ' + mediaResult.rows[0].promo_code });
+        }
+        
+        // Создаём промокод
+        await pool.query('UPDATE media_users SET promo_code = $1 WHERE username = $2', [promo_code, username]);
+        res.json({ success: true, message: 'Промокод создан!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка сервера' });
+    }
+});
+
+// API: Проверить промокод (для скидки)
+app.get('/api/check-promo/:code', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT username FROM media_users WHERE promo_code = $1', [req.params.code]);
+        if (result.rows.length > 0) {
+            res.json({ valid: true, discount: 5, author: result.rows[0].username });
+        } else {
+            res.json({ valid: false });
+        }
+    } catch (err) {
+        res.json({ valid: false });
     }
 });
 
@@ -730,23 +784,29 @@ app.delete('/api/configs/:id', async (req, res) => {
 // ========================================
 
 // Загрузка media конфига (только для роли media)
-app.post('/api/media-configs/upload', upload.single('file'), async (req, res) => {
+app.post('/api/media-configs/upload', async (req, res) => {
     if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
     
     // Проверка роли
-    const userResult = await pool.query('SELECT username, role FROM users WHERE uid = $1', [req.session.userId]);
-    if (!userResult.rows[0] || userResult.rows[0].role !== 'media') {
+    const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [req.session.userId]);
+    const username = userResult.rows[0]?.username;
+    if (!username) return res.status(400).json({ success: false, message: 'Пользователь не найден' });
+    
+    const mediaCheck = await pool.query('SELECT * FROM media_users WHERE username = $1', [username]);
+    if (mediaCheck.rows.length === 0) {
         return res.status(403).json({ success: false, message: 'Нет доступа. Нужна роль Media' });
     }
     
-    if (!req.file) return res.status(400).json({ success: false, message: 'Файл не загружен' });
-    const { name, description, promo_code } = req.body;
+    const { name, description, content } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'Введите название' });
+    if (!content) return res.status(400).json({ success: false, message: 'Конфиг пустой' });
     
     try {
+        // Конвертируем в base64
+        const contentBase64 = Buffer.from(content, 'utf8').toString('base64');
         await pool.query(
-            'INSERT INTO media_configs (name, description, filename, author_id, author_name, promo_code) VALUES ($1, $2, $3, $4, $5, $6)',
-            [name, description || '', req.file.filename, req.session.userId, userResult.rows[0].username, promo_code || null]
+            'INSERT INTO media_configs (name, description, filename, author_id, author_name, content) VALUES ($1, $2, $3, $4, $5, $6)',
+            [name, description || '', name + '.json', req.session.userId, username, contentBase64]
         );
         res.json({ success: true, message: 'Media конфиг загружен!' });
     } catch (err) {
