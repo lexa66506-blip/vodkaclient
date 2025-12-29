@@ -167,47 +167,49 @@ nav {
     position: relative;
     z-index: 10;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 60px;
-    min-height: 60vh;
+    flex-direction: column;
+    padding: 60px 60px 100px;
+    min-height: 100vh;
 }
 
-/* Секция О нас */
-.about-section {
-    position: relative;
-    z-index: 10;
-    padding: 80px 60px;
+/* Заголовок VodkaClient */
+.hero-title {
     text-align: center;
-    background: rgba(5, 5, 5, 0.6);
+    margin-bottom: 60px;
 }
 
-.about-content {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.about-content h2 {
-    font-size: 52px;
-    font-weight: 700;
-    margin-bottom: 20px;
+.hero-title h1 {
+    font-size: 72px;
+    font-weight: 800;
+    letter-spacing: 4px;
     color: #fff;
+    margin-bottom: 15px;
 }
 
-.about-content p {
-    font-size: 20px;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 40px;
-    line-height: 1.6;
+.hero-title p {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 1px;
 }
 
-.about-content .hero-buttons {
-    justify-content: center;
+/* Ряд с контентом */
+.hero-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
 }
 
 .hero-content {
     max-width: 600px;
     animation: slideInLeft 1s ease-out;
+}
+
+.hero-content h2 {
+    font-size: 64px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    line-height: 1.2;
 }
 
 .hero-content h1 {
@@ -829,20 +831,30 @@ nav {
 /* Адаптивность */
 @media (max-width: 1024px) {
     .hero {
-        padding: 40px 30px;
+        padding: 40px 30px 60px;
+    }
+    
+    .hero-title h1 {
+        font-size: 52px;
+    }
+    
+    .hero-row {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .hero-content {
+        max-width: 100%;
+        margin-bottom: 40px;
+    }
+    
+    .hero-buttons {
+        justify-content: center;
     }
     
     .hero-visual {
         width: 400px;
         height: 400px;
-    }
-    
-    .about-section {
-        padding: 60px 30px;
-    }
-    
-    .about-content h2 {
-        font-size: 36px;
     }
     
     nav {
@@ -867,11 +879,19 @@ nav {
 }
 
 @media (max-width: 768px) {
-    .about-content h2 {
-        font-size: 32px;
+    .hero-title h1 {
+        font-size: 36px;
     }
     
-    .about-content p {
+    .hero-title p {
+        font-size: 14px;
+    }
+    
+    .hero-content h2 {
+        font-size: 36px;
+    }
+    
+    .hero-content p {
         font-size: 16px;
     }
     
@@ -931,28 +951,6 @@ nav {
     }
 }
 
-/* Главный заголовок VodkaClient */
-.main-title {
-    position: relative;
-    z-index: 10;
-    text-align: center;
-    padding: 80px 60px 20px;
-}
-
-.main-title h1 {
-    font-size: 72px;
-    font-weight: 800;
-    letter-spacing: 4px;
-    color: #fff;
-    margin-bottom: 15px;
-}
-
-.main-title p {
-    font-size: 18px;
-    color: rgba(255, 255, 255, 0.5);
-    letter-spacing: 1px;
-}
-
 /* Анимации при скролле */
 .scroll-animate {
     opacity: 0;
@@ -996,18 +994,6 @@ nav {
 .scroll-animate-scale.visible {
     opacity: 1;
     transform: scale(1);
-}
-
-@media (max-width: 768px) {
-    .main-title h1 {
-        font-size: 42px;
-    }
-    .main-title p {
-        font-size: 14px;
-    }
-    .main-title {
-        padding: 50px 30px 10px;
-    }
 }
 </style>
 </head>
@@ -1135,47 +1121,47 @@ nav {
     </div>
 </nav>
 
-<!-- Главный заголовок VodkaClient -->
-<section class="main-title">
-    <h1>VodkaClient</h1>
-    <p>Выведи игру на новый уровень</p>
-</section>
-
-<!-- Главная секция с кубиком -->
+<!-- Главная секция -->
 <section class="hero" id="hero">
-    <div class="hero-visual">
-        <div class="model-container">
-            <div class="model-glow"></div>
-            <div class="model-cube">
-                <div class="cube-face"></div>
-                <div class="cube-face"></div>
-                <div class="cube-face"></div>
-                <div class="cube-face"></div>
-                <div class="cube-face"></div>
-                <div class="cube-face"></div>
-                
-                <!-- Внутренний куб с логотипом -->
-                <div class="inner-cube">
-                    <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
-                    <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
-                    <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
-                    <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
-                    <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
-                    <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
-                </div>
+    <!-- Заголовок VodkaClient вверху -->
+    <div class="hero-title">
+        <h1>VodkaClient</h1>
+        <p>Выведи игру на новый уровень</p>
+    </div>
+    
+    <!-- Контент: О нас слева, кубик справа -->
+    <div class="hero-row">
+        <div class="hero-content">
+            <h2>О нас</h2>
+            <p>Мы предоставляем вам лучший клиент для комфортной игры, который даст вам наилучшие впечатления от игры.</p>
+            <div class="hero-buttons">
+                <button class="btn-primary" id="watchBtn">Смотреть</button>
+                <button class="btn-secondary" id="detailsBtn">Подробнее</button>
             </div>
         </div>
-    </div>
-</section>
-
-<!-- Секция О нас -->
-<section class="about-section scroll-animate">
-    <div class="about-content">
-        <h2>О нас</h2>
-        <p>Мы предоставляем вам лучший клиент для комфортной игры, который даст вам наилучшие впечатления от игры.</p>
-        <div class="hero-buttons">
-            <button class="btn-primary" id="watchBtn">Смотреть</button>
-            <button class="btn-secondary" id="detailsBtn">Подробнее</button>
+        
+        <div class="hero-visual">
+            <div class="model-container">
+                <div class="model-glow"></div>
+                <div class="model-cube">
+                    <div class="cube-face"></div>
+                    <div class="cube-face"></div>
+                    <div class="cube-face"></div>
+                    <div class="cube-face"></div>
+                    <div class="cube-face"></div>
+                    <div class="cube-face"></div>
+                    
+                    <!-- Внутренний куб с логотипом -->
+                    <div class="inner-cube">
+                        <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
+                        <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
+                        <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
+                        <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
+                        <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
+                        <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
