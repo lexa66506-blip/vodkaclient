@@ -902,82 +902,37 @@ nav {
     }
 }
 
-/* Hero центральная секция */
-.hero-center {
-    position: relative;
-    z-index: 10;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Текст под кубиком */
+.cube-text {
+    position: absolute;
+    bottom: -80px;
+    left: 50%;
+    transform: translateX(-50%);
     text-align: center;
+    width: 100%;
 }
 
-.hero-center-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
-}
-
-.hero-cube-wrapper {
-    position: relative;
-    width: 350px;
-    height: 350px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: floatCube 4s ease-in-out infinite;
-}
-
-@keyframes floatCube {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
-}
-
-.hero-title {
-    font-size: 72px;
+.cube-title {
+    font-size: 42px;
     font-weight: 800;
-    letter-spacing: 4px;
+    letter-spacing: 3px;
     background: linear-gradient(135deg, #fff 0%, #888 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: none;
-    animation: titleGlow 3s ease-in-out infinite;
+    animation: titlePulse 3s ease-in-out infinite;
+    margin-bottom: 10px;
 }
 
-@keyframes titleGlow {
-    0%, 100% { filter: drop-shadow(0 0 20px rgba(255,255,255,0.3)); }
-    50% { filter: drop-shadow(0 0 40px rgba(255,255,255,0.5)); }
+@keyframes titlePulse {
+    0%, 100% { filter: drop-shadow(0 0 15px rgba(255,255,255,0.2)); }
+    50% { filter: drop-shadow(0 0 30px rgba(255,255,255,0.4)); }
 }
 
-.hero-subtitle {
-    font-size: 22px;
-    color: rgba(255, 255, 255, 0.6);
-    max-width: 500px;
-    line-height: 1.6;
-}
-
-.scroll-indicator {
-    margin-top: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 14px;
-    animation: bounce 2s ease-in-out infinite;
-}
-
-.scroll-arrow {
-    font-size: 24px;
-    animation: arrowBounce 1.5s ease-in-out infinite;
-}
-
-@keyframes arrowBounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(10px); }
+.cube-subtitle {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 1px;
 }
 
 /* Анимации при скролле */
@@ -1026,16 +981,14 @@ nav {
 }
 
 @media (max-width: 768px) {
-    .hero-title {
-        font-size: 42px;
+    .cube-title {
+        font-size: 28px;
     }
-    .hero-subtitle {
-        font-size: 16px;
-        padding: 0 20px;
+    .cube-subtitle {
+        font-size: 14px;
     }
-    .hero-cube-wrapper {
-        width: 250px;
-        height: 250px;
+    .cube-text {
+        bottom: -60px;
     }
 }
 </style>
@@ -1147,37 +1100,6 @@ nav {
 <!-- Анимированный фон -->
 <div class="particles" id="particles"></div>
 
-<!-- Hero секция с кубиком по центру -->
-<section class="hero-center">
-    <div class="hero-center-content">
-        <div class="hero-cube-wrapper">
-            <div class="model-glow"></div>
-            <div class="model-cube">
-                <div class="cube-face"></div>
-                <div class="cube-face"></div>
-                <div class="cube-face"></div>
-                <div class="cube-face"></div>
-                <div class="cube-face"></div>
-                <div class="cube-face"></div>
-                <div class="inner-cube">
-                    <div class="inner-face"><img src="logo.png" alt="Logo"></div>
-                    <div class="inner-face"><img src="logo.png" alt="Logo"></div>
-                    <div class="inner-face"><img src="logo.png" alt="Logo"></div>
-                    <div class="inner-face"><img src="logo.png" alt="Logo"></div>
-                    <div class="inner-face"><img src="logo.png" alt="Logo"></div>
-                    <div class="inner-face"><img src="logo.png" alt="Logo"></div>
-                </div>
-            </div>
-        </div>
-        <h1 class="hero-title">VodkaClient</h1>
-        <p class="hero-subtitle">Выведи свою игру на совершенно новый уровень</p>
-        <div class="scroll-indicator">
-            <span>Листай вниз</span>
-            <div class="scroll-arrow">↓</div>
-        </div>
-    </div>
-</section>
-
 <!-- Навигация -->
 <nav>
     <div class="logo">VodkaClient</div>
@@ -1227,6 +1149,11 @@ nav {
                     <div class="inner-face"><img src="logo.png" alt="VodkaClient Logo"></div>
                 </div>
             </div>
+        </div>
+        <!-- Текст под кубиком -->
+        <div class="cube-text">
+            <h2 class="cube-title">VodkaClient</h2>
+            <p class="cube-subtitle">Выведи игру на новый уровень</p>
         </div>
     </div>
 </section>
