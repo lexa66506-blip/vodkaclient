@@ -650,8 +650,10 @@ app.post('/api/configs/upload', async (req, res) => {
     if (!content) return res.status(400).json({ success: false, message: 'Конфиг пустой' });
     try {
         const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [req.session.userId]);
+        // Конвертируем в base64 для безопасного хранения
+        const contentBase64 = Buffer.from(content, 'utf8').toString('base64');
         await pool.query('INSERT INTO configs (name, description, filename, content, author_id, author_name, private) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-            [name, description || '', name + '.json', content, req.session.userId, userResult.rows[0]?.username || 'Unknown', isPrivate === 'true' || isPrivate === true]);
+            [name, description || '', name + '.json', contentBase64, req.session.userId, userResult.rows[0]?.username || 'Unknown', isPrivate === 'true' || isPrivate === true]);
         res.json({ success: true, message: 'Конфиг загружен!' });
     } catch (err) { 
         console.error(err);
@@ -699,9 +701,11 @@ app.get('/api/configs/download/:id', async (req, res) => {
         
         // Отдаём содержимое из базы данных
         if (config.content) {
+            // Декодируем из base64
+            const content = Buffer.from(config.content, 'base64').toString('utf8');
             res.setHeader('Content-Type', 'application/octet-stream');
             res.setHeader('Content-Disposition', 'attachment; filename="' + config.name + '.json"');
-            res.send(config.content);
+            res.send(content);
         } else {
             return res.status(404).json({ success: false, message: 'Конфиг повреждён, перезагрузите его' });
         }
