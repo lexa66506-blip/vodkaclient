@@ -1130,44 +1130,136 @@ nav {
             <div class="pricing-card">
                 <h3>1 Неделя</h3>
                 <div class="price">99 <span>рублей</span></div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
-                    <a href="https://t.me/Attack_T1rov" target="_blank" class="btn-buy" style="flex: 1; min-width: 100px;">📱 Telegram</a>
-                    <a href="https://funpay.com/users/9146188/" target="_blank" class="btn-buy" style="flex: 1; min-width: 100px;">💳 FunPay</a>
-                </div>
+                <button class="btn-buy" onclick="openOrderModal('1 Неделя', 99)">Купить</button>
             </div>
             <div class="pricing-card">
                 <h3>1 Месяц</h3>
                 <div class="price">199 <span>рублей</span></div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
-                    <a href="https://t.me/Attack_T1rov" target="_blank" class="btn-buy" style="flex: 1; min-width: 100px;">📱 Telegram</a>
-                    <a href="https://funpay.com/users/9146188/" target="_blank" class="btn-buy" style="flex: 1; min-width: 100px;">💳 FunPay</a>
-                </div>
+                <button class="btn-buy" onclick="openOrderModal('1 Месяц', 199)">Купить</button>
             </div>
             <div class="pricing-card">
                 <h3>6 Месяцев</h3>
                 <div class="price">499 <span>рублей</span></div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
-                    <a href="https://t.me/Attack_T1rov" target="_blank" class="btn-buy" style="flex: 1; min-width: 100px;">📱 Telegram</a>
-                    <a href="https://funpay.com/users/9146188/" target="_blank" class="btn-buy" style="flex: 1; min-width: 100px;">💳 FunPay</a>
+                <button class="btn-buy" onclick="openOrderModal('6 Месяцев', 499)">Купить</button>
                 </div>
             </div>
             <div class="pricing-card">
                 <h3>LifeTime</h3>
-                <div class="price">799 <span>рублей</span></div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
-                    <a href="https://t.me/Attack_T1rov" target="_blank" class="btn-buy" style="flex: 1; min-width: 100px;">📱 Telegram</a>
-                    <a href="https://funpay.com/users/9146188/" target="_blank" class="btn-buy" style="flex: 1; min-width: 100px;">💳 FunPay</a>
-                </div>
+                <div class="price">699 <span>рублей</span></div>
+                <button class="btn-buy" onclick="openOrderModal('LifeTime', 699)">Купить</button>
             </div>
             <div class="pricing-card" style="border-color: rgba(255, 165, 0, 0.5);">
                 <h3 style="color: #ffa500;">🔄 Сброс HWID</h3>
                 <div class="price">149 <span>рублей</span></div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
-                    <a href="https://t.me/Attack_T1rov" target="_blank" class="btn-buy" style="flex: 1; min-width: 100px; border-color: rgba(255, 165, 0, 0.5);">📱 Telegram</a>
-                    <a href="https://funpay.com/users/9146188/" target="_blank" class="btn-buy" style="flex: 1; min-width: 100px; border-color: rgba(255, 165, 0, 0.5);">💳 FunPay</a>
-                </div>
+                <button class="btn-buy" onclick="openOrderModal('Сброс HWID', 149)" style="border-color: rgba(255, 165, 0, 0.5);">Купить</button>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Модальное окно заказа -->
+<div id="orderModal" style="
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+">
+    <div style="
+        background: rgba(15, 15, 15, 0.98);
+        border: 1px solid rgba(60, 60, 60, 0.5);
+        border-radius: 16px;
+        padding: 30px;
+        width: 90%;
+        max-width: 450px;
+    ">
+        <h2 id="orderTitle" style="font-size: 24px; margin-bottom: 20px; text-align: center;">Оформление заказа</h2>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: rgba(255,255,255,0.8); font-size: 14px;">Email</label>
+            <input type="email" id="orderEmail" placeholder="Введите ваш email" style="
+                width: 100%;
+                padding: 12px 16px;
+                background: rgba(20, 20, 20, 0.8);
+                border: 1px solid rgba(60, 60, 60, 0.5);
+                border-radius: 8px;
+                color: #fff;
+                font-size: 14px;
+            ">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: rgba(255,255,255,0.8); font-size: 14px;">Промокод (если есть)</label>
+            <input type="text" id="orderPromo" placeholder="Введите промокод" oninput="applyPromo()" style="
+                width: 100%;
+                padding: 12px 16px;
+                background: rgba(20, 20, 20, 0.8);
+                border: 1px solid rgba(60, 60, 60, 0.5);
+                border-radius: 8px;
+                color: #fff;
+                font-size: 14px;
+            ">
+            <p id="promoInfo" style="margin-top: 8px; font-size: 12px; color: #888;"></p>
+        </div>
+        
+        <div style="
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        ">
+            <p style="color: #888; font-size: 14px; margin-bottom: 5px;">Итого:</p>
+            <p id="orderPrice" style="font-size: 28px; font-weight: 700; color: #fff;"></p>
+            <p id="discountNote" style="font-size: 12px; color: #55ff55; margin-top: 5px;"></p>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <a id="telegramPayBtn" href="#" target="_blank" style="
+                flex: 1;
+                padding: 14px;
+                background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+                border: 1px solid rgba(60, 60, 60, 0.5);
+                border-radius: 8px;
+                color: #fff;
+                font-size: 14px;
+                font-weight: 600;
+                text-align: center;
+                text-decoration: none;
+                transition: all 0.3s;
+            ">📱 Telegram</a>
+            <a id="funpayPayBtn" href="https://funpay.com/users/9146188/" target="_blank" style="
+                flex: 1;
+                padding: 14px;
+                background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+                border: 1px solid rgba(60, 60, 60, 0.5);
+                border-radius: 8px;
+                color: #fff;
+                font-size: 14px;
+                font-weight: 600;
+                text-align: center;
+                text-decoration: none;
+                transition: all 0.3s;
+            ">💳 FunPay</a>
+        </div>
+        <p style="font-size: 11px; color: #666; text-align: center; margin-bottom: 15px;">* Промокоды работают только для оплаты через Telegram</p>
+        
+        <button onclick="closeOrderModal()" style="
+            width: 100%;
+            padding: 12px;
+            background: rgba(50, 50, 50, 0.5);
+            border: 1px solid rgba(60, 60, 60, 0.5);
+            border-radius: 8px;
+            color: #888;
+            font-size: 14px;
+            cursor: pointer;
+        ">Отмена</button>
     </div>
 </div>
 
@@ -1460,6 +1552,63 @@ async function getFreeDay() {
         alert('❌ Сначала войдите в аккаунт!');
     }
 }
+
+// Модалка заказа
+let currentOrderPlan = '';
+let currentOrderPrice = 0;
+const promoCodes = {
+    'T1rov': 15,
+    'hatalapata': 10,
+    'Zhenkam': 10
+};
+
+function openOrderModal(plan, price) {
+    currentOrderPlan = plan;
+    currentOrderPrice = price;
+    document.getElementById('orderTitle').textContent = 'Заказ: ' + plan;
+    document.getElementById('orderEmail').value = '';
+    document.getElementById('orderPromo').value = '';
+    document.getElementById('promoInfo').textContent = '';
+    document.getElementById('discountNote').textContent = '';
+    document.getElementById('orderPrice').textContent = price + ' ₽';
+    document.getElementById('telegramPayBtn').href = 'https://t.me/Attack_T1rov';
+    document.getElementById('orderModal').style.display = 'flex';
+}
+
+function closeOrderModal() {
+    document.getElementById('orderModal').style.display = 'none';
+}
+
+function applyPromo() {
+    const promo = document.getElementById('orderPromo').value.trim();
+    const promoInfo = document.getElementById('promoInfo');
+    const discountNote = document.getElementById('discountNote');
+    const priceEl = document.getElementById('orderPrice');
+    
+    if (promoCodes[promo]) {
+        const discount = promoCodes[promo];
+        const newPrice = Math.round(currentOrderPrice * (100 - discount) / 100);
+        priceEl.textContent = newPrice + ' ₽';
+        promoInfo.style.color = '#55ff55';
+        promoInfo.textContent = '✓ Промокод применён: -' + discount + '%';
+        discountNote.textContent = 'Скидка действует только для Telegram';
+    } else if (promo) {
+        priceEl.textContent = currentOrderPrice + ' ₽';
+        promoInfo.style.color = '#ff5555';
+        promoInfo.textContent = '✗ Промокод не найден';
+        discountNote.textContent = '';
+    } else {
+        priceEl.textContent = currentOrderPrice + ' ₽';
+        promoInfo.textContent = '';
+        discountNote.textContent = '';
+    }
+}
+
+document.getElementById('orderModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('orderModal')) {
+        closeOrderModal();
+    }
+});
 </script>
 
 <!-- Футер -->
