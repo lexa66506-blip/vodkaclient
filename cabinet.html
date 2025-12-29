@@ -652,11 +652,26 @@ async function loadUserData() {
         // Проверяем роль через API
         const mediaCheck = await fetch('/api/check-media/' + data.username);
         const mediaData = await mediaCheck.json();
-        const role = mediaData.isMedia ? 'media' : 'user';
+        
+        const ownerCheck = await fetch('/api/check-owner/' + data.username);
+        const ownerData = await ownerCheck.json();
+        
+        let role = 'user';
+        if (ownerData.isOwner) role = 'owner';
+        else if (mediaData.isMedia) role = 'media';
         
         const roleEl = document.getElementById('infoRole');
         roleEl.textContent = role.charAt(0).toUpperCase() + role.slice(1);
-        if (role === 'media') {
+        
+        if (role === 'owner') {
+            roleEl.style.color = '#ffa500';
+            roleEl.style.background = 'rgba(255, 165, 0, 0.2)';
+            // Beta Access для owner
+            const betaEl = document.getElementById('infoBeta');
+            betaEl.textContent = 'Да';
+            betaEl.style.color = '#55ff55';
+            betaEl.style.background = 'rgba(50, 255, 50, 0.2)';
+        } else if (role === 'media') {
             roleEl.style.color = '#9370db';
             roleEl.style.background = 'rgba(138, 43, 226, 0.2)';
             // Beta Access для media
