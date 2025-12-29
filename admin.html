@@ -314,6 +314,7 @@ nav {
                 <tr>
                     <th>UID</th>
                     <th>Логин</th>
+                    <th>Роль</th>
                     <th>HWID</th>
                     <th>Подписка</th>
                     <th>Дата регистрации</th>
@@ -322,7 +323,7 @@ nav {
             </thead>
             <tbody id="usersTableBody">
                 <tr>
-                    <td colspan="5" style="text-align: center;">Загрузка...</td>
+                    <td colspan="7" style="text-align: center;">Загрузка...</td>
                 </tr>
             </tbody>
         </table>
@@ -369,6 +370,28 @@ nav {
 
     <div style="text-align: center; margin-top: 40px;">
         <button class="btn-logout" id="adminLogoutBtn">Выйти</button>
+    </div>
+    
+    <!-- Media конфиги -->
+    <div class="users-section" style="margin-top: 30px; border-color: rgba(138, 43, 226, 0.5);">
+        <h2 style="color: #9370db;">🎬 Media конфиги</h2>
+        <p style="color: rgba(255, 255, 255, 0.6); margin-bottom: 20px;">Конфиги от пользователей с ролью Media. Установите цену и ссылку на FunPay.</p>
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Автор</th>
+                    <th>Промокод</th>
+                    <th>Цена</th>
+                    <th>FunPay URL</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody id="mediaConfigsTableBody">
+                <tr><td colspan="7" style="text-align: center;">Загрузка...</td></tr>
+            </tbody>
+        </table>
     </div>
     
     <!-- ОПАСНАЯ ЗОНА: Сброс базы данных -->
@@ -460,9 +483,18 @@ async function loadAdminData() {
                 
                 const hwidText = user.hwid ? `<span style="font-family: monospace; font-size: 11px; color: #55ff55;">${user.hwid}</span>` : '<span style="color: rgba(255,255,255,0.3);">Нет</span>';
                 
+                const roleColor = user.role === 'media' ? '#9370db' : '#888';
+                const roleText = user.role || 'user';
+                
                 tr.innerHTML = `
                     <td><strong>${user.uid}</strong></td>
                     <td>${user.username}</td>
+                    <td>
+                        <select onchange="setRole(${user.uid}, this.value)" style="padding: 4px 8px; background: rgba(20,20,20,0.8); border: 1px solid rgba(60,60,60,0.5); border-radius: 4px; color: ${roleColor}; font-size: 12px;">
+                            <option value="user" ${roleText === 'user' ? 'selected' : ''}>user</option>
+                            <option value="media" ${roleText === 'media' ? 'selected' : ''}>media</option>
+                        </select>
+                    </td>
                     <td>${hwidText}</td>
                     <td>${subscriptionText}</td>
                     <td>${date}</td>
@@ -479,6 +511,103 @@ async function loadAdminData() {
     
     // Загрузка ключей
     loadKeys();
+    // Загрузка media конфигов
+    loadMediaConfigs();
+}
+
+// Выдать роль
+async function setRole(uid, role) {
+    try {
+        const response = await fetch('/api/admin/set-role', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uid, role })
+        });
+        const data = await response.json();
+        if (data.success) {
+            console.log('Роль обновлена');
+        } else {
+            alert('Ошибка: ' + data.message);
+        }
+    } catch (error) {
+        alert('Ошибка соединения');
+    }
+}
+
+// Загрузка media конфигов
+async function loadMediaConfigs() {
+    try {
+        const response = await fetch('/api/admin/media-configs');
+        const data = await response.json();
+        const tbody = document.getElementById('mediaConfigsTableBody');
+        tbody.innerHTML = '';
+        
+        if (!data.configs || data.configs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #666;">Нет media конфигов</td></tr>';
+            return;
+        }
+        
+        data.configs.forEach(config => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${config.id}</td>
+                <td>${config.name}</td>
+                <td style="color: #9370db;">${config.author_name}</td>
+                <td style="color: #55ff55;">${config.promo_code || '-'}</td>
+                <td>
+                    <input type="number" value="${config.price || 0}" id="price-${config.id}" style="width: 70px; padding: 4px; background: rgba(20,20,20,0.8); border: 1px solid rgba(60,60,60,0.5); border-radius: 4px; color: #fff;"> ₽
+                </td>
+                <td>
+                    <input type="text" value="${config.funpay_url || ''}" id="funpay-${config.id}" placeholder="https://funpay.com/..." style="width: 200px; padding: 4px; background: rgba(20,20,20,0.8); border: 1px solid rgba(60,60,60,0.5); border-radius: 4px; color: #fff; font-size: 11px;">
+                </td>
+                <td>
+                    <button class="btn-generate" onclick="updateMediaConfig(${config.id})" style="padding: 6px 12px; font-size: 11px;">💾</button>
+                    <button class="btn-delete" onclick="deleteMediaConfig(${config.id})">🗑</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (error) {
+        console.error('Ошибка загрузки media конфигов:', error);
+    }
+}
+
+// Обновить media конфиг
+async function updateMediaConfig(id) {
+    const price = document.getElementById('price-' + id).value;
+    const funpay_url = document.getElementById('funpay-' + id).value;
+    
+    try {
+        const response = await fetch('/api/admin/media-configs/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, price: parseInt(price) || 0, funpay_url })
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('Сохранено!');
+        } else {
+            alert('Ошибка: ' + data.message);
+        }
+    } catch (error) {
+        alert('Ошибка соединения');
+    }
+}
+
+// Удалить media конфиг
+async function deleteMediaConfig(id) {
+    if (!confirm('Удалить этот media конфиг?')) return;
+    try {
+        const response = await fetch('/api/admin/media-configs/' + id, { method: 'DELETE' });
+        const data = await response.json();
+        if (data.success) {
+            loadMediaConfigs();
+        } else {
+            alert('Ошибка: ' + data.message);
+        }
+    } catch (error) {
+        alert('Ошибка соединения');
+    }
 }
 
 // Загрузка ключей
