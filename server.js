@@ -115,6 +115,28 @@ async function initDB() {
         // Добавляем колонку promo_code если её нет
         await pool.query(`ALTER TABLE media_users ADD COLUMN IF NOT EXISTS promo_code VARCHAR(50) DEFAULT NULL`).catch(() => {});
         
+        // Таблица для owner пользователей (разработчики)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS owner_users (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        // Таблица для конфигов от разработчиков
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS owner_configs (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                description TEXT,
+                content TEXT,
+                author_name VARCHAR(255),
+                downloads INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
         console.log('✅ Таблицы PostgreSQL созданы');
     } catch (err) {
         console.error('❌ Ошибка создания таблиц:', err);
@@ -344,6 +366,114 @@ app.get('/api/admin/media-users', async (req, res) => {
         res.json({ success: true, users: result.rows.map(r => r.username) });
     } catch (err) {
         res.json({ success: false, users: [] });
+    }
+});
+
+// API: Проверить owner роль
+app.get('/api/check-owner/:username', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM owner_users WHERE username = $1', [req.params.username]);
+        res.json({ isOwner: result.rows.length > 0 });
+    } catch (err) {
+        res.json({ isOwner: false });
+    }
+});
+
+// API: Список всех owner юзеров
+app.get('/api/admin/owner-users', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT username FROM owner_users');
+        res.json({ success: true, users: result.rows.map(r => r.username) });
+    } catch (err) {
+        res.json({ success: false, users: [] });
+    }
+});
+
+// API: Выдать роль owner
+app.post('/api/admin/set-owner', async (req, res) => {
+    const { username, role } = req.body;
+    try {
+        if (role === 'owner') {
+            await pool.query('INSERT INTO owner_users (username) VALUES ($1) ON CONFLICT (username) DO NOTHING', [username]);
+        } else {
+            await pool.query('DELETE FROM owner_users WHERE username = $1', [username]);
+        }
+        res.json({ success: true, message: 'Роль обновлена' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка сервера' });
+    }
+});
+
+// API: Загрузить owner конфиг
+app.post('/api/owner-configs/upload', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    
+    const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [req.session.userId]);
+    const username = userResult.rows[0]?.username;
+    if (!username) return res.status(400).json({ success: false, message: 'Пользователь не найден' });
+    
+    const ownerCheck = await pool.query('SELECT * FROM owner_users WHERE username = $1', [username]);
+    if (ownerCheck.rows.length === 0) {
+        return res.status(403).json({ success: false, message: 'Нет доступа. Нужна роль Owner' });
+    }
+    
+    const { name, description, content } = req.body;
+    if (!name) return res.status(400).json({ success: false, message: 'Введите название' });
+    if (!content) return res.status(400).json({ success: false, message: 'Конфиг пустой' });
+    
+    try {
+        const contentBase64 = Buffer.from(content, 'utf8').toString('base64');
+        await pool.query('INSERT INTO owner_configs (name, description, content, author_name) VALUES ($1, $2, $3, $4)',
+            [name, description || '', contentBase64, username]);
+        res.json({ success: true, message: 'Конфиг загружен!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка загрузки' });
+    }
+});
+
+// API: Получить owner конфиги
+app.get('/api/owner-configs', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, name, description, author_name, downloads FROM owner_configs ORDER BY created_at DESC');
+        res.json({ success: true, configs: result.rows });
+    } catch (err) {
+        res.status(500).json({ success: false, configs: [] });
+    }
+});
+
+// API: Скачать owner конфиг
+app.get('/api/owner-configs/download/:id', async (req, res) => {
+    const userId = req.session.userId;
+    if (!userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    
+    // Проверка подписки
+    const userResult = await pool.query('SELECT subscription_type, subscription_expires FROM users WHERE uid = $1', [userId]);
+    const user = userResult.rows[0];
+    let hasSub = false;
+    if (user?.subscription_type === 'lifetime') hasSub = true;
+    else if (user?.subscription_expires && new Date(user.subscription_expires) > new Date()) hasSub = true;
+    
+    if (!hasSub) return res.status(403).json({ success: false, message: 'Нужна активная подписка' });
+    
+    try {
+        const result = await pool.query('SELECT * FROM owner_configs WHERE id = $1', [req.params.id]);
+        if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Не найден' });
+        const config = result.rows[0];
+        await pool.query('UPDATE owner_configs SET downloads = downloads + 1 WHERE id = $1', [req.params.id]);
+        
+        if (config.content) {
+            const content = Buffer.from(config.content, 'base64').toString('utf8');
+            res.setHeader('Content-Type', 'application/octet-stream');
+            res.setHeader('Content-Disposition', 'attachment; filename="' + config.name + '.json"');
+            res.send(content);
+        } else {
+            return res.status(404).json({ success: false, message: 'Конфиг повреждён' });
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Ошибка' });
     }
 });
 
