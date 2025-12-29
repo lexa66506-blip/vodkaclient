@@ -502,6 +502,24 @@ body {
                     <div class="info-label">⭐ Beta Access:</div>
                     <div class="info-value" id="infoBeta">Нет</div>
                 </div>
+                
+                <!-- Секция для Media -->
+                <div id="mediaSection" style="display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(138, 43, 226, 0.3);">
+                    <div style="color: #9370db; font-size: 14px; margin-bottom: 15px; font-weight: 600;">🎬 Media панель</div>
+                    
+                    <div id="promoCreateSection">
+                        <div style="color: #ff6b6b; font-size: 11px; margin-bottom: 8px;">⚠️ Внимание! Промокод можно создать только 1 раз!</div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="text" id="promoInput" placeholder="Введите промокод" style="flex: 1; padding: 10px 12px; background: rgba(15,15,15,0.9); border: 1px solid rgba(138,43,226,0.3); border-radius: 8px; color: #fff; font-size: 13px;">
+                            <button onclick="createPromo()" style="padding: 10px 16px; background: rgba(138,43,226,0.3); border: 1px solid rgba(138,43,226,0.5); border-radius: 8px; color: #9370db; font-size: 13px; cursor: pointer;">Создать</button>
+                        </div>
+                    </div>
+                    
+                    <div id="promoShowSection" style="display: none;">
+                        <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Ваш промокод (даёт 5% скидки):</div>
+                        <div id="promoDisplay" style="padding: 10px 15px; background: rgba(138,43,226,0.2); border: 1px solid rgba(138,43,226,0.4); border-radius: 8px; color: #9370db; font-size: 16px; font-weight: 600;"></div>
+                    </div>
+                </div>
             </div>
             
             <div class="actions-panel">
@@ -646,6 +664,14 @@ async function loadUserData() {
             betaEl.textContent = 'Да';
             betaEl.style.color = '#55ff55';
             betaEl.style.background = 'rgba(50, 255, 50, 0.2)';
+            // Показываем Media секцию
+            document.getElementById('mediaSection').style.display = 'block';
+            // Если промокод уже создан - показываем его
+            if (mediaData.promoCode) {
+                document.getElementById('promoCreateSection').style.display = 'none';
+                document.getElementById('promoShowSection').style.display = 'block';
+                document.getElementById('promoDisplay').textContent = mediaData.promoCode;
+            }
         }
         
         if (data.subscription_active) {
@@ -980,6 +1006,34 @@ async function uploadMediaConfig() {
         }
     } catch (error) {
         showMessage(messageDiv, 'Ошибка загрузки', false);
+    }
+}
+
+// Создание промокода для Media
+async function createPromo() {
+    const promoCode = document.getElementById('promoInput').value.trim();
+    if (!promoCode || promoCode.length < 3) {
+        alert('Промокод минимум 3 символа');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/media/create-promo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ promo_code: promoCode })
+        });
+        const data = await response.json();
+        if (data.success) {
+            alert('Промокод создан: ' + promoCode);
+            document.getElementById('promoCreateSection').style.display = 'none';
+            document.getElementById('promoShowSection').style.display = 'block';
+            document.getElementById('promoDisplay').textContent = promoCode;
+        } else {
+            alert('Ошибка: ' + data.message);
+        }
+    } catch (error) {
+        alert('Ошибка соединения');
     }
 }
 
