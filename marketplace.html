@@ -219,6 +219,7 @@ body {
             <div class="tab-panel" id="tab-media">
                 <div class="content-header">
                     <div class="content-title">🎬 Конфиги от Media</div>
+                    <button class="upload-btn" id="mediaUploadBtn" style="display: none; background: rgba(138,43,226,0.3); border-color: rgba(138,43,226,0.5); color: #9370db;">+ Загрузить конфиг</button>
                 </div>
                 <div class="content-body">
                     <div class="empty-state" id="mediaEmpty">
@@ -270,6 +271,34 @@ body {
     </div>
 </div>
 
+<!-- Модалка загрузки Media конфига -->
+<div class="upload-modal" id="mediaUploadModal">
+    <div class="upload-modal-content">
+        <div class="upload-modal-header">
+            <div class="upload-modal-title" style="color: #9370db;">🎬 Загрузить Media конфиг</div>
+            <button class="upload-modal-close" onclick="document.getElementById('mediaUploadModal').classList.remove('active')">✕</button>
+        </div>
+        <div class="upload-form active" style="display: flex;">
+            <div class="upload-form-row">
+                <label class="upload-form-label">Название конфига</label>
+                <input type="text" class="upload-form-input" id="mediaConfigName" placeholder="Мой крутой конфиг">
+            </div>
+            <div class="upload-form-row">
+                <label class="upload-form-label">Описание</label>
+                <textarea class="upload-form-textarea" id="mediaConfigDesc" placeholder="Описание конфига..."></textarea>
+            </div>
+            <div class="upload-form-row">
+                <label class="upload-form-label">Файл конфига</label>
+                <input type="file" id="mediaConfigFile" accept=".json,.cfg,.txt,.yaml,.yml" style="color: #888;">
+            </div>
+            <div class="upload-form-actions">
+                <button class="upload-form-btn cancel" onclick="document.getElementById('mediaUploadModal').classList.remove('active')">Отмена</button>
+                <button class="upload-form-btn submit" onclick="uploadMediaConfig()" style="background: rgba(138,43,226,0.4); border-color: rgba(138,43,226,0.5);">Загрузить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 let userData = null;
 let hasSubscription = false;
@@ -282,6 +311,13 @@ async function checkAuth() {
         userData = data;
         hasSubscription = data.subscription_active;
         document.getElementById('navUsername').textContent = data.username;
+        
+        // Проверяем Media роль
+        const mediaCheck = await fetch('/api/check-media/' + data.username);
+        const mediaData = await mediaCheck.json();
+        if (mediaData.isMedia) {
+            document.getElementById('mediaUploadBtn').style.display = 'block';
+        }
     } catch (error) { window.location.href = '/'; }
 }
 
@@ -478,6 +514,47 @@ document.getElementById('uploadSubmit').addEventListener('click', async () => {
 });
 
 checkAuth().then(() => loadAllConfigs());
+
+// Кнопка загрузки media конфига
+document.getElementById('mediaUploadBtn').addEventListener('click', () => {
+    document.getElementById('mediaUploadModal').classList.add('active');
+});
+
+// Загрузка media конфига
+async function uploadMediaConfig() {
+    const name = document.getElementById('mediaConfigName').value.trim();
+    const desc = document.getElementById('mediaConfigDesc').value.trim();
+    const fileInput = document.getElementById('mediaConfigFile');
+    
+    if (!name) { alert('Введите название'); return; }
+    if (!fileInput.files[0]) { alert('Выберите файл'); return; }
+    
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const content = e.target.result;
+        try {
+            const response = await fetch('/api/media-configs/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description: desc, content })
+            });
+            const data = await response.json();
+            if (data.success) {
+                alert('Конфиг загружен! Ожидайте установки цены админом.');
+                document.getElementById('mediaUploadModal').classList.remove('active');
+                document.getElementById('mediaConfigName').value = '';
+                document.getElementById('mediaConfigDesc').value = '';
+                fileInput.value = '';
+                loadMediaConfigs();
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        } catch (error) {
+            alert('Ошибка загрузки');
+        }
+    };
+    reader.readAsText(fileInput.files[0]);
+}
 
 // Загрузка media конфигов
 async function loadMediaConfigs() {
