@@ -832,55 +832,10 @@ function initBalls() {
 }
 
 function drawBall(ball) {
-    // Тень под шариком
-    ctx.beginPath();
-    ctx.arc(ball.x + 2, ball.y + 2, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-    ctx.fill();
-    
-    // Градиент для объёма
-    const gradient = ctx.createRadialGradient(
-        ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, 0,
-        ball.x, ball.y, ball.radius
-    );
-    gradient.addColorStop(0, lightenColor(ball.color, 40));
-    gradient.addColorStop(0.5, ball.color);
-    gradient.addColorStop(1, darkenColor(ball.color, 30));
-    
     ctx.beginPath();
     ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = ball.color;
     ctx.fill();
-    
-    // Главный блик
-    ctx.beginPath();
-    ctx.arc(ball.x - ball.radius * 0.35, ball.y - ball.radius * 0.35, ball.radius * 0.3, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.fill();
-    
-    // Маленький яркий блик
-    ctx.beginPath();
-    ctx.arc(ball.x - ball.radius * 0.2, ball.y - ball.radius * 0.5, ball.radius * 0.1, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.fill();
-}
-
-function lightenColor(color, percent) {
-    const num = parseInt(color.replace('#', ''), 16);
-    const amt = Math.round(2.55 * percent);
-    const R = Math.min(255, (num >> 16) + amt);
-    const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
-    const B = Math.min(255, (num & 0x0000FF) + amt);
-    return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
-}
-
-function darkenColor(color, percent) {
-    const num = parseInt(color.replace('#', ''), 16);
-    const amt = Math.round(2.55 * percent);
-    const R = Math.max(0, (num >> 16) - amt);
-    const G = Math.max(0, ((num >> 8) & 0x00FF) - amt);
-    const B = Math.max(0, (num & 0x0000FF) - amt);
-    return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
 }
 
 function updateBalls() {
@@ -992,8 +947,6 @@ function updateBalls() {
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     updateBalls();
-    // Сортировка по Y для правильного наложения
-    balls.sort((a, b) => a.y - b.y);
     balls.forEach(drawBall);
     requestAnimationFrame(animate);
 }
