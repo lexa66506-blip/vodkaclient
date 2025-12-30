@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>VodkaClient</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="translations.js"></script>
 
 <style>
 * {
@@ -1710,102 +1711,10 @@ downloadBtn.addEventListener('click', (e) => {
     window.open(loaderUrl, '_blank');
 });
 
-// Система переводов
-const translations = {
-    ru: {
-        'nav.support': 'Поддержка',
-        'nav.download': 'Скачать лаунчер',
-        'nav.buy': 'Купить',
-        'nav.login': 'Войти в кабинет',
-        'hero.subtitle': 'Выведи игру на новый уровень',
-        'hero.about': 'О нас',
-        'hero.description': 'Мы предоставляем вам лучший клиент для комфортной игры, который даст вам наилучшие впечатления от игры.',
-        'hero.watch': 'Смотреть',
-        'hero.details': 'Подробнее',
-        'features.title': 'Наши преимущества',
-        'features.subtitle': 'Мы кратко изложили вам то, что вы гарантированно получите после покупки нашего клиента.',
-        'features.design.title': 'Красивый внешний вид',
-        'features.design.desc': 'В нашем клиенте присутствует большое количество визуальных функций, которые сделают вашу игру более красочной. А так же вы можете настроить оформление клиента под себя, сделав его по настоящему красивым.',
-        'features.customization.title': 'Настраиваемость',
-        'features.customization.desc': 'В нашем клиенте вы можете настроить практически любую функцию под себя, а так же использовать конфигурации других пользователей, благодаря этому вы сможете использовать наш клиент максимуме его возможностей.',
-        'features.optimization.title': 'Оптимизация',
-        'features.optimization.desc': 'Мы постоянно улучшаем оптимизацию нашего клиента с самой первой версии. Благодаря этому вы сможете запустить наш клиент даже на слабых компьютерах.',
-        'features.updates.title': 'Частые обновления',
-        'features.updates.desc': 'Мы регулярно обновляем функционал в нашем клиенте, добавляя новые функции, а так же совершенствуя уже существующие. Благодаря этому наш клиент имеет преимущество над существующие сервера.',
-        'features.support.title': 'Лучшая поддержка',
-        'features.support.desc': 'У нас самая лучшая поддержка, которая разбирается в своем деле и сможет помочь вам по любому вопросу связанному с нашим клиетом.',
-        'features.usability.title': 'Удобство использования',
-        'features.usability.desc': 'Наш клиент разработан с учетом удобства использования. Интуитивно понятный интерфейс и простая настройка позволят вам быстро освоиться и начать играть с максимальным комфортом.'
-    },
-    en: {
-        'nav.support': 'Support',
-        'nav.download': 'Download Launcher',
-        'nav.buy': 'Buy',
-        'nav.login': 'Login',
-        'hero.subtitle': 'Take your game to the next level',
-        'hero.about': 'About Us',
-        'hero.description': 'We provide you with the best client for comfortable gaming that will give you the best gaming experience.',
-        'hero.watch': 'Watch',
-        'hero.details': 'Learn More',
-        'features.title': 'Our Advantages',
-        'features.subtitle': 'We have briefly outlined what you are guaranteed to get after purchasing our client.',
-        'features.design.title': 'Beautiful Design',
-        'features.design.desc': 'Our client has a large number of visual features that will make your game more colorful. You can also customize the client design to your liking, making it truly beautiful.',
-        'features.customization.title': 'Customization',
-        'features.customization.desc': 'In our client you can customize almost any function to your liking, as well as use configurations from other users, so you can use our client to its maximum potential.',
-        'features.optimization.title': 'Optimization',
-        'features.optimization.desc': 'We are constantly improving the optimization of our client since the very first version. Thanks to this, you can run our client even on weak computers.',
-        'features.updates.title': 'Frequent Updates',
-        'features.updates.desc': 'We regularly update the functionality in our client, adding new features and improving existing ones. Thanks to this, our client has an advantage over existing servers.',
-        'features.support.title': 'Best Support',
-        'features.support.desc': 'We have the best support team that knows their stuff and can help you with any question related to our client.',
-        'features.usability.title': 'Ease of Use',
-        'features.usability.desc': 'Our client is designed with ease of use in mind. An intuitive interface and simple setup will allow you to quickly get started and play with maximum comfort.'
-    },
-    ua: {
-        'nav.support': 'Підтримка',
-        'nav.download': 'Завантажити лаунчер',
-        'nav.buy': 'Купити',
-        'nav.login': 'Увійти в кабінет',
-        'hero.subtitle': 'Виведи гру на новий рівень',
-        'hero.about': 'Про нас',
-        'hero.description': 'Ми надаємо вам найкращий клієнт для комфортної гри, який дасть вам найкращі враження від гри.',
-        'hero.watch': 'Дивитись',
-        'hero.details': 'Детальніше',
-        'features.title': 'Наші переваги',
-        'features.subtitle': 'Ми коротко виклали вам те, що ви гарантовано отримаєте після покупки нашого клієнта.',
-        'features.design.title': 'Гарний зовнішній вигляд',
-        'features.design.desc': 'У нашому клієнті присутня велика кількість візуальних функцій, які зроблять вашу гру більш барвистою. А також ви можете налаштувати оформлення клієнта під себе, зробивши його по-справжньому гарним.',
-        'features.customization.title': 'Налаштовуваність',
-        'features.customization.desc': 'У нашому клієнті ви можете налаштувати практично будь-яку функцію під себе, а також використовувати конфігурації інших користувачів, завдяки цьому ви зможете використовувати наш клієнт на максимумі його можливостей.',
-        'features.optimization.title': 'Оптимізація',
-        'features.optimization.desc': 'Ми постійно покращуємо оптимізацію нашого клієнта з самої першої версії. Завдяки цьому ви зможете запустити наш клієнт навіть на слабких комп\'ютерах.',
-        'features.updates.title': 'Часті оновлення',
-        'features.updates.desc': 'Ми регулярно оновлюємо функціонал у нашому клієнті, додаючи нові функції, а також вдосконалюючи вже існуючі. Завдяки цьому наш клієнт має перевагу над існуючими серверами.',
-        'features.support.title': 'Найкраща підтримка',
-        'features.support.desc': 'У нас найкраща підтримка, яка розбирається у своїй справі і зможе допомогти вам з будь-яким питанням, пов\'язаним з нашим клієнтом.',
-        'features.usability.title': 'Зручність використання',
-        'features.usability.desc': 'Наш клієнт розроблений з урахуванням зручності використання. Інтуїтивно зрозумілий інтерфейс і проста настройка дозволять вам швидко освоїтися і почати грати з максимальним комфортом.'
-    }
-};
-
-const langNames = { ru: 'Русский', en: 'English', ua: 'Українська' };
-
-function setLanguage(lang) {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) {
-            el.textContent = translations[lang][key];
-        }
-    });
-    document.documentElement.lang = lang === 'ua' ? 'uk' : lang;
-    localStorage.setItem('vodka-lang', lang);
-}
-
 // Выбор языка - выпадающее меню
 const langSelector = document.getElementById('langSelector');
 const langDropdown = document.getElementById('langDropdown');
-const currentLang = document.getElementById('currentLang');
+const currentLangEl = document.getElementById('currentLang');
 
 langSelector.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1822,17 +1731,17 @@ document.querySelectorAll('.lang-option').forEach(option => {
         const lang = option.dataset.lang;
         document.querySelectorAll('.lang-option').forEach(o => o.classList.remove('active'));
         option.classList.add('active');
-        currentLang.textContent = langNames[lang];
+        currentLangEl.textContent = langNames[lang];
         setLanguage(lang);
         langDropdown.classList.remove('active');
     });
 });
 
 // Загрузка сохранённого языка
-const savedLang = localStorage.getItem('vodka-lang') || 'ru';
+const savedLang = getCurrentLang();
 if (savedLang !== 'ru') {
     setLanguage(savedLang);
-    currentLang.textContent = langNames[savedLang];
+    currentLangEl.textContent = langNames[savedLang];
     document.querySelectorAll('.lang-option').forEach(o => {
         o.classList.toggle('active', o.dataset.lang === savedLang);
     });
