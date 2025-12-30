@@ -1023,16 +1023,17 @@ app.post('/api/media-configs/upload', async (req, res) => {
         return res.status(403).json({ success: false, message: 'Нет доступа. Нужна роль Media' });
     }
     
-    const { name, description, content } = req.body;
+    const { name, description, content, funpay_url } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'Введите название' });
+    if (!funpay_url) return res.status(400).json({ success: false, message: 'Введите ссылку на FunPay' });
     if (!content) return res.status(400).json({ success: false, message: 'Конфиг пустой' });
     
     try {
         // Конвертируем в base64
         const contentBase64 = Buffer.from(content, 'utf8').toString('base64');
         await pool.query(
-            'INSERT INTO media_configs (name, description, filename, author_id, author_name, content) VALUES ($1, $2, $3, $4, $5, $6)',
-            [name, description || '', name + '.json', req.session.userId, username, contentBase64]
+            'INSERT INTO media_configs (name, description, filename, author_id, author_name, content, funpay_url) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+            [name, description || '', name + '.json', req.session.userId, username, contentBase64, funpay_url]
         );
         res.json({ success: true, message: 'Media конфиг загружен!' });
     } catch (err) {
