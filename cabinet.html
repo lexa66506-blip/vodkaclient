@@ -797,218 +797,76 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     window.location.href = '/';
 });
 
-// ========== УЛУЧШЕННАЯ ФИЗИКА ШАРИКОВ ==========
+// ========== ШАРИКИ ==========
 const canvas = document.getElementById('ballsCanvas');
 const ctx = canvas.getContext('2d');
 
 let balls = [];
-let ballMouseX = -1000, ballMouseY = -1000;
-let isMouseInCanvas = false;
+let mouseX = 0, mouseY = 0;
 
-const colors = [
-    '#555', '#666', '#777', '#888', '#999', '#aaa',
-    '#4a4a4a', '#5a5a5a', '#6a6a6a', '#7a7a7a'
-];
+const colors = ['#555', '#666', '#777', '#888', '#999', '#aaa'];
 
 function initBalls() {
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
     
     balls = [];
-    const count = 45; // Оптимальное количество
-    
-    for (let i = 0; i < count; i++) {
-        const radius = Math.random() * 18 + 10; // 10-28px
+    for (let i = 0; i < 40; i++) {
         balls.push({
-            x: Math.random() * (canvas.width - radius * 2) + radius,
-            y: Math.random() * (canvas.height * 0.5) + radius,
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
             vx: (Math.random() - 0.5) * 2,
-            vy: Math.random() * 2,
-            radius: radius,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            mass: radius * radius * 0.01 // Масса пропорциональна площади
+            vy: (Math.random() - 0.5) * 2,
+            radius: Math.random() * 15 + 8,
+            color: colors[Math.floor(Math.random() * colors.length)]
         });
     }
 }
 
-function drawBall(ball) {
-    // Тень под шариком
-    ctx.beginPath();
-    ctx.arc(ball.x + 2, ball.y + 2, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-    ctx.fill();
-    
-    // Градиент для объёма
-    const gradient = ctx.createRadialGradient(
-        ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, 0,
-        ball.x, ball.y, ball.radius
-    );
-    gradient.addColorStop(0, lightenColor(ball.color, 40));
-    gradient.addColorStop(0.5, ball.color);
-    gradient.addColorStop(1, darkenColor(ball.color, 30));
-    
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = gradient;
-    ctx.fill();
-    
-    // Главный блик
-    ctx.beginPath();
-    ctx.arc(ball.x - ball.radius * 0.35, ball.y - ball.radius * 0.35, ball.radius * 0.3, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.fill();
-    
-    // Маленький яркий блик
-    ctx.beginPath();
-    ctx.arc(ball.x - ball.radius * 0.2, ball.y - ball.radius * 0.5, ball.radius * 0.1, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.fill();
-}
-
-function lightenColor(color, percent) {
-    const num = parseInt(color.replace('#', ''), 16);
-    const amt = Math.round(2.55 * percent);
-    const R = Math.min(255, (num >> 16) + amt);
-    const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
-    const B = Math.min(255, (num & 0x0000FF) + amt);
-    return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
-}
-
-function darkenColor(color, percent) {
-    const num = parseInt(color.replace('#', ''), 16);
-    const amt = Math.round(2.55 * percent);
-    const R = Math.max(0, (num >> 16) - amt);
-    const G = Math.max(0, ((num >> 8) & 0x00FF) - amt);
-    const B = Math.max(0, (num & 0x0000FF) - amt);
-    return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
-}
-
 function updateBalls() {
-    const gravity = 0.25;
-    const airFriction = 0.995;
-    const groundFriction = 0.92;
-    const wallBounce = 0.6;
-    const groundBounce = 0.5;
-    const w = canvas.width;
-    const h = canvas.height;
-    
     for (let ball of balls) {
-        // Гравитация
-        ball.vy += gravity;
-        
-        // Воздушное сопротивление
-        ball.vx *= airFriction;
-        ball.vy *= airFriction;
-        
-        // Движение
         ball.x += ball.vx;
         ball.y += ball.vy;
         
-        // Взаимодействие с мышкой - плавное отталкивание
-        if (isMouseInCanvas) {
-            const dx = ball.x - ballMouseX;
-            const dy = ball.y - ballMouseY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const interactionRadius = 80;
-            
-            if (dist < interactionRadius && dist > 0) {
-                const force = Math.pow((interactionRadius - dist) / interactionRadius, 2) * 3;
-                const nx = dx / dist;
-                const ny = dy / dist;
-                ball.vx += nx * force;
-                ball.vy += ny * force - 1.5; // Подкидываем вверх
-            }
+        // Отскок от стен
+        if (ball.x < ball.radius || ball.x > canvas.width - ball.radius) ball.vx *= -1;
+        if (ball.y < ball.radius || ball.y > canvas.height - ball.radius) ball.vy *= -1;
+        
+        // Взаимодействие с мышкой
+        const dx = ball.x - mouseX;
+        const dy = ball.y - mouseY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 60) {
+            ball.vx += dx * 0.02;
+            ball.vy += dy * 0.02;
         }
         
-        // Левая стена
-        if (ball.x - ball.radius < 0) {
-            ball.x = ball.radius;
-            ball.vx = Math.abs(ball.vx) * wallBounce;
-        }
-        // Правая стена
-        if (ball.x + ball.radius > w) {
-            ball.x = w - ball.radius;
-            ball.vx = -Math.abs(ball.vx) * wallBounce;
-        }
-        // Потолок
-        if (ball.y - ball.radius < 0) {
-            ball.y = ball.radius;
-            ball.vy = Math.abs(ball.vy) * wallBounce;
-        }
-        // Пол - с трением
-        if (ball.y + ball.radius > h) {
-            ball.y = h - ball.radius;
-            ball.vy = -Math.abs(ball.vy) * groundBounce;
-            ball.vx *= groundFriction; // Трение о пол
-            
-            // Остановка если скорость очень маленькая
-            if (Math.abs(ball.vy) < 0.5) ball.vy = 0;
-        }
+        // Ограничение скорости
+        ball.vx *= 0.99;
+        ball.vy *= 0.99;
     }
-    
-    // Улучшенные коллизии между шариками
-    for (let i = 0; i < balls.length; i++) {
-        for (let j = i + 1; j < balls.length; j++) {
-            const b1 = balls[i], b2 = balls[j];
-            const dx = b2.x - b1.x;
-            const dy = b2.y - b1.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const minDist = b1.radius + b2.radius;
-            
-            if (dist < minDist && dist > 0.001) {
-                // Нормаль столкновения
-                const nx = dx / dist;
-                const ny = dy / dist;
-                
-                // Разделение шариков (предотвращение проникновения)
-                const overlap = (minDist - dist) * 0.5;
-                const totalMass = b1.mass + b2.mass;
-                b1.x -= nx * overlap * (b2.mass / totalMass);
-                b1.y -= ny * overlap * (b2.mass / totalMass);
-                b2.x += nx * overlap * (b1.mass / totalMass);
-                b2.y += ny * overlap * (b1.mass / totalMass);
-                
-                // Относительная скорость
-                const dvx = b1.vx - b2.vx;
-                const dvy = b1.vy - b2.vy;
-                const dvn = dvx * nx + dvy * ny;
-                
-                // Только если шарики сближаются
-                if (dvn > 0) {
-                    // Коэффициент восстановления
-                    const restitution = 0.7;
-                    const impulse = (1 + restitution) * dvn / totalMass;
-                    
-                    b1.vx -= impulse * b2.mass * nx;
-                    b1.vy -= impulse * b2.mass * ny;
-                    b2.vx += impulse * b1.mass * nx;
-                    b2.vy += impulse * b1.mass * ny;
-                }
-            }
-        }
+}
+
+function drawBalls() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let ball of balls) {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+        ctx.fillStyle = ball.color;
+        ctx.fill();
     }
 }
 
 function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     updateBalls();
-    // Сортировка по Y для правильного наложения
-    balls.sort((a, b) => a.y - b.y);
-    balls.forEach(drawBall);
+    drawBalls();
     requestAnimationFrame(animate);
 }
 
 canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
-    ballMouseX = e.clientX - rect.left;
-    ballMouseY = e.clientY - rect.top;
-    isMouseInCanvas = true;
-});
-
-canvas.addEventListener('mouseleave', () => {
-    isMouseInCanvas = false;
-    ballMouseX = -1000;
-    ballMouseY = -1000;
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
 });
 
 window.addEventListener('resize', () => {
