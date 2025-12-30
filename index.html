@@ -79,7 +79,7 @@ body {
 
 /* Навигация */
 .floating-nav {
-    position: fixed;
+    position: absolute;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
@@ -1435,10 +1435,15 @@ const loginForm = document.getElementById('loginForm');
 const registerForm = document.getElementById('registerForm');
 const errorMessage = document.getElementById('errorMessage');
 const successMessage = document.getElementById('successMessage');
+let isLoggedIn = false;
 
 // Открытие модального окна авторизации
 loginBtn.addEventListener('click', () => {
-    authModal.classList.add('active');
+    if (isLoggedIn) {
+        window.location.href = '/cabinet.html';
+    } else {
+        authModal.classList.add('active');
+    }
 });
 
 // Закрытие модального окна
@@ -1561,9 +1566,7 @@ loginForm.addEventListener('submit', async (e) => {
 function updateUserInfo(username, uid) {
     const loginBtn = document.getElementById('loginBtn');
     loginBtn.textContent = '👤 ' + username;
-    loginBtn.onclick = () => {
-        window.location.href = '/cabinet.html';
-    };
+    isLoggedIn = true;
 }
 
 // Проверка авторизации при загрузке
