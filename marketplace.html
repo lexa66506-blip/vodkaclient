@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Marketplace - VodkaClient</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="translations.js"></script>
 
 <style>
 * {
@@ -50,9 +49,9 @@ body {
 <nav class="floating-nav">
     <div class="nav-logo">VodkaClient</div>
     <div class="nav-links">
-        <a href="/" data-i18n="nav.home">🏠 Главная</a>
-        <a href="/marketplace.html" class="active" data-i18n="nav.marketplace">🛒 Маркетплейс</a>
-        <a href="https://t.me/SmertnixVteste" target="_blank" data-i18n="nav.support">💬 Поддержка</a>
+        <a href="/">🏠 Home</a>
+        <a href="/marketplace.html" class="active">🛒 Marketplace</a>
+        <a href="https://t.me/SmertnixVteste" target="_blank">💬 Support</a>
     </div>
     <a href="/cabinet.html" class="nav-user">
         <span>👤</span>
@@ -157,14 +156,14 @@ body {
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-content">
-        <div class="sidebar-header" data-i18n="market.menu">📦 Меню</div>
+        <div class="sidebar-header">📦 Меню</div>
         <div class="sidebar-menu">
-            <div class="sidebar-item active" data-tab="search"><span>🏠</span> <span data-i18n="market.home">Главная</span></div>
-            <div class="sidebar-item" data-tab="my-configs"><span>📁</span> <span data-i18n="market.myConfigs">Мои конфиги</span></div>
-            <div class="sidebar-item" data-tab="saved"><span>💾</span> <span data-i18n="market.saved">Сохранённые</span></div>
-            <div class="sidebar-item" data-tab="owner"><span>⚙️</span> <span data-i18n="market.fromDevs">От разработчиков</span></div>
-            <div class="sidebar-item" data-tab="media"><span>🎬</span> <span data-i18n="market.fromMedia">От Media</span></div>
-            <div class="sidebar-item upload-sidebar-btn" id="uploadSidebarBtn"><span>📤</span> <span data-i18n="market.upload">Загрузить</span></div>
+            <div class="sidebar-item active" data-tab="search"><span>🏠</span> Главная</div>
+            <div class="sidebar-item" data-tab="my-configs"><span>📁</span> Мои конфиги</div>
+            <div class="sidebar-item" data-tab="saved"><span>💾</span> Сохранённые</div>
+            <div class="sidebar-item" data-tab="owner"><span>⚙️</span> От разработчиков</div>
+            <div class="sidebar-item" data-tab="media"><span>🎬</span> От Media</div>
+            <div class="sidebar-item upload-sidebar-btn" id="uploadSidebarBtn"><span>📤</span> Загрузить</div>
         </div>
     </div>
     <div class="sidebar-toggle" id="sidebarToggle">›</div>
@@ -176,16 +175,16 @@ body {
             
             <div class="tab-panel active" id="tab-search">
                 <div class="content-header">
-                    <div class="content-title" data-i18n="market.home">🏠 Главная</div>
+                    <div class="content-title">🏠 Главная</div>
                     <div class="search-box">
-                        <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="market.searchPlaceholder" placeholder="Название или автор...">
-                        <button class="search-btn" id="searchBtn" data-i18n="market.search">Найти</button>
+                        <input type="text" class="search-input" id="searchInput" placeholder="Название или автор...">
+                        <button class="search-btn" id="searchBtn">Найти</button>
                     </div>
                 </div>
                 <div class="content-body">
                     <div class="empty-state" id="searchEmpty">
                         <div class="empty-state-icon">🛒</div>
-                        <div class="empty-state-text" data-i18n="market.welcome">Добро пожаловать в Marketplace!</div>
+                        <div class="empty-state-text">Добро пожаловать в Marketplace!</div>
                     </div>
                     <div class="configs-grid" id="searchResults" style="display: none;"></div>
                 </div>
@@ -193,14 +192,14 @@ body {
 
             <div class="tab-panel" id="tab-my-configs">
                 <div class="content-header">
-                    <div class="content-title" data-i18n="market.myConfigs">📁 Мои конфиги</div>
-                    <button class="upload-btn" id="uploadBtn" data-i18n="market.uploadConfig">+ Загрузить конфиг</button>
+                    <div class="content-title">📁 Мои конфиги</div>
+                    <button class="upload-btn" id="uploadBtn">+ Загрузить конфиг</button>
                 </div>
                 <div class="content-body">
                     <div class="empty-state" id="myConfigsEmpty">
                         <div class="empty-state-icon">📂</div>
-                        <div class="empty-state-text" data-i18n="market.noConfigs">У вас пока нет загруженных конфигов</div>
-                        <button class="upload-btn" id="uploadBtn2" data-i18n="market.uploadFirst">+ Загрузить первый конфиг</button>
+                        <div class="empty-state-text">У вас пока нет загруженных конфигов</div>
+                        <button class="upload-btn" id="uploadBtn2">+ Загрузить первый конфиг</button>
                     </div>
                     <div class="configs-grid" id="myConfigsGrid" style="display: none;"></div>
                 </div>
@@ -208,12 +207,12 @@ body {
 
             <div class="tab-panel" id="tab-saved">
                 <div class="content-header">
-                    <div class="content-title" data-i18n="market.saved">💾 Сохранённые конфиги</div>
+                    <div class="content-title">💾 Сохранённые конфиги</div>
                 </div>
                 <div class="content-body">
                     <div class="empty-state" id="savedEmpty">
                         <div class="empty-state-icon">💾</div>
-                        <div class="empty-state-text" data-i18n="market.noSaved">Нет сохранённых конфигов</div>
+                        <div class="empty-state-text">Нет сохранённых конфигов</div>
                     </div>
                     <div class="configs-grid" id="savedConfigsGrid" style="display: none;"></div>
                 </div>
@@ -290,7 +289,7 @@ body {
 
 <!-- Модалка загрузки Owner конфига -->
 <div class="upload-modal" id="ownerUploadModal">
-    <div class="upload-modal-content" style="border-color: rgba(255,165,0,0.4);">
+    <div class="upload-modal-content">
         <div class="upload-modal-header">
             <div class="upload-modal-title" style="color: #ffa500;">⚙️ Загрузить Owner конфиг</div>
             <button class="upload-modal-close" id="ownerUploadClose">✕</button>
@@ -323,8 +322,8 @@ body {
 </div>
 
 <!-- Модалка загрузки Media конфига -->
-<div class="upload-modal" id="mediaUploadModal"></div>
-    <div class="upload-modal-content" style="border-color: rgba(138,43,226,0.4);">
+<div class="upload-modal" id="mediaUploadModal">
+    <div class="upload-modal-content">
         <div class="upload-modal-header">
             <div class="upload-modal-title" style="color: #9370db;">🎬 Загрузить Media конфиг</div>
             <button class="upload-modal-close" id="mediaUploadClose">✕</button>
@@ -970,19 +969,6 @@ document.addEventListener('keydown', e => {
         e.preventDefault();
     }
 });
-</script>
-
-<!-- Блокировка просмотра исходного кода -->
-<script>
-document.onkeydown = function(e) {
-    if (e.ctrlKey && e.code === 'KeyU') return false;
-    if (e.code === 'F12') return false;
-    if (e.ctrlKey && e.shiftKey && e.code === 'KeyI') return false;
-    if (e.ctrlKey && e.shiftKey && e.code === 'KeyJ') return false;
-    if (e.ctrlKey && e.shiftKey && e.code === 'KeyC') return false;
-    if (e.ctrlKey && e.code === 'KeyS') return false;
-};
-document.oncontextmenu = function() { return false; };
 </script>
 </body>
 </html>
