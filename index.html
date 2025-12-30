@@ -139,10 +139,64 @@ nav {
     border-radius: 8px;
     cursor: pointer;
     transition: background 0.3s;
+    position: relative;
 }
 
 .lang-selector:hover {
     background: rgba(30, 30, 30, 0.9);
+}
+
+.lang-selector .lang-icon {
+    font-size: 16px;
+}
+
+.lang-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid rgba(60, 60, 60, 0.5);
+    border-radius: 8px;
+    min-width: 160px;
+    z-index: 200;
+    overflow: hidden;
+}
+
+.lang-dropdown.active {
+    display: block;
+}
+
+.lang-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lang-option:hover {
+    background: rgba(40, 40, 40, 0.8);
+    color: #fff;
+}
+
+.lang-option.active {
+    background: rgba(50, 50, 50, 0.8);
+    color: #fff;
+}
+
+.lang-option .flag {
+    font-size: 18px;
+}
+
+.lang-option .soon {
+    font-size: 10px;
+    color: #888;
+    margin-left: auto;
 }
 
 .btn-login {
@@ -1121,16 +1175,31 @@ nav {
 <nav>
     <div class="logo">VodkaClient</div>
     <div class="nav-links">
-        <a href="https://t.me/SmertnixVteste" target="_blank">Поддержка</a>
-        <a href="#" id="downloadBtn">Скачать лаунчер</a>
-        <a href="#" id="buyBtn">Купить</a>
+        <a href="https://t.me/SmertnixVteste" target="_blank" data-i18n="nav.support">Поддержка</a>
+        <a href="#" id="downloadBtn" data-i18n="nav.download">Скачать лаунчер</a>
+        <a href="#" id="buyBtn" data-i18n="nav.buy">Купить</a>
         <div class="lang-selector" id="langSelector">
-            <span>Русский</span>
+            <span class="lang-icon">🌐</span>
+            <span id="currentLang">Русский</span>
+            <div class="lang-dropdown" id="langDropdown">
+                <div class="lang-option active" data-lang="ru">
+                    <span class="flag">🇷🇺</span>
+                    <span>Русский</span>
+                </div>
+                <div class="lang-option" data-lang="en">
+                    <span class="flag">🇬🇧</span>
+                    <span>English</span>
+                </div>
+                <div class="lang-option" data-lang="ua">
+                    <span class="flag">🇺🇦</span>
+                    <span>Українська</span>
+                </div>
+            </div>
         </div>
         <div id="userInfo" class="user-info">
             <span id="usernameDisplay"></span>
         </div>
-        <button class="btn-login" id="loginBtn">Войти в кабинет</button>
+        <button class="btn-login" id="loginBtn" data-i18n="nav.login">Войти в кабинет</button>
     </div>
 </nav>
 
@@ -1139,17 +1208,17 @@ nav {
     <!-- Заголовок VodkaClient вверху -->
     <div class="hero-title">
         <h1>VodkaClient</h1>
-        <p>Выведи игру на новый уровень</p>
+        <p data-i18n="hero.subtitle">Выведи игру на новый уровень</p>
     </div>
     
     <!-- Контент: О нас слева, кубик справа -->
     <div class="hero-row">
         <div class="hero-content">
-            <h2>О нас</h2>
-            <p>Мы предоставляем вам лучший клиент для комфортной игры, который даст вам наилучшие впечатления от игры.</p>
+            <h2 data-i18n="hero.about">О нас</h2>
+            <p data-i18n="hero.description">Мы предоставляем вам лучший клиент для комфортной игры, который даст вам наилучшие впечатления от игры.</p>
             <div class="hero-buttons">
-                <button class="btn-primary" id="watchBtn">Смотреть</button>
-                <button class="btn-secondary" id="detailsBtn">Подробнее</button>
+                <button class="btn-primary" id="watchBtn" data-i18n="hero.watch">Смотреть</button>
+                <button class="btn-secondary" id="detailsBtn" data-i18n="hero.details">Подробнее</button>
             </div>
         </div>
         
@@ -1182,39 +1251,39 @@ nav {
 <!-- Секция преимуществ -->
 <section class="features scroll-animate">
     <div class="features-header scroll-animate">
-        <h2>Наши преимущества</h2>
-        <p>Мы кратко изложили вам то, что вы гарантированно получите после покупки нашего клиента.</p>
+        <h2 data-i18n="features.title">Наши преимущества</h2>
+        <p data-i18n="features.subtitle">Мы кратко изложили вам то, что вы гарантированно получите после покупки нашего клиента.</p>
     </div>
     
     <div class="features-grid">
         <div class="feature-card scroll-animate-left">
-            <h3>Красивый внешний вид</h3>
-            <p>В нашем клиенте присутствует большое количество визуальных функций, которые сделают вашу игру более красочной. А так же вы можете настроить оформление клиента под себя, сделав его по настоящему красивым.</p>
+            <h3 data-i18n="features.design.title">Красивый внешний вид</h3>
+            <p data-i18n="features.design.desc">В нашем клиенте присутствует большое количество визуальных функций, которые сделают вашу игру более красочной. А так же вы можете настроить оформление клиента под себя, сделав его по настоящему красивым.</p>
         </div>
         
         <div class="feature-card scroll-animate-scale">
-            <h3>Настраиваемость</h3>
-            <p>В нашем клиенте вы можете настроить практически любую функцию под себя, а так же использовать конфигурации других пользователей, благодаря этому вы сможете использовать наш клиент максимуме его возможностей.</p>
+            <h3 data-i18n="features.customization.title">Настраиваемость</h3>
+            <p data-i18n="features.customization.desc">В нашем клиенте вы можете настроить практически любую функцию под себя, а так же использовать конфигурации других пользователей, благодаря этому вы сможете использовать наш клиент максимуме его возможностей.</p>
         </div>
         
         <div class="feature-card scroll-animate-right">
-            <h3>Оптимизация</h3>
-            <p>Мы постоянно улучшаем оптимизацию нашего клиента с самой первой версии. Благодаря этому вы сможете запустить наш клиент даже на слабых компьютерах.</p>
+            <h3 data-i18n="features.optimization.title">Оптимизация</h3>
+            <p data-i18n="features.optimization.desc">Мы постоянно улучшаем оптимизацию нашего клиента с самой первой версии. Благодаря этому вы сможете запустить наш клиент даже на слабых компьютерах.</p>
         </div>
         
         <div class="feature-card scroll-animate-left">
-            <h3>Частые обновления</h3>
-            <p>Мы регулярно обновляем функционал в нашем клиенте, добавляя новые функции, а так же совершенствуя уже существующие. Благодаря этому наш клиент имеет преимущество над существующие сервера.</p>
+            <h3 data-i18n="features.updates.title">Частые обновления</h3>
+            <p data-i18n="features.updates.desc">Мы регулярно обновляем функционал в нашем клиенте, добавляя новые функции, а так же совершенствуя уже существующие. Благодаря этому наш клиент имеет преимущество над существующие сервера.</p>
         </div>
         
         <div class="feature-card scroll-animate-scale">
-            <h3>Лучшая поддержка</h3>
-            <p>У нас самая лучшая поддержка, которая разбирается в своем деле и сможет помочь вам по любому вопросу связанному с нашим клиетом.</p>
+            <h3 data-i18n="features.support.title">Лучшая поддержка</h3>
+            <p data-i18n="features.support.desc">У нас самая лучшая поддержка, которая разбирается в своем деле и сможет помочь вам по любому вопросу связанному с нашим клиетом.</p>
         </div>
         
         <div class="feature-card scroll-animate-right">
-            <h3>Удобство использования</h3>
-            <p>Наш клиент разработан с учетом удобства использования. Интуитивно понятный интерфейс и простая настройка позволят вам быстро освоиться и начать играть с максимальным комфортом.</p>
+            <h3 data-i18n="features.usability.title">Удобство использования</h3>
+            <p data-i18n="features.usability.desc">Наш клиент разработан с учетом удобства использования. Интуитивно понятный интерфейс и простая настройка позволят вам быстро освоиться и начать играть с максимальным комфортом.</p>
         </div>
     </div>
 </section>
@@ -1641,11 +1710,133 @@ downloadBtn.addEventListener('click', (e) => {
     window.open(loaderUrl, '_blank');
 });
 
-// Кнопка "Русский" - показывает доступные языки
+// Система переводов
+const translations = {
+    ru: {
+        'nav.support': 'Поддержка',
+        'nav.download': 'Скачать лаунчер',
+        'nav.buy': 'Купить',
+        'nav.login': 'Войти в кабинет',
+        'hero.subtitle': 'Выведи игру на новый уровень',
+        'hero.about': 'О нас',
+        'hero.description': 'Мы предоставляем вам лучший клиент для комфортной игры, который даст вам наилучшие впечатления от игры.',
+        'hero.watch': 'Смотреть',
+        'hero.details': 'Подробнее',
+        'features.title': 'Наши преимущества',
+        'features.subtitle': 'Мы кратко изложили вам то, что вы гарантированно получите после покупки нашего клиента.',
+        'features.design.title': 'Красивый внешний вид',
+        'features.design.desc': 'В нашем клиенте присутствует большое количество визуальных функций, которые сделают вашу игру более красочной. А так же вы можете настроить оформление клиента под себя, сделав его по настоящему красивым.',
+        'features.customization.title': 'Настраиваемость',
+        'features.customization.desc': 'В нашем клиенте вы можете настроить практически любую функцию под себя, а так же использовать конфигурации других пользователей, благодаря этому вы сможете использовать наш клиент максимуме его возможностей.',
+        'features.optimization.title': 'Оптимизация',
+        'features.optimization.desc': 'Мы постоянно улучшаем оптимизацию нашего клиента с самой первой версии. Благодаря этому вы сможете запустить наш клиент даже на слабых компьютерах.',
+        'features.updates.title': 'Частые обновления',
+        'features.updates.desc': 'Мы регулярно обновляем функционал в нашем клиенте, добавляя новые функции, а так же совершенствуя уже существующие. Благодаря этому наш клиент имеет преимущество над существующие сервера.',
+        'features.support.title': 'Лучшая поддержка',
+        'features.support.desc': 'У нас самая лучшая поддержка, которая разбирается в своем деле и сможет помочь вам по любому вопросу связанному с нашим клиетом.',
+        'features.usability.title': 'Удобство использования',
+        'features.usability.desc': 'Наш клиент разработан с учетом удобства использования. Интуитивно понятный интерфейс и простая настройка позволят вам быстро освоиться и начать играть с максимальным комфортом.'
+    },
+    en: {
+        'nav.support': 'Support',
+        'nav.download': 'Download Launcher',
+        'nav.buy': 'Buy',
+        'nav.login': 'Login',
+        'hero.subtitle': 'Take your game to the next level',
+        'hero.about': 'About Us',
+        'hero.description': 'We provide you with the best client for comfortable gaming that will give you the best gaming experience.',
+        'hero.watch': 'Watch',
+        'hero.details': 'Learn More',
+        'features.title': 'Our Advantages',
+        'features.subtitle': 'We have briefly outlined what you are guaranteed to get after purchasing our client.',
+        'features.design.title': 'Beautiful Design',
+        'features.design.desc': 'Our client has a large number of visual features that will make your game more colorful. You can also customize the client design to your liking, making it truly beautiful.',
+        'features.customization.title': 'Customization',
+        'features.customization.desc': 'In our client you can customize almost any function to your liking, as well as use configurations from other users, so you can use our client to its maximum potential.',
+        'features.optimization.title': 'Optimization',
+        'features.optimization.desc': 'We are constantly improving the optimization of our client since the very first version. Thanks to this, you can run our client even on weak computers.',
+        'features.updates.title': 'Frequent Updates',
+        'features.updates.desc': 'We regularly update the functionality in our client, adding new features and improving existing ones. Thanks to this, our client has an advantage over existing servers.',
+        'features.support.title': 'Best Support',
+        'features.support.desc': 'We have the best support team that knows their stuff and can help you with any question related to our client.',
+        'features.usability.title': 'Ease of Use',
+        'features.usability.desc': 'Our client is designed with ease of use in mind. An intuitive interface and simple setup will allow you to quickly get started and play with maximum comfort.'
+    },
+    ua: {
+        'nav.support': 'Підтримка',
+        'nav.download': 'Завантажити лаунчер',
+        'nav.buy': 'Купити',
+        'nav.login': 'Увійти в кабінет',
+        'hero.subtitle': 'Виведи гру на новий рівень',
+        'hero.about': 'Про нас',
+        'hero.description': 'Ми надаємо вам найкращий клієнт для комфортної гри, який дасть вам найкращі враження від гри.',
+        'hero.watch': 'Дивитись',
+        'hero.details': 'Детальніше',
+        'features.title': 'Наші переваги',
+        'features.subtitle': 'Ми коротко виклали вам те, що ви гарантовано отримаєте після покупки нашого клієнта.',
+        'features.design.title': 'Гарний зовнішній вигляд',
+        'features.design.desc': 'У нашому клієнті присутня велика кількість візуальних функцій, які зроблять вашу гру більш барвистою. А також ви можете налаштувати оформлення клієнта під себе, зробивши його по-справжньому гарним.',
+        'features.customization.title': 'Налаштовуваність',
+        'features.customization.desc': 'У нашому клієнті ви можете налаштувати практично будь-яку функцію під себе, а також використовувати конфігурації інших користувачів, завдяки цьому ви зможете використовувати наш клієнт на максимумі його можливостей.',
+        'features.optimization.title': 'Оптимізація',
+        'features.optimization.desc': 'Ми постійно покращуємо оптимізацію нашого клієнта з самої першої версії. Завдяки цьому ви зможете запустити наш клієнт навіть на слабких комп\'ютерах.',
+        'features.updates.title': 'Часті оновлення',
+        'features.updates.desc': 'Ми регулярно оновлюємо функціонал у нашому клієнті, додаючи нові функції, а також вдосконалюючи вже існуючі. Завдяки цьому наш клієнт має перевагу над існуючими серверами.',
+        'features.support.title': 'Найкраща підтримка',
+        'features.support.desc': 'У нас найкраща підтримка, яка розбирається у своїй справі і зможе допомогти вам з будь-яким питанням, пов\'язаним з нашим клієнтом.',
+        'features.usability.title': 'Зручність використання',
+        'features.usability.desc': 'Наш клієнт розроблений з урахуванням зручності використання. Інтуїтивно зрозумілий інтерфейс і проста настройка дозволять вам швидко освоїтися і почати грати з максимальним комфортом.'
+    }
+};
+
+const langNames = { ru: 'Русский', en: 'English', ua: 'Українська' };
+
+function setLanguage(lang) {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+            el.textContent = translations[lang][key];
+        }
+    });
+    document.documentElement.lang = lang === 'ua' ? 'uk' : lang;
+    localStorage.setItem('vodka-lang', lang);
+}
+
+// Выбор языка - выпадающее меню
 const langSelector = document.getElementById('langSelector');
-langSelector.addEventListener('click', () => {
-    alert('Доступные языки:\n🇷🇺 Русский (текущий)\n🇬🇧 English (скоро)\n🇨🇳 中文 (скоро)');
+const langDropdown = document.getElementById('langDropdown');
+const currentLang = document.getElementById('currentLang');
+
+langSelector.addEventListener('click', (e) => {
+    e.stopPropagation();
+    langDropdown.classList.toggle('active');
 });
+
+document.addEventListener('click', () => {
+    langDropdown.classList.remove('active');
+});
+
+document.querySelectorAll('.lang-option').forEach(option => {
+    option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lang = option.dataset.lang;
+        document.querySelectorAll('.lang-option').forEach(o => o.classList.remove('active'));
+        option.classList.add('active');
+        currentLang.textContent = langNames[lang];
+        setLanguage(lang);
+        langDropdown.classList.remove('active');
+    });
+});
+
+// Загрузка сохранённого языка
+const savedLang = localStorage.getItem('vodka-lang') || 'ru';
+if (savedLang !== 'ru') {
+    setLanguage(savedLang);
+    currentLang.textContent = langNames[savedLang];
+    document.querySelectorAll('.lang-option').forEach(o => {
+        o.classList.toggle('active', o.dataset.lang === savedLang);
+    });
+}
 
 // Получить бесплатный день
 async function getFreeDay() {
