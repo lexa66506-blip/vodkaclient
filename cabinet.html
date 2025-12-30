@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Личный кабинет - VodkaClient</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="translations.js"></script>
 
 <style>
 * {
@@ -434,9 +435,9 @@ body {
 <nav class="floating-nav">
     <div class="nav-logo">VodkaClient</div>
     <div class="nav-links">
-        <a href="/">🏠 Home</a>
-        <a href="/marketplace.html">🛒 Marketplace</a>
-        <a href="https://t.me/SmertnixVteste" target="_blank">💬 Support</a>
+        <a href="/" data-i18n="nav.home">🏠 Главная</a>
+        <a href="/marketplace.html" data-i18n="nav.marketplace">🛒 Маркетплейс</a>
+        <a href="https://t.me/SmertnixVteste" target="_blank" data-i18n="nav.support">💬 Поддержка</a>
     </div>
     <div class="nav-user" id="navUser">
         <span>👤</span>
@@ -445,7 +446,7 @@ body {
 </nav>
 
 <div class="main-container">
-    <div id="loadingMessage" class="loading">Загрузка...</div>
+    <div id="loadingMessage" class="loading" data-i18n="cabinet.loading">Загрузка...</div>
 
     <div class="cabinet-wrapper" id="cabinetContent" style="display: none;">
         <!-- Левая панель -->
@@ -471,7 +472,7 @@ body {
                     </div>
                 </div>
                 
-                <button class="btn-download" id="downloadBtn">Download Loader</button>
+                <button class="btn-download" id="downloadBtn" data-i18n="cabinet.download">Скачать лаунчер</button>
             </div>
         </div>
         
@@ -479,7 +480,7 @@ body {
         <div class="right-panel">
             <div class="info-panel">
                 <div class="info-row">
-                    <div class="info-label">👤 Username:</div>
+                    <div class="info-label" data-i18n="cabinet.username">👤 Имя пользователя:</div>
                     <div class="info-value" id="infoUsername">-</div>
                 </div>
                 <div class="info-row">
@@ -487,20 +488,20 @@ body {
                     <div class="info-value" id="infoEmail">-</div>
                 </div>
                 <div class="info-row">
-                    <div class="info-label">⏰ Subscription:</div>
+                    <div class="info-label" data-i18n="cabinet.subscription">⏰ Подписка:</div>
                     <div class="info-value" id="infoSubscription">-</div>
                 </div>
                 <div class="info-row">
                     <div class="info-label">💻 HWID:</div>
-                    <div class="info-value hwid" id="infoHwid">Не привязан</div>
+                    <div class="info-value hwid" id="infoHwid" data-i18n="cabinet.hwidNotLinked">Не привязан</div>
                 </div>
                 <div class="info-row">
-                    <div class="info-label">⚡ Role:</div>
+                    <div class="info-label" data-i18n="cabinet.role">⚡ Роль:</div>
                     <div class="info-value status" id="infoRole">User</div>
                 </div>
                 <div class="info-row">
-                    <div class="info-label">⭐ Beta Access:</div>
-                    <div class="info-value" id="infoBeta">Нет</div>
+                    <div class="info-label" data-i18n="cabinet.betaAccess">⭐ Бета доступ:</div>
+                    <div class="info-value" id="infoBeta" data-i18n="cabinet.no">Нет</div>
                 </div>
                 
                 <!-- Секция для Media -->
@@ -523,25 +524,25 @@ body {
             </div>
             
             <div class="actions-panel">
-                <div class="actions-title">Actions</div>
+                <div class="actions-title" data-i18n="cabinet.actions">Действия</div>
                 <div class="actions-grid">
                     <div class="action-card">
-                        <label>Configure RAM</label>
-                        <button class="action-btn" onclick="openModal('ram')">Configure</button>
+                        <label data-i18n="cabinet.configureRam">Настроить RAM</label>
+                        <button class="action-btn" onclick="openModal('ram')" data-i18n="cabinet.configure">Настроить</button>
                     </div>
                     <div class="action-card">
-                        <label>Activate Key</label>
-                        <button class="action-btn" onclick="openModal('key')">Activate</button>
+                        <label data-i18n="cabinet.activateKey">Активировать ключ</label>
+                        <button class="action-btn" onclick="openModal('key')" data-i18n="cabinet.activate">Активировать</button>
                     </div>
                     <div class="action-card">
-                        <label>Change Avatar</label>
-                        <button class="action-btn" onclick="openModal('avatar')">Change</button>
+                        <label data-i18n="cabinet.changeAvatar">Сменить аватар</label>
+                        <button class="action-btn" onclick="openModal('avatar')" data-i18n="cabinet.change">Сменить</button>
                     </div>
                 </div>
-                <button class="action-btn" onclick="openModal('password')" style="width: 100%; margin-top: 15px;">🔑 Сменить пароль</button>
+                <button class="action-btn" onclick="openModal('password')" style="width: 100%; margin-top: 15px;" data-i18n="cabinet.changePassword">🔑 Сменить пароль</button>
             </div>
             
-            <button class="logout-btn" id="logoutBtn">🚪 Выйти из аккаунта</button>
+            <button class="logout-btn" id="logoutBtn" data-i18n="cabinet.logout">🚪 Выйти из аккаунта</button>
         </div>
     </div>
 </div>
