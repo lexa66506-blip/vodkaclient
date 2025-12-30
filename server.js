@@ -1055,6 +1055,42 @@ app.get('/api/media-configs', async (req, res) => {
     }
 });
 
+// Удалить свой media конфиг
+app.delete('/api/media-configs/:id', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    try {
+        // Проверяем что это конфиг текущего юзера
+        const check = await pool.query('SELECT author_id FROM media_configs WHERE id = $1', [req.params.id]);
+        if (check.rows.length === 0) return res.status(404).json({ success: false, message: 'Конфиг не найден' });
+        if (check.rows[0].author_id !== req.session.userId) {
+            return res.status(403).json({ success: false, message: 'Это не ваш конфиг' });
+        }
+        await pool.query('DELETE FROM media_configs WHERE id = $1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Ошибка удаления' });
+    }
+});
+
+// Удалить свой owner конфиг
+app.delete('/api/owner-configs/:id', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
+    try {
+        const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [req.session.userId]);
+        const username = userResult.rows[0]?.username;
+        
+        const check = await pool.query('SELECT author_name FROM owner_configs WHERE id = $1', [req.params.id]);
+        if (check.rows.length === 0) return res.status(404).json({ success: false, message: 'Конфиг не найден' });
+        if (check.rows[0].author_name !== username) {
+            return res.status(403).json({ success: false, message: 'Это не ваш конфиг' });
+        }
+        await pool.query('DELETE FROM owner_configs WHERE id = $1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Ошибка удаления' });
+    }
+});
+
 // Админ: получить все media конфиги для управления
 app.get('/api/admin/media-configs', async (req, res) => {
     try {
