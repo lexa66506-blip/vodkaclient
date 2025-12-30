@@ -113,6 +113,14 @@ body {
 .empty-state-text { font-size: 14px; margin-bottom: 20px; }
 .upload-btn { padding: 12px 25px; background: rgba(80,80,80,0.3); border: 1px dashed rgba(80,80,80,0.5); border-radius: 10px; color: #888; font-size: 13px; cursor: pointer; transition: all 0.2s; }
 .upload-btn:hover { background: rgba(100,100,100,0.3); color: #aaa; }
+
+/* Контекстное меню */
+.context-menu { position: fixed; background: rgba(25,25,25,0.98); border: 1px solid rgba(80,80,80,0.4); border-radius: 10px; padding: 6px 0; min-width: 150px; z-index: 2000; display: none; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+.context-menu.active { display: block; }
+.context-menu-item { padding: 10px 16px; color: #aaa; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s; }
+.context-menu-item:hover { background: rgba(80,80,80,0.3); color: #fff; }
+.context-menu-item.delete { color: #ff6b6b; }
+.context-menu-item.delete:hover { background: rgba(255,50,50,0.2); }
 </style>
 
 <style>
@@ -359,9 +367,16 @@ body {
     </div>
 </div>
 
+<!-- Контекстное меню -->
+<div class="context-menu" id="contextMenu">
+    <div class="context-menu-item delete" id="contextDelete">🗑 Удалить</div>
+</div>
+
 <script>
 let userData = null;
 let hasSubscription = false;
+let contextConfigId = null;
+let contextConfigType = null;
 
 async function checkAuth() {
     try {
@@ -775,8 +790,9 @@ async function loadMediaConfigs() {
 }
 
 function renderMediaConfigCard(config) {
+    const isOwner = userData && userData.username === config.author_name;
     return `
-        <div class="config-card" style="border-color: rgba(138, 43, 226, 0.3);">
+        <div class="config-card" style="border-color: rgba(138, 43, 226, 0.3);" ${isOwner ? `oncontextmenu="showContextMenu(event, ${config.id}, 'media')"` : ''}>
             <div class="config-card-header">
                 <div class="config-name">${config.name}</div>
                 <div class="config-badge" style="background: rgba(138, 43, 226, 0.3); color: #9370db;">Media</div>
@@ -920,8 +936,9 @@ async function loadOwnerConfigs() {
 
 function renderOwnerConfigCard(config) {
     const canDownload = hasSubscription;
+    const isOwner = userData && userData.username === config.author_name;
     return `
-        <div class="config-card" style="border-color: rgba(255, 165, 0, 0.3);">
+        <div class="config-card" style="border-color: rgba(255, 165, 0, 0.3);" ${isOwner ? `oncontextmenu="showContextMenu(event, ${config.id}, 'owner')"` : ''}>
             <div class="config-card-header">
                 <div class="config-name">${config.name}</div>
                 <div class="config-badge" style="background: rgba(255, 165, 0, 0.3); color: #ffa500;">Owner</div>
@@ -959,8 +976,49 @@ async function downloadAndSaveOwnerConfig(id, name) {
     }
 }
 
-// Защита от ПКМ и DevTools
-document.addEventListener('contextmenu', e => e.preventDefault());
+// ========== КОНТЕКСТНОЕ МЕНЮ ==========
+const contextMenu = document.getElementById('contextMenu');
+
+function showContextMenu(e, configId, configType) {
+    e.preventDefault();
+    contextConfigId = configId;
+    contextConfigType = configType;
+    contextMenu.style.left = e.pageX + 'px';
+    contextMenu.style.top = e.pageY + 'px';
+    contextMenu.classList.add('active');
+}
+
+document.addEventListener('click', () => {
+    contextMenu.classList.remove('active');
+});
+
+document.getElementById('contextDelete').addEventListener('click', async () => {
+    if (!contextConfigId || !contextConfigType) return;
+    if (!confirm('Удалить этот конфиг?')) return;
+    
+    try {
+        let url = '';
+        if (contextConfigType === 'media') url = '/api/media-configs/' + contextConfigId;
+        else if (contextConfigType === 'owner') url = '/api/owner-configs/' + contextConfigId;
+        else url = '/api/configs/' + contextConfigId;
+        
+        const response = await fetch(url, { method: 'DELETE' });
+        const data = await response.json();
+        if (data.success) {
+            alert('Конфиг удалён');
+            if (contextConfigType === 'media') loadMediaConfigs();
+            else if (contextConfigType === 'owner') loadOwnerConfigs();
+            else loadMyConfigs();
+        } else {
+            alert('Ошибка: ' + data.message);
+        }
+    } catch (error) {
+        alert('Ошибка удаления');
+    }
+    contextMenu.classList.remove('active');
+});
+
+// Защита от DevTools (но разрешаем ПКМ на карточках)
 document.addEventListener('keydown', e => {
     if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) {
         e.preventDefault();
