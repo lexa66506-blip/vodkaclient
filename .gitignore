@@ -1,0 +1,26 @@
+# Node modules
+node_modules/
+
+# Logs
+logs/
+*.log
+
+# Database (не загружаем базу на GitHub)
+users.db
+
+# IDE settings
+.vscode/
+.idea/
+
+# Environment variables
+.env
+
+# PM2
+.pm2/
+
+# Windows batch files (локальные скрипты)
+*.bat
+
+# OS files
+.DS_Store
+Thumbs.db
