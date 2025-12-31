@@ -1965,20 +1965,6 @@ document.addEventListener('keydown', e => {
         e.preventDefault();
     }
 });
-
-// Детект DevTools
-(function() {
-    const devtools = { open: false };
-    const threshold = 160;
-    setInterval(() => {
-        if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
-            if (!devtools.open) {
-                devtools.open = true;
-                document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#0a0a0a;color:#fff;font-size:24px;">DevTools запрещены</div>';
-            }
-        }
-    }, 500);
-})();
 </script>
 
 <!-- Блокировка просмотра исходного кода -->
