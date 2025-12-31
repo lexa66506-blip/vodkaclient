@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -788,7 +788,7 @@ function showMessage(div, text, success) {
 
 document.getElementById('downloadBtn').addEventListener('click', () => {
     if (userData && userData.subscription_active) {
-        window.open('https://www.dropbox.com/scl/fi/2zbuk1s0opsmjl21zrsd3/VodkaClient.exe?rlkey=vt6dzy7evnbxr8rosnidyyaio&st=tz9vgxj3&dl=1', '_blank');
+        window.open('https://www.dropbox.com/scl/fi/7p2hql3lhp3v98s633a3f/vodkaCiient.exe?rlkey=hchtczlxhm9dlidd2mlbpjn0u&st=w8h0f8un&dl=1', '_blank');
     } else { alert('Нужна активная подписка'); }
 });
 
@@ -797,157 +797,76 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     window.location.href = '/';
 });
 
-// ========== ШАРИКИ КАК НА KLERPIK ==========
+// ========== ШАРИКИ ==========
 const canvas = document.getElementById('ballsCanvas');
 const ctx = canvas.getContext('2d');
 
 let balls = [];
-let ballMouseX = 0, ballMouseY = 0;
+let mouseX = 0, mouseY = 0;
 
-const colors = [
-    '#555', '#666', '#777', '#888', '#999', '#aaa',
-    '#444', '#333', '#5a5a5a', '#6b6b6b'
-];
+const colors = ['#555', '#666', '#777', '#888', '#999', '#aaa'];
 
 function initBalls() {
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
     
     balls = [];
-    const count = 60; // Много шариков как на скрине
-    
-    for (let i = 0; i < count; i++) {
-        const radius = Math.random() * 12 + 8; // 8-20px
+    for (let i = 0; i < 40; i++) {
         balls.push({
             x: Math.random() * canvas.width,
-            y: canvas.height - radius - Math.random() * 150, // Внизу
-            vx: 0,
-            vy: 0,
-            radius: radius,
-            color: colors[Math.floor(Math.random() * colors.length)],
-            mass: radius
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2,
+            radius: Math.random() * 15 + 8,
+            color: colors[Math.floor(Math.random() * colors.length)]
         });
     }
 }
 
-function drawBall(ball) {
-    // Основной круг
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = ball.color;
-    ctx.fill();
-    
-    // Блик сверху-слева (как на скрине)
-    ctx.beginPath();
-    ctx.arc(ball.x - ball.radius * 0.3, ball.y - ball.radius * 0.3, ball.radius * 0.35, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.fill();
-    
-    // Маленький блик
-    ctx.beginPath();
-    ctx.arc(ball.x - ball.radius * 0.15, ball.y - ball.radius * 0.45, ball.radius * 0.12, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.fill();
-}
-
 function updateBalls() {
-    const gravity = 0.15;
-    const friction = 0.95;
-    const bounce = 0.3;
-    const w = canvas.width;
-    const h = canvas.height;
-    
     for (let ball of balls) {
-        // Гравитация
-        ball.vy += gravity;
-        
-        // Сильное трение чтобы быстро успокаивались
-        ball.vx *= friction;
-        ball.vy *= friction;
-        
-        // Движение
         ball.x += ball.vx;
         ball.y += ball.vy;
         
-        // УЛУЧШЕННОЕ отталкивание при наведении мышки - СИЛЬНЕЕ ПОДПРЫГИВАЮТ
-        const dx = ball.x - ballMouseX;
-        const dy = ball.y - ballMouseY;
+        // Отскок от стен
+        if (ball.x < ball.radius || ball.x > canvas.width - ball.radius) ball.vx *= -1;
+        if (ball.y < ball.radius || ball.y > canvas.height - ball.radius) ball.vy *= -1;
+        
+        // Взаимодействие с мышкой
+        const dx = ball.x - mouseX;
+        const dy = ball.y - mouseY;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        
-        if (dist < 50 + ball.radius && dist > 0) {
-            // Подкидываем СИЛЬНЕЕ вверх и в сторону
-            const force = (50 + ball.radius - dist) / 20; // Чем ближе, тем сильнее
-            ball.vx += (dx / dist) * force * 1.5;
-            ball.vy -= force * 2.5; // Подкидываем вверх сильнее
+        if (dist < 60) {
+            ball.vx += dx * 0.02;
+            ball.vy += dy * 0.02;
         }
         
-        // Границы
-        if (ball.x - ball.radius < 0) {
-            ball.x = ball.radius;
-            ball.vx *= -bounce;
-        }
-        if (ball.x + ball.radius > w) {
-            ball.x = w - ball.radius;
-            ball.vx *= -bounce;
-        }
-        if (ball.y - ball.radius < 0) {
-            ball.y = ball.radius;
-            ball.vy *= -bounce;
-        }
-        if (ball.y + ball.radius > h) {
-            ball.y = h - ball.radius;
-            ball.vy *= -bounce;
-        }
+        // Ограничение скорости
+        ball.vx *= 0.99;
+        ball.vy *= 0.99;
     }
-    
-    // Коллизии между шариками (упрощённые)
-    for (let i = 0; i < balls.length; i++) {
-        for (let j = i + 1; j < balls.length; j++) {
-            const b1 = balls[i], b2 = balls[j];
-            const dx = b2.x - b1.x;
-            const dy = b2.y - b1.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const minDist = b1.radius + b2.radius;
-            
-            if (dist < minDist && dist > 0) {
-                const overlap = (minDist - dist) / 2;
-                const nx = dx / dist;
-                const ny = dy / dist;
-                
-                b1.x -= nx * overlap;
-                b1.y -= ny * overlap;
-                b2.x += nx * overlap;
-                b2.y += ny * overlap;
-                
-                // Обмен скоростями
-                const dvx = b1.vx - b2.vx;
-                const dvy = b1.vy - b2.vy;
-                const dvn = dvx * nx + dvy * ny;
-                
-                if (dvn > 0) {
-                    const m1 = b1.mass, m2 = b2.mass;
-                    const f = dvn / (m1 + m2) * 0.8;
-                    b1.vx -= f * m2 * nx;
-                    b1.vy -= f * m2 * ny;
-                    b2.vx += f * m1 * nx;
-                    b2.vy += f * m1 * ny;
-                }
-            }
-        }
+}
+
+function drawBalls() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let ball of balls) {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+        ctx.fillStyle = ball.color;
+        ctx.fill();
     }
 }
 
 function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     updateBalls();
-    balls.forEach(drawBall);
+    drawBalls();
     requestAnimationFrame(animate);
 }
 
 canvas.addEventListener('mousemove', (e) => {
     const rect = canvas.getBoundingClientRect();
-    ballMouseX = e.clientX - rect.left;
-    ballMouseY = e.clientY - rect.top;
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
 });
 
 window.addEventListener('resize', () => {
@@ -1079,4 +998,3 @@ document.oncontextmenu = function() { return false; };
 </script>
 </body>
 </html>
-

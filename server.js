@@ -3,7 +3,6 @@ const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
-const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,32 +12,6 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
-
-// ========== АНТИ-DDOS ЗАЩИТА ==========
-// Общий лимит - 100 запросов в минуту
-const generalLimiter = rateLimit({
-    windowMs: 60 * 1000,
-    max: 100,
-    message: { success: false, message: 'Слишком много запросов. Подождите минуту.' },
-    standardHeaders: true,
-    legacyHeaders: false
-});
-
-// Строгий лимит для авторизации - 5 попыток в 15 минут
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 5,
-    message: { success: false, message: 'Слишком много попыток входа. Подождите 15 минут.' }
-});
-
-// Лимит для API - 30 запросов в минуту
-const apiLimiter = rateLimit({
-    windowMs: 60 * 1000,
-    max: 30,
-    message: { success: false, message: 'Слишком много запросов к API.' }
-});
-
-app.use(generalLimiter);
 
 // Middleware
 app.use(express.json());
@@ -72,7 +45,6 @@ async function initDB() {
                 password VARCHAR(255) NOT NULL,
                 email VARCHAR(255) DEFAULT NULL,
                 hwid VARCHAR(255) DEFAULT NULL,
-                role VARCHAR(50) DEFAULT 'user',
                 subscription_type VARCHAR(50) DEFAULT NULL,
                 subscription_expires TIMESTAMP DEFAULT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -81,10 +53,6 @@ async function initDB() {
         
         // Добавляем колонку email если её нет
         await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255) DEFAULT NULL`).catch(() => {});
-        // Добавляем колонку role если её нет
-        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'user'`).catch(() => {});
-        // Устанавливаем дефолтную роль для существующих пользователей без роли
-        await pool.query(`UPDATE users SET role = 'user' WHERE role IS NULL`).catch(() => {});
         
         await pool.query(`
             CREATE TABLE IF NOT EXISTS keys (
@@ -110,73 +78,6 @@ async function initDB() {
             )
         `);
         
-        // Таблица для media конфигов
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS media_configs (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                description TEXT,
-                filename VARCHAR(255) NOT NULL,
-                content TEXT,
-                author_id INTEGER REFERENCES users(uid),
-                author_name VARCHAR(255),
-                price INTEGER DEFAULT 0,
-                funpay_url VARCHAR(500),
-                promo_code VARCHAR(50),
-                downloads INTEGER DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-        // Добавляем колонку content если её нет
-        await pool.query(`ALTER TABLE media_configs ADD COLUMN IF NOT EXISTS content TEXT`).catch(() => {});
-        
-        // Таблица для media пользователей
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS media_users (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(255) UNIQUE NOT NULL,
-                promo_code VARCHAR(50) DEFAULT NULL,
-                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-        // Добавляем колонку promo_code если её нет
-        await pool.query(`ALTER TABLE media_users ADD COLUMN IF NOT EXISTS promo_code VARCHAR(50) DEFAULT NULL`).catch(() => {});
-        
-        // Таблица для owner пользователей (разработчики)
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS owner_users (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(255) UNIQUE NOT NULL,
-                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-        
-        // Таблица для конфигов от разработчиков
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS owner_configs (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                description TEXT,
-                content TEXT,
-                author_name VARCHAR(255),
-                downloads INTEGER DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
-        `);
-        
-        // Таблица для сохранённых конфигов пользователей
-        await pool.query(`
-            CREATE TABLE IF NOT EXISTS saved_configs (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL,
-                config_id INTEGER NOT NULL,
-                config_type VARCHAR(50) NOT NULL,
-                config_name VARCHAR(255),
-                saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE(user_id, config_id, config_type)
-            )
-        `);
-        
         console.log('✅ Таблицы PostgreSQL созданы');
     } catch (err) {
         console.error('❌ Ошибка создания таблиц:', err);
@@ -185,8 +86,8 @@ async function initDB() {
 
 initDB();
 
-// API: Регистрация (с защитой от спама)
-app.post('/api/register', authLimiter, async (req, res) => {
+// API: Регистрация
+app.post('/api/register', async (req, res) => {
     const { username, password, email } = req.body;
     if (!username || !password || !email) return res.status(400).json({ success: false, message: 'Заполните все поля' });
     if (username.length < 3) return res.status(400).json({ success: false, message: 'Логин минимум 3 символа' });
@@ -221,8 +122,8 @@ app.post('/api/register', authLimiter, async (req, res) => {
     }
 });
 
-// API: Вход (с защитой от брутфорса)
-app.post('/api/login', authLimiter, async (req, res) => {
+// API: Вход
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ success: false, message: 'Заполните все поля' });
 
@@ -249,7 +150,7 @@ app.get('/api/check-auth', async (req, res) => {
 
     try {
         const result = await pool.query(
-            'SELECT uid, username, email, hwid, role, created_at, subscription_type, subscription_expires FROM users WHERE uid = $1',
+            'SELECT uid, username, email, hwid, created_at, subscription_type, subscription_expires FROM users WHERE uid = $1',
             [req.session.userId]
         );
         
@@ -268,7 +169,6 @@ app.get('/api/check-auth', async (req, res) => {
             username: user.username,
             email: user.email,
             hwid: user.hwid,
-            role: user.role || 'user',
             created_at: user.created_at,
             subscription_type: user.subscription_type,
             subscription_expires: user.subscription_expires,
@@ -316,204 +216,12 @@ app.post('/api/change-password', async (req, res) => {
 app.get('/api/admin/users', async (req, res) => {
     try {
         const result = await pool.query(
-            'SELECT uid, username, hwid, role, created_at, subscription_type, subscription_expires FROM users ORDER BY uid'
+            'SELECT uid, username, hwid, created_at, subscription_type, subscription_expires FROM users ORDER BY uid'
         );
         res.json({ success: true, users: result.rows });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, message: 'Ошибка сервера' });
-    }
-});
-
-// API: Выдать роль media
-app.post('/api/admin/set-role', async (req, res) => {
-    const { uid, role, username } = req.body;
-    try {
-        if (role === 'media') {
-            await pool.query('INSERT INTO media_users (username) VALUES ($1) ON CONFLICT (username) DO NOTHING', [username]);
-        } else {
-            await pool.query('DELETE FROM media_users WHERE username = $1', [username]);
-        }
-        res.json({ success: true, message: 'Роль обновлена' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка сервера' });
-    }
-});
-
-// API: Проверить media роль
-app.get('/api/check-media/:username', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT * FROM media_users WHERE username = $1', [req.params.username]);
-        if (result.rows.length > 0) {
-            res.json({ isMedia: true, promoCode: result.rows[0].promo_code });
-        } else {
-            res.json({ isMedia: false, promoCode: null });
-        }
-    } catch (err) {
-        res.json({ isMedia: false, promoCode: null });
-    }
-});
-
-// API: Создать промокод для media (только 1 раз)
-app.post('/api/media/create-promo', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    const { promo_code } = req.body;
-    if (!promo_code || promo_code.length < 3) return res.status(400).json({ success: false, message: 'Промокод минимум 3 символа' });
-    
-    try {
-        // Получаем username
-        const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [req.session.userId]);
-        const username = userResult.rows[0]?.username;
-        if (!username) return res.status(400).json({ success: false, message: 'Пользователь не найден' });
-        
-        // Проверяем что это media
-        const mediaResult = await pool.query('SELECT * FROM media_users WHERE username = $1', [username]);
-        if (mediaResult.rows.length === 0) return res.status(403).json({ success: false, message: 'Вы не Media' });
-        
-        // Проверяем что промокод ещё не создан
-        if (mediaResult.rows[0].promo_code) {
-            return res.status(400).json({ success: false, message: 'Промокод уже создан: ' + mediaResult.rows[0].promo_code });
-        }
-        
-        // Создаём промокод
-        await pool.query('UPDATE media_users SET promo_code = $1 WHERE username = $2', [promo_code, username]);
-        res.json({ success: true, message: 'Промокод создан!' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка сервера' });
-    }
-});
-
-// API: Проверить промокод (для скидки)
-app.get('/api/check-promo/:code', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT username FROM media_users WHERE promo_code = $1', [req.params.code]);
-        if (result.rows.length > 0) {
-            res.json({ valid: true, discount: 5, author: result.rows[0].username });
-        } else {
-            res.json({ valid: false });
-        }
-    } catch (err) {
-        res.json({ valid: false });
-    }
-});
-
-// API: Список всех media юзеров
-app.get('/api/admin/media-users', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT username FROM media_users');
-        res.json({ success: true, users: result.rows.map(r => r.username) });
-    } catch (err) {
-        res.json({ success: false, users: [] });
-    }
-});
-
-// API: Проверить owner роль
-app.get('/api/check-owner/:username', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT * FROM owner_users WHERE username = $1', [req.params.username]);
-        res.json({ isOwner: result.rows.length > 0 });
-    } catch (err) {
-        res.json({ isOwner: false });
-    }
-});
-
-// API: Список всех owner юзеров
-app.get('/api/admin/owner-users', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT username FROM owner_users');
-        res.json({ success: true, users: result.rows.map(r => r.username) });
-    } catch (err) {
-        res.json({ success: false, users: [] });
-    }
-});
-
-// API: Выдать роль owner
-app.post('/api/admin/set-owner', async (req, res) => {
-    const { username, role } = req.body;
-    try {
-        if (role === 'owner') {
-            await pool.query('INSERT INTO owner_users (username) VALUES ($1) ON CONFLICT (username) DO NOTHING', [username]);
-        } else {
-            await pool.query('DELETE FROM owner_users WHERE username = $1', [username]);
-        }
-        res.json({ success: true, message: 'Роль обновлена' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка сервера' });
-    }
-});
-
-// API: Загрузить owner конфиг
-app.post('/api/owner-configs/upload', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    
-    const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [req.session.userId]);
-    const username = userResult.rows[0]?.username;
-    if (!username) return res.status(400).json({ success: false, message: 'Пользователь не найден' });
-    
-    const ownerCheck = await pool.query('SELECT * FROM owner_users WHERE username = $1', [username]);
-    if (ownerCheck.rows.length === 0) {
-        return res.status(403).json({ success: false, message: 'Нет доступа. Нужна роль Owner' });
-    }
-    
-    const { name, description, content } = req.body;
-    if (!name) return res.status(400).json({ success: false, message: 'Введите название' });
-    if (!content) return res.status(400).json({ success: false, message: 'Конфиг пустой' });
-    
-    try {
-        const contentBase64 = Buffer.from(content, 'utf8').toString('base64');
-        await pool.query('INSERT INTO owner_configs (name, description, content, author_name) VALUES ($1, $2, $3, $4)',
-            [name, description || '', contentBase64, username]);
-        res.json({ success: true, message: 'Конфиг загружен!' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка загрузки' });
-    }
-});
-
-// API: Получить owner конфиги
-app.get('/api/owner-configs', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT id, name, description, author_name, downloads FROM owner_configs ORDER BY created_at DESC');
-        res.json({ success: true, configs: result.rows });
-    } catch (err) {
-        res.status(500).json({ success: false, configs: [] });
-    }
-});
-
-// API: Скачать owner конфиг
-app.get('/api/owner-configs/download/:id', async (req, res) => {
-    const userId = req.session.userId;
-    if (!userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    
-    // Проверка подписки
-    const userResult = await pool.query('SELECT subscription_type, subscription_expires FROM users WHERE uid = $1', [userId]);
-    const user = userResult.rows[0];
-    let hasSub = false;
-    if (user?.subscription_type === 'lifetime') hasSub = true;
-    else if (user?.subscription_expires && new Date(user.subscription_expires) > new Date()) hasSub = true;
-    
-    if (!hasSub) return res.status(403).json({ success: false, message: 'Нужна активная подписка' });
-    
-    try {
-        const result = await pool.query('SELECT * FROM owner_configs WHERE id = $1', [req.params.id]);
-        if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Не найден' });
-        const config = result.rows[0];
-        await pool.query('UPDATE owner_configs SET downloads = downloads + 1 WHERE id = $1', [req.params.id]);
-        
-        if (config.content) {
-            const content = Buffer.from(config.content, 'base64').toString('utf8');
-            res.setHeader('Content-Type', 'application/octet-stream');
-            res.setHeader('Content-Disposition', 'attachment; filename="' + config.name + '.json"');
-            res.send(content);
-        } else {
-            return res.status(404).json({ success: false, message: 'Конфиг повреждён' });
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка' });
     }
 });
 
@@ -652,7 +360,7 @@ app.post('/api/launcher/check-subscription', async (req, res) => {
         if (freeKeyCheck.rows.length > 0) {
             return res.status(403).json({ 
                 success: false, 
-                message: 'Вы уже получали бесплатный ключ на другом аккаунте', 
+                message: 'Вы уже получали бесплатный ключ на другой аккаунт! Доступ запрещён.', 
                 has_subscription: false,
                 banned: true
             });
@@ -822,315 +530,7 @@ app.post('/api/admin/reset-database', async (req, res) => {
     }
 });
 
-// ========== СОХРАНЁННЫЕ КОНФИГИ ==========
-
-// API: Сохранить конфиг после скачивания
-app.post('/api/saved-configs/add', apiLimiter, async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    const { config_id, config_type, config_name } = req.body;
-    try {
-        await pool.query(
-            'INSERT INTO saved_configs (user_id, config_id, config_type, config_name) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, config_id, config_type) DO NOTHING',
-            [req.session.userId, config_id, config_type, config_name]
-        );
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false, message: 'Ошибка сохранения' });
-    }
-});
-
-// API: Получить сохранённые конфиги
-app.get('/api/saved-configs', apiLimiter, async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ success: false, configs: [] });
-    try {
-        const result = await pool.query(
-            'SELECT * FROM saved_configs WHERE user_id = $1 ORDER BY saved_at DESC',
-            [req.session.userId]
-        );
-        res.json({ success: true, configs: result.rows });
-    } catch (err) {
-        res.json({ success: false, configs: [] });
-    }
-});
-
-// API: Удалить из сохранённых
-app.delete('/api/saved-configs/:id', apiLimiter, async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ success: false });
-    try {
-        await pool.query('DELETE FROM saved_configs WHERE id = $1 AND user_id = $2', [req.params.id, req.session.userId]);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false });
-    }
-});
-
-// API: Проверить сохранён ли конфиг
-app.get('/api/saved-configs/check/:config_id/:config_type', async (req, res) => {
-    if (!req.session.userId) return res.json({ saved: false });
-    try {
-        const result = await pool.query(
-            'SELECT id FROM saved_configs WHERE user_id = $1 AND config_id = $2 AND config_type = $3',
-            [req.session.userId, req.params.config_id, req.params.config_type]
-        );
-        res.json({ saved: result.rows.length > 0, savedId: result.rows[0]?.id });
-    } catch (err) {
-        res.json({ saved: false });
-    }
-});
-
 // Запуск сервера
 app.listen(PORT, () => {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
-});
-
-// ========================================
-// API ДЛЯ КОНФИГОВ (MARKETPLACE)
-// ========================================
-
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-
-const configsDir = path.join(__dirname, 'configs');
-if (!fs.existsSync(configsDir)) fs.mkdirSync(configsDir, { recursive: true });
-
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, configsDir),
-    filename: (req, file, cb) => cb(null, Date.now() + '-' + Math.random().toString(36).substring(7) + path.extname(file.originalname))
-});
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: (req, file, cb) => {
-        const ext = path.extname(file.originalname).toLowerCase();
-        if (['.json', '.cfg', '.txt', '.yaml', '.yml'].includes(ext)) cb(null, true);
-        else cb(new Error('Неподдерживаемый формат'));
-    }
-});
-
-(async () => {
-    try {
-        await pool.query(`CREATE TABLE IF NOT EXISTS configs (
-            id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, description TEXT,
-            filename VARCHAR(255) NOT NULL, content TEXT,
-            author_id INTEGER REFERENCES users(uid),
-            author_name VARCHAR(255), private BOOLEAN DEFAULT FALSE,
-            downloads INTEGER DEFAULT 0, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )`);
-        // Добавляем колонку content если её нет
-        await pool.query(`ALTER TABLE configs ADD COLUMN IF NOT EXISTS content TEXT`).catch(() => {});
-    } catch (err) { console.error('Configs table error:', err); }
-})();
-
-app.post('/api/configs/upload', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    const { name, description, content, private: isPrivate } = req.body;
-    if (!name) return res.status(400).json({ success: false, message: 'Введите название' });
-    if (!content) return res.status(400).json({ success: false, message: 'Конфиг пустой' });
-    try {
-        const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [req.session.userId]);
-        // Конвертируем в base64 для безопасного хранения
-        const contentBase64 = Buffer.from(content, 'utf8').toString('base64');
-        await pool.query('INSERT INTO configs (name, description, filename, content, author_id, author_name, private) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-            [name, description || '', name + '.json', contentBase64, req.session.userId, userResult.rows[0]?.username || 'Unknown', isPrivate === 'true' || isPrivate === true]);
-        res.json({ success: true, message: 'Конфиг загружен!' });
-    } catch (err) { 
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка загрузки' }); 
-    }
-});
-
-app.get('/api/configs/my', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    try {
-        const result = await pool.query('SELECT id, name, description, author_name as author, private, downloads FROM configs WHERE author_id = $1 ORDER BY created_at DESC', [req.session.userId]);
-        res.json({ success: true, configs: result.rows });
-    } catch (err) { res.status(500).json({ success: false, message: 'Ошибка' }); }
-});
-
-app.get('/api/configs/search', async (req, res) => {
-    const { q } = req.query;
-    try {
-        const result = q 
-            ? await pool.query(`SELECT id, name, description, author_name as author, downloads FROM configs WHERE private = FALSE AND (name ILIKE $1 OR author_name ILIKE $1) ORDER BY downloads DESC LIMIT 50`, [`%${q}%`])
-            : await pool.query(`SELECT id, name, description, author_name as author, downloads FROM configs WHERE private = FALSE ORDER BY created_at DESC LIMIT 50`);
-        res.json({ success: true, configs: result.rows });
-    } catch (err) { res.status(500).json({ success: false, message: 'Ошибка' }); }
-});
-
-app.get('/api/configs/download/:id', async (req, res) => {
-    const userId = req.session.userId;
-    if (!userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    
-    // Проверка подписки
-    const userResult = await pool.query('SELECT subscription_type, subscription_expires FROM users WHERE uid = $1', [userId]);
-    const user = userResult.rows[0];
-    let hasSub = false;
-    if (user?.subscription_type === 'lifetime') hasSub = true;
-    else if (user?.subscription_expires && new Date(user.subscription_expires) > new Date()) hasSub = true;
-    
-    if (!hasSub) return res.status(403).json({ success: false, message: 'Нужна активная подписка' });
-    
-    try {
-        const result = await pool.query('SELECT * FROM configs WHERE id = $1', [req.params.id]);
-        if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Конфиг не найден' });
-        const config = result.rows[0];
-        if (config.private && config.author_id !== userId) return res.status(403).json({ success: false, message: 'Нет доступа' });
-        await pool.query('UPDATE configs SET downloads = downloads + 1 WHERE id = $1', [req.params.id]);
-        
-        // Отдаём содержимое из базы данных
-        if (config.content) {
-            // Декодируем из base64
-            const content = Buffer.from(config.content, 'base64').toString('utf8');
-            res.setHeader('Content-Type', 'application/octet-stream');
-            res.setHeader('Content-Disposition', 'attachment; filename="' + config.name + '.json"');
-            res.send(content);
-        } else {
-            return res.status(404).json({ success: false, message: 'Конфиг повреждён, перезагрузите его' });
-        }
-    } catch (err) { 
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка сервера' }); 
-    }
-});
-
-app.delete('/api/configs/:id', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    try {
-        const result = await pool.query('SELECT * FROM configs WHERE id = $1 AND author_id = $2', [req.params.id, req.session.userId]);
-        if (result.rows.length === 0) return res.status(404).json({ success: false, message: 'Не найден' });
-        await pool.query('DELETE FROM configs WHERE id = $1', [req.params.id]);
-        res.json({ success: true, message: 'Удалён' });
-    } catch (err) { res.status(500).json({ success: false, message: 'Ошибка' }); }
-});
-
-// ========================================
-// API ДЛЯ MEDIA КОНФИГОВ
-// ========================================
-
-// Загрузка media конфига (только для роли media)
-app.post('/api/media-configs/upload', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    
-    // Проверка роли
-    const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [req.session.userId]);
-    const username = userResult.rows[0]?.username;
-    if (!username) return res.status(400).json({ success: false, message: 'Пользователь не найден' });
-    
-    const mediaCheck = await pool.query('SELECT * FROM media_users WHERE username = $1', [username]);
-    if (mediaCheck.rows.length === 0) {
-        return res.status(403).json({ success: false, message: 'Нет доступа. Нужна роль Media' });
-    }
-    
-    const { name, description, content, funpay_url } = req.body;
-    if (!name) return res.status(400).json({ success: false, message: 'Введите название' });
-    if (!funpay_url) return res.status(400).json({ success: false, message: 'Введите ссылку на FunPay' });
-    if (!content) return res.status(400).json({ success: false, message: 'Конфиг пустой' });
-    
-    try {
-        // Конвертируем в base64
-        const contentBase64 = Buffer.from(content, 'utf8').toString('base64');
-        await pool.query(
-            'INSERT INTO media_configs (name, description, filename, author_id, author_name, content, funpay_url) VALUES ($1, $2, $3, $4, $5, $6, $7)',
-            [name, description || '', name + '.json', req.session.userId, username, contentBase64, funpay_url]
-        );
-        res.json({ success: true, message: 'Media конфиг загружен!' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка загрузки' });
-    }
-});
-
-// Получить все media конфиги (для маркетплейса)
-app.get('/api/media-configs', async (req, res) => {
-    try {
-        const result = await pool.query(
-            'SELECT id, name, description, author_name, price, funpay_url, promo_code, downloads FROM media_configs ORDER BY created_at DESC'
-        );
-        res.json({ success: true, configs: result.rows });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка' });
-    }
-});
-
-// Удалить свой media конфиг
-app.delete('/api/media-configs/:id', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    try {
-        // Проверяем что это конфиг текущего юзера
-        const check = await pool.query('SELECT author_id FROM media_configs WHERE id = $1', [req.params.id]);
-        if (check.rows.length === 0) return res.status(404).json({ success: false, message: 'Конфиг не найден' });
-        if (check.rows[0].author_id !== req.session.userId) {
-            return res.status(403).json({ success: false, message: 'Это не ваш конфиг' });
-        }
-        await pool.query('DELETE FROM media_configs WHERE id = $1', [req.params.id]);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false, message: 'Ошибка удаления' });
-    }
-});
-
-// Удалить свой owner конфиг
-app.delete('/api/owner-configs/:id', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ success: false, message: 'Не авторизован' });
-    try {
-        const userResult = await pool.query('SELECT username FROM users WHERE uid = $1', [req.session.userId]);
-        const username = userResult.rows[0]?.username;
-        
-        const check = await pool.query('SELECT author_name FROM owner_configs WHERE id = $1', [req.params.id]);
-        if (check.rows.length === 0) return res.status(404).json({ success: false, message: 'Конфиг не найден' });
-        if (check.rows[0].author_name !== username) {
-            return res.status(403).json({ success: false, message: 'Это не ваш конфиг' });
-        }
-        await pool.query('DELETE FROM owner_configs WHERE id = $1', [req.params.id]);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ success: false, message: 'Ошибка удаления' });
-    }
-});
-
-// Админ: получить все media конфиги для управления
-app.get('/api/admin/media-configs', async (req, res) => {
-    try {
-        const result = await pool.query(
-            'SELECT * FROM media_configs ORDER BY created_at DESC'
-        );
-        res.json({ success: true, configs: result.rows });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка' });
-    }
-});
-
-// Админ: обновить цену и ссылку FunPay для media конфига
-app.post('/api/admin/media-configs/update', async (req, res) => {
-    const { id, price, funpay_url } = req.body;
-    try {
-        await pool.query(
-            'UPDATE media_configs SET price = $1, funpay_url = $2 WHERE id = $3',
-            [price || 0, funpay_url || null, id]
-        );
-        res.json({ success: true, message: 'Обновлено' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка' });
-    }
-});
-
-// Админ: удалить media конфиг
-app.delete('/api/admin/media-configs/:id', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT filename FROM media_configs WHERE id = $1', [req.params.id]);
-        if (result.rows.length > 0) {
-            const filePath = path.join(configsDir, result.rows[0].filename);
-            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-        }
-        await pool.query('DELETE FROM media_configs WHERE id = $1', [req.params.id]);
-        res.json({ success: true, message: 'Удалён' });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, message: 'Ошибка' });
-    }
 });

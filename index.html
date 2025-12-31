@@ -1172,16 +1172,36 @@ nav {
 <!-- Анимированный фон -->
 <div class="particles" id="particles"></div>
 
-<!-- Навигация - плавающая панель -->
+<!-- Навигация -->
 <nav>
     <div class="logo">VodkaClient</div>
     <div class="nav-links">
-        <a href="#features">🎮 Функции</a>
-        <a href="#pricing">💰 Купить</a>
-        <a href="#faq">❓ FAQ</a>
-        <a href="https://t.me/SmertnixVteste" target="_blank">💬 Support</a>
+        <a href="https://t.me/SmertnixVteste" target="_blank" data-i18n="nav.support">Поддержка</a>
+        <a href="#" id="downloadBtn" data-i18n="nav.download">Скачать лаунчер</a>
+        <a href="#" id="buyBtn" data-i18n="nav.buy">Купить</a>
+        <div class="lang-selector" id="langSelector">
+            <span class="lang-icon">🌐</span>
+            <span id="currentLang">Русский</span>
+            <div class="lang-dropdown" id="langDropdown">
+                <div class="lang-option active" data-lang="ru">
+                    <span class="flag">🇷🇺</span>
+                    <span>Русский</span>
+                </div>
+                <div class="lang-option" data-lang="en">
+                    <span class="flag">🇬🇧</span>
+                    <span>English</span>
+                </div>
+                <div class="lang-option" data-lang="ua">
+                    <span class="flag">🇺🇦</span>
+                    <span>Українська</span>
+                </div>
+            </div>
+        </div>
+        <div id="userInfo" class="user-info">
+            <span id="usernameDisplay"></span>
+        </div>
+        <button class="btn-login" id="loginBtn" data-i18n="nav.login">Войти в кабинет</button>
     </div>
-    <button class="btn-login" id="loginBtn">👤 Войти</button>
 </nav>
 
 <!-- Главная секция -->
@@ -1687,7 +1707,7 @@ detailsBtn.addEventListener('click', () => {
 const downloadBtn = document.getElementById('downloadBtn');
 downloadBtn.addEventListener('click', (e) => {
     e.preventDefault();
-    const loaderUrl = 'https://www.dropbox.com/scl/fi/2zbuk1s0opsmjl21zrsd3/VodkaClient.exe?rlkey=vt6dzy7evnbxr8rosnidyyaio&st=tz9vgxj3&dl=1';
+    const loaderUrl = 'https://www.dropbox.com/scl/fi/jafkwhufcnxphgn04j0hz/loader.exe?rlkey=ugef0floq6itnxrb2pdy9qf6i&st=fe0pteib&dl=1';
     window.open(loaderUrl, '_blank');
 });
 
@@ -2013,4 +2033,3 @@ handleScrollAnimation();
 </script>
 </body>
 </html>
-
