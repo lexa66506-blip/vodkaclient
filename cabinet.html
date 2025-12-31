@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -710,6 +710,7 @@ async function loadUserData() {
         document.getElementById('cabinetContent').style.display = 'flex';
         
         initBalls();
+        setupBallsEvents();
         animate();
         
     } catch (error) {
@@ -798,15 +799,17 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
 });
 
 // ========== ШАРИКИ ==========
-const canvas = document.getElementById('ballsCanvas');
-const ctx = canvas.getContext('2d');
-
+let canvas, ctx;
 let balls = [];
 let mouseX = 0, mouseY = 0;
 
 const colors = ['#555', '#666', '#777', '#888', '#999', '#aaa'];
 
 function initBalls() {
+    canvas = document.getElementById('ballsCanvas');
+    if (!canvas) return;
+    ctx = canvas.getContext('2d');
+    
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
     
@@ -858,20 +861,26 @@ function drawBalls() {
 }
 
 function animate() {
+    if (!canvas || !ctx) return;
     updateBalls();
     drawBalls();
     requestAnimationFrame(animate);
 }
 
-canvas.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    mouseX = e.clientX - rect.left;
-    mouseY = e.clientY - rect.top;
-});
+function setupBallsEvents() {
+    if (!canvas) return;
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+    });
+}
 
 window.addEventListener('resize', () => {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    if (canvas) {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+    }
 });
 
 // ========== АДМИН АВТОРИЗАЦИЯ (Alt+N) ==========
