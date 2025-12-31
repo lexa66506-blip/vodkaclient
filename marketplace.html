@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>Marketplace - VodkaClient</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="translations.js"></script>
 
 <style>
 * {
@@ -49,9 +50,9 @@ body {
 <nav class="floating-nav">
     <div class="nav-logo">VodkaClient</div>
     <div class="nav-links">
-        <a href="/">🏠 Home</a>
-        <a href="/marketplace.html" class="active">🛒 Marketplace</a>
-        <a href="https://t.me/SmertnixVteste" target="_blank">💬 Support</a>
+        <a href="/" data-i18n="nav.home">🏠 Главная</a>
+        <a href="/marketplace.html" class="active" data-i18n="nav.marketplace">🛒 Маркетплейс</a>
+        <a href="https://t.me/SmertnixVteste" target="_blank" data-i18n="nav.support">💬 Поддержка</a>
     </div>
     <a href="/cabinet.html" class="nav-user">
         <span>👤</span>
@@ -113,14 +114,6 @@ body {
 .empty-state-text { font-size: 14px; margin-bottom: 20px; }
 .upload-btn { padding: 12px 25px; background: rgba(80,80,80,0.3); border: 1px dashed rgba(80,80,80,0.5); border-radius: 10px; color: #888; font-size: 13px; cursor: pointer; transition: all 0.2s; }
 .upload-btn:hover { background: rgba(100,100,100,0.3); color: #aaa; }
-
-/* Контекстное меню */
-.context-menu { position: fixed; background: rgba(25,25,25,0.98); border: 1px solid rgba(80,80,80,0.4); border-radius: 10px; padding: 6px 0; min-width: 150px; z-index: 2000; display: none; box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
-.context-menu.active { display: block; }
-.context-menu-item { padding: 10px 16px; color: #aaa; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s; }
-.context-menu-item:hover { background: rgba(80,80,80,0.3); color: #fff; }
-.context-menu-item.delete { color: #ff6b6b; }
-.context-menu-item.delete:hover { background: rgba(255,50,50,0.2); }
 </style>
 
 <style>
@@ -129,12 +122,12 @@ body {
 
 .upload-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; }
 .upload-modal.active { display: flex; }
-.upload-modal-content { width: 90%; max-width: 600px; max-height: 90vh; background: rgba(25,25,25,0.98); border: 1px solid rgba(80,80,80,0.4); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
+.upload-modal-content { width: 90%; max-width: 600px; height: 400px; background: rgba(25,25,25,0.98); border: 1px solid rgba(80,80,80,0.4); border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
 .upload-modal-header { padding: 20px 25px; border-bottom: 1px solid rgba(80,80,80,0.3); display: flex; justify-content: space-between; align-items: center; }
 .upload-modal-title { font-size: 18px; font-weight: 600; color: #fff; }
 .upload-modal-close { width: 32px; height: 32px; background: rgba(80,80,80,0.3); border: none; border-radius: 8px; color: #888; font-size: 18px; cursor: pointer; transition: all 0.2s; }
 .upload-modal-close:hover { background: rgba(255,80,80,0.3); color: #ff8888; }
-.upload-dropzone { flex: 1; margin: 25px; min-height: 250px; border: 2px dashed rgba(80,80,80,0.5); border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; transition: all 0.3s; cursor: pointer; }
+.upload-dropzone { flex: 1; margin: 25px; border: 2px dashed rgba(80,80,80,0.5); border-radius: 15px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 15px; transition: all 0.3s; cursor: pointer; }
 .upload-dropzone:hover { border-color: rgba(120,120,120,0.6); background: rgba(40,40,40,0.3); }
 .upload-dropzone.dragover { border-color: rgba(100,200,100,0.6); background: rgba(100,200,100,0.1); }
 .upload-dropzone-icon { font-size: 64px; color: #555; }
@@ -164,14 +157,14 @@ body {
 
 <div class="sidebar" id="sidebar">
     <div class="sidebar-content">
-        <div class="sidebar-header">📦 Меню</div>
+        <div class="sidebar-header" data-i18n="market.menu">📦 Меню</div>
         <div class="sidebar-menu">
-            <div class="sidebar-item active" data-tab="search"><span>🏠</span> Главная</div>
-            <div class="sidebar-item" data-tab="my-configs"><span>📁</span> Мои конфиги</div>
-            <div class="sidebar-item" data-tab="saved"><span>💾</span> Сохранённые</div>
-            <div class="sidebar-item" data-tab="owner"><span>⚙️</span> От разработчиков</div>
-            <div class="sidebar-item" data-tab="media"><span>🎬</span> От Media</div>
-            <div class="sidebar-item upload-sidebar-btn" id="uploadSidebarBtn"><span>📤</span> Загрузить</div>
+            <div class="sidebar-item active" data-tab="search"><span>🏠</span> <span data-i18n="market.home">Главная</span></div>
+            <div class="sidebar-item" data-tab="my-configs"><span>📁</span> <span data-i18n="market.myConfigs">Мои конфиги</span></div>
+            <div class="sidebar-item" data-tab="saved"><span>💾</span> <span data-i18n="market.saved">Сохранённые</span></div>
+            <div class="sidebar-item" data-tab="owner"><span>⚙️</span> <span data-i18n="market.fromDevs">От разработчиков</span></div>
+            <div class="sidebar-item" data-tab="media"><span>🎬</span> <span data-i18n="market.fromMedia">От Media</span></div>
+            <div class="sidebar-item upload-sidebar-btn" id="uploadSidebarBtn"><span>📤</span> <span data-i18n="market.upload">Загрузить</span></div>
         </div>
     </div>
     <div class="sidebar-toggle" id="sidebarToggle">›</div>
@@ -183,16 +176,16 @@ body {
             
             <div class="tab-panel active" id="tab-search">
                 <div class="content-header">
-                    <div class="content-title">🏠 Главная</div>
+                    <div class="content-title" data-i18n="market.home">🏠 Главная</div>
                     <div class="search-box">
-                        <input type="text" class="search-input" id="searchInput" placeholder="Название или автор...">
-                        <button class="search-btn" id="searchBtn">Найти</button>
+                        <input type="text" class="search-input" id="searchInput" data-i18n-placeholder="market.searchPlaceholder" placeholder="Название или автор...">
+                        <button class="search-btn" id="searchBtn" data-i18n="market.search">Найти</button>
                     </div>
                 </div>
                 <div class="content-body">
                     <div class="empty-state" id="searchEmpty">
                         <div class="empty-state-icon">🛒</div>
-                        <div class="empty-state-text">Добро пожаловать в Marketplace!</div>
+                        <div class="empty-state-text" data-i18n="market.welcome">Добро пожаловать в Marketplace!</div>
                     </div>
                     <div class="configs-grid" id="searchResults" style="display: none;"></div>
                 </div>
@@ -200,14 +193,14 @@ body {
 
             <div class="tab-panel" id="tab-my-configs">
                 <div class="content-header">
-                    <div class="content-title">📁 Мои конфиги</div>
-                    <button class="upload-btn" id="uploadBtn">+ Загрузить конфиг</button>
+                    <div class="content-title" data-i18n="market.myConfigs">📁 Мои конфиги</div>
+                    <button class="upload-btn" id="uploadBtn" data-i18n="market.uploadConfig">+ Загрузить конфиг</button>
                 </div>
                 <div class="content-body">
                     <div class="empty-state" id="myConfigsEmpty">
                         <div class="empty-state-icon">📂</div>
-                        <div class="empty-state-text">У вас пока нет загруженных конфигов</div>
-                        <button class="upload-btn" id="uploadBtn2">+ Загрузить первый конфиг</button>
+                        <div class="empty-state-text" data-i18n="market.noConfigs">У вас пока нет загруженных конфигов</div>
+                        <button class="upload-btn" id="uploadBtn2" data-i18n="market.uploadFirst">+ Загрузить первый конфиг</button>
                     </div>
                     <div class="configs-grid" id="myConfigsGrid" style="display: none;"></div>
                 </div>
@@ -215,12 +208,12 @@ body {
 
             <div class="tab-panel" id="tab-saved">
                 <div class="content-header">
-                    <div class="content-title">💾 Сохранённые конфиги</div>
+                    <div class="content-title" data-i18n="market.saved">💾 Сохранённые конфиги</div>
                 </div>
                 <div class="content-body">
                     <div class="empty-state" id="savedEmpty">
                         <div class="empty-state-icon">💾</div>
-                        <div class="empty-state-text">Нет сохранённых конфигов</div>
+                        <div class="empty-state-text" data-i18n="market.noSaved">Нет сохранённых конфигов</div>
                     </div>
                     <div class="configs-grid" id="savedConfigsGrid" style="display: none;"></div>
                 </div>
@@ -297,7 +290,7 @@ body {
 
 <!-- Модалка загрузки Owner конфига -->
 <div class="upload-modal" id="ownerUploadModal">
-    <div class="upload-modal-content">
+    <div class="upload-modal-content" style="border-color: rgba(255,165,0,0.4);">
         <div class="upload-modal-header">
             <div class="upload-modal-title" style="color: #ffa500;">⚙️ Загрузить Owner конфиг</div>
             <button class="upload-modal-close" id="ownerUploadClose">✕</button>
@@ -330,8 +323,8 @@ body {
 </div>
 
 <!-- Модалка загрузки Media конфига -->
-<div class="upload-modal" id="mediaUploadModal">
-    <div class="upload-modal-content">
+<div class="upload-modal" id="mediaUploadModal"></div>
+    <div class="upload-modal-content" style="border-color: rgba(138,43,226,0.4);">
         <div class="upload-modal-header">
             <div class="upload-modal-title" style="color: #9370db;">🎬 Загрузить Media конфиг</div>
             <button class="upload-modal-close" id="mediaUploadClose">✕</button>
@@ -355,10 +348,6 @@ body {
                 <label class="upload-form-label">Описание</label>
                 <textarea class="upload-form-textarea" id="mediaConfigDesc" placeholder="Описание конфига..."></textarea>
             </div>
-            <div class="upload-form-row">
-                <label class="upload-form-label">Ссылка на FunPay</label>
-                <input type="text" class="upload-form-input" id="mediaFunpayUrl" placeholder="https://funpay.com/lots/...">
-            </div>
             <div class="upload-form-actions">
                 <button class="upload-form-btn cancel" id="mediaCancelBtn">Отмена</button>
                 <button class="upload-form-btn submit" id="mediaSubmitBtn" style="background: rgba(138,43,226,0.4); border-color: rgba(138,43,226,0.5);" onmouseover="this.style.background='rgba(138,43,226,0.6)';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='rgba(138,43,226,0.4)';this.style.transform=''">Загрузить</button>
@@ -367,16 +356,9 @@ body {
     </div>
 </div>
 
-<!-- Контекстное меню -->
-<div class="context-menu" id="contextMenu">
-    <div class="context-menu-item delete" id="contextDelete">🗑 Удалить</div>
-</div>
-
 <script>
 let userData = null;
 let hasSubscription = false;
-let contextConfigId = null;
-let contextConfigType = null;
 
 async function checkAuth() {
     try {
@@ -729,7 +711,6 @@ function resetMediaUpload() {
     document.getElementById('mediaProgressFill').style.width = '0%';
     document.getElementById('mediaConfigName').value = '';
     document.getElementById('mediaConfigDesc').value = '';
-    document.getElementById('mediaFunpayUrl').value = '';
     mediaSelectedFile = null;
     mediaFileInput.value = '';
 }
@@ -737,9 +718,7 @@ function resetMediaUpload() {
 document.getElementById('mediaSubmitBtn').addEventListener('click', async () => {
     const name = document.getElementById('mediaConfigName').value.trim();
     const desc = document.getElementById('mediaConfigDesc').value.trim();
-    const funpayUrl = document.getElementById('mediaFunpayUrl').value.trim();
     if (!name) { alert('Введите название'); return; }
-    if (!funpayUrl) { alert('Введите ссылку на FunPay'); return; }
     if (!mediaSelectedFile) { alert('Файл не выбран'); return; }
     
     const reader = new FileReader();
@@ -749,11 +728,11 @@ document.getElementById('mediaSubmitBtn').addEventListener('click', async () => 
             const response = await fetch('/api/media-configs/upload', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, description: desc, content, funpay_url: funpayUrl })
+                body: JSON.stringify({ name, description: desc, content })
             });
             const data = await response.json();
             if (data.success) {
-                alert('Конфиг загружен!');
+                alert('Конфиг загружен! Ожидайте установки цены админом.');
                 document.getElementById('mediaUploadModal').classList.remove('active');
                 resetMediaUpload();
                 loadMediaConfigs();
@@ -790,18 +769,27 @@ async function loadMediaConfigs() {
 }
 
 function renderMediaConfigCard(config) {
-    const isOwner = userData && userData.username === config.author_name;
+    const hasPrice = config.price && config.price > 0 && config.funpay_url;
+    
     return `
-        <div class="config-card" style="border-color: rgba(138, 43, 226, 0.3);" ${isOwner ? `oncontextmenu="showContextMenu(event, ${config.id}, 'media')"` : ''}>
+        <div class="config-card" style="border-color: rgba(138, 43, 226, 0.3);">
             <div class="config-card-header">
                 <div class="config-name">${config.name}</div>
                 <div class="config-badge" style="background: rgba(138, 43, 226, 0.3); color: #9370db;">Media</div>
             </div>
             <div class="config-author" style="color: #9370db;">от ${config.author_name}</div>
             <div class="config-desc">${config.description || 'Без описания'}</div>
-            <div class="config-actions">
-                <a href="${config.funpay_url}" target="_blank" class="config-btn primary" style="background: rgba(138, 43, 226, 0.3); border-color: rgba(138, 43, 226, 0.4); color: #9370db; text-decoration: none; text-align: center; display: block;">💳 Купить</a>
-            </div>
+            ${hasPrice ? `
+                <div style="margin-bottom: 10px;">
+                    <span style="font-size: 18px; font-weight: 600; color: #fff;">${config.price} ₽</span>
+                    ${config.promo_code ? `<span style="font-size: 11px; color: #55ff55; margin-left: 8px;">Промокод: ${config.promo_code} (-5%)</span>` : ''}
+                </div>
+                <div class="config-actions">
+                    <a href="${config.funpay_url}" target="_blank" class="config-btn primary" style="background: rgba(138, 43, 226, 0.3); border-color: rgba(138, 43, 226, 0.4); color: #9370db; text-decoration: none; text-align: center; display: block;">💳 Купить на FunPay</a>
+                </div>
+            ` : `
+                <div style="color: #666; font-size: 12px;">Цена ещё не установлена</div>
+            `}
         </div>
     `;
 }
@@ -936,9 +924,8 @@ async function loadOwnerConfigs() {
 
 function renderOwnerConfigCard(config) {
     const canDownload = hasSubscription;
-    const isOwner = userData && userData.username === config.author_name;
     return `
-        <div class="config-card" style="border-color: rgba(255, 165, 0, 0.3);" ${isOwner ? `oncontextmenu="showContextMenu(event, ${config.id}, 'owner')"` : ''}>
+        <div class="config-card" style="border-color: rgba(255, 165, 0, 0.3);">
             <div class="config-card-header">
                 <div class="config-name">${config.name}</div>
                 <div class="config-badge" style="background: rgba(255, 165, 0, 0.3); color: #ffa500;">Owner</div>
@@ -976,54 +963,26 @@ async function downloadAndSaveOwnerConfig(id, name) {
     }
 }
 
-// ========== КОНТЕКСТНОЕ МЕНЮ ==========
-const contextMenu = document.getElementById('contextMenu');
-
-function showContextMenu(e, configId, configType) {
-    e.preventDefault();
-    contextConfigId = configId;
-    contextConfigType = configType;
-    contextMenu.style.left = e.pageX + 'px';
-    contextMenu.style.top = e.pageY + 'px';
-    contextMenu.classList.add('active');
-}
-
-document.addEventListener('click', () => {
-    contextMenu.classList.remove('active');
-});
-
-document.getElementById('contextDelete').addEventListener('click', async () => {
-    if (!contextConfigId || !contextConfigType) return;
-    if (!confirm('Удалить этот конфиг?')) return;
-    
-    try {
-        let url = '';
-        if (contextConfigType === 'media') url = '/api/media-configs/' + contextConfigId;
-        else if (contextConfigType === 'owner') url = '/api/owner-configs/' + contextConfigId;
-        else url = '/api/configs/' + contextConfigId;
-        
-        const response = await fetch(url, { method: 'DELETE' });
-        const data = await response.json();
-        if (data.success) {
-            alert('Конфиг удалён');
-            if (contextConfigType === 'media') loadMediaConfigs();
-            else if (contextConfigType === 'owner') loadOwnerConfigs();
-            else loadMyConfigs();
-        } else {
-            alert('Ошибка: ' + data.message);
-        }
-    } catch (error) {
-        alert('Ошибка удаления');
-    }
-    contextMenu.classList.remove('active');
-});
-
-// Защита от DevTools (но разрешаем ПКМ на карточках)
+// Защита от ПКМ и DevTools
+document.addEventListener('contextmenu', e => e.preventDefault());
 document.addEventListener('keydown', e => {
     if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || (e.ctrlKey && e.key === 'U')) {
         e.preventDefault();
     }
 });
+</script>
+
+<!-- Блокировка просмотра исходного кода -->
+<script>
+document.onkeydown = function(e) {
+    if (e.ctrlKey && e.code === 'KeyU') return false;
+    if (e.code === 'F12') return false;
+    if (e.ctrlKey && e.shiftKey && e.code === 'KeyI') return false;
+    if (e.ctrlKey && e.shiftKey && e.code === 'KeyJ') return false;
+    if (e.ctrlKey && e.shiftKey && e.code === 'KeyC') return false;
+    if (e.ctrlKey && e.code === 'KeyS') return false;
+};
+document.oncontextmenu = function() { return false; };
 </script>
 </body>
 </html>
