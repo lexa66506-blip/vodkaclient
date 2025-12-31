@@ -78,6 +78,25 @@ async function initDB() {
             )
         `);
         
+        // Таблица media юзеров
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS media_users (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                promo_code VARCHAR(255) DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
+        // Таблица owner юзеров
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS owner_users (
+                id SERIAL PRIMARY KEY,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+        
         console.log('✅ Таблицы PostgreSQL созданы');
     } catch (err) {
         console.error('❌ Ошибка создания таблиц:', err);
@@ -515,11 +534,12 @@ app.post('/api/admin/reset-database', async (req, res) => {
     
     try {
         // Удаляем ВСЕ данные в правильном порядке (сначала зависимые таблицы)
-        await pool.query('DELETE FROM configs');
-        await pool.query('DELETE FROM keys');
-        await pool.query('DELETE FROM media_users');
-        await pool.query('DELETE FROM owner_users');
-        await pool.query('DELETE FROM users');
+        await pool.query('DELETE FROM configs').catch(() => {});
+        await pool.query('DELETE FROM keys').catch(() => {});
+        await pool.query('DELETE FROM media_users').catch(() => {});
+        await pool.query('DELETE FROM owner_users').catch(() => {});
+        await pool.query('DELETE FROM free_keys_used').catch(() => {});
+        await pool.query('DELETE FROM users').catch(() => {});
         
         // Сбрасываем счётчики
         try {
