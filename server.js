@@ -514,19 +514,28 @@ app.post('/api/admin/reset-database', async (req, res) => {
     }
     
     try {
-        // Удаляем все данные
+        // Удаляем ВСЕ данные в правильном порядке (сначала зависимые таблицы)
+        await pool.query('DELETE FROM configs');
         await pool.query('DELETE FROM keys');
+        await pool.query('DELETE FROM media_users');
+        await pool.query('DELETE FROM owner_users');
         await pool.query('DELETE FROM users');
         
-        // Сбрасываем счётчик UID на 1
-        await pool.query('ALTER SEQUENCE users_uid_seq RESTART WITH 1');
-        await pool.query('ALTER SEQUENCE keys_id_seq RESTART WITH 1');
+        // Сбрасываем счётчики
+        try {
+            await pool.query('ALTER SEQUENCE users_uid_seq RESTART WITH 1');
+            await pool.query('ALTER SEQUENCE keys_id_seq RESTART WITH 1');
+            await pool.query('ALTER SEQUENCE configs_id_seq RESTART WITH 1');
+        } catch (seqErr) {
+            // Игнорируем ошибки сброса счётчиков - не критично
+            console.log('Счётчики не сброшены (не критично)');
+        }
         
         console.log('⚠️ БАЗА ДАННЫХ ПОЛНОСТЬЮ ОЧИЩЕНА!');
         res.json({ success: true, message: 'База данных очищена' });
     } catch (err) {
         console.error('Ошибка сброса БД:', err);
-        res.status(500).json({ success: false, message: 'Ошибка сброса базы данных' });
+        res.status(500).json({ success: false, message: 'Ошибка сброса базы данных: ' + err.message });
     }
 });
 
